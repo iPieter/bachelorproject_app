@@ -1,7 +1,9 @@
 package televic.project.kuleuven.televicmechanicassistant;
 
+import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.util.Log;
 import android.util.LruCache;
 
 import com.android.volley.Request;
@@ -13,16 +15,19 @@ import com.android.volley.toolbox.Volley;
  * Created by Matthias on 28/03/2017.
  */
 
-public class RESTSingleton {
-    private static RESTSingleton mInstance;
+public class RESTSingleton{
+    private final String LOG_TAG = RESTSingleton.class.getSimpleName();
+
+    public final static String BASE_URL = "http://192.168.0.213:3000";
+    public final static String OVERVIEW_PARAM = ""; //"/overview"; //need mode after this url
+    public final static String ACTIVE_ISSUES_PARAM = ""; //"/active";
+    public final static String IN_PROGRESS_ISSUES_PARAM = ""; //"/in_progress";
+    public final static String ASSIGNED_ISSUES_PARAM = ""; //"/assigned";
+
+    private static RESTSingleton mInstance = null;
     private RequestQueue mRequestQueue;
     private ImageLoader mImageLoader;
     private static Context mCtx;
-    public final static String BASE_URL = "http://localhost:8080/rest/app";
-    public final static String OVERVIEW_PARAM = "/overview"; //need mode after this url
-    public final static String ACTIVE_ISSUES_PARAM = "/active";
-    public final static String IN_PROGRESS_ISSUES_PARAM = "/in_progress";
-    public final static String ASSIGNED_ISSUES_PARAM = "/assigned";
 
     private RESTSingleton(Context context) {
         mCtx = context;
@@ -61,6 +66,7 @@ public class RESTSingleton {
 
     public <T> void addToRequestQueue(Request<T> req) {
         getRequestQueue().add(req);
+        Log.v(LOG_TAG, "REST request added to requestqueue: " + req.toString());
     }
 
     public ImageLoader getImageLoader() {

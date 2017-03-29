@@ -1,38 +1,16 @@
 package televic.project.kuleuven.televicmechanicassistant;
 
-import android.app.Activity;
-import android.app.ListActivity;
-import android.content.Intent;
-import android.database.Cursor;
-import android.provider.ContactsContract;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
-import android.support.v4.widget.SimpleCursorAdapter;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Gravity;
+import android.util.Log;
+
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.FrameLayout.LayoutParams;
-import android.widget.TextView;
 
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-
-import org.json.JSONObject;
 
 public class IssueOverviewActivity extends AppCompatActivity {
-    final private String TRAINCOACH_ID = "traincoach_id";
+    private final String LOG_TAG = IssueOverviewActivity.class.getSimpleName();
+    private final String TRAINCOACH_ID = "traincoach_id";
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,7 +20,11 @@ public class IssueOverviewActivity extends AppCompatActivity {
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.overview_container, new IssueOverviewFragment())
                     .commit();
+            Log.v(LOG_TAG,"Fragment transaction ended");
         }
+
+        RESTSingleton.getInstance(getApplicationContext());
+        Log.v(LOG_TAG,"Fragment transaction ended2");
     }
 
     @Override
@@ -52,6 +34,7 @@ public class IssueOverviewActivity extends AppCompatActivity {
         return true;
     }
 
+    //See Fragment for implementation
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -60,7 +43,6 @@ public class IssueOverviewActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.action_settings) {
-            //TODO Go to settings
             return true;
         }
 

@@ -14,6 +14,7 @@ import android.widget.ListView;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONArray;
@@ -21,7 +22,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Matthias on 29/03/2017.
@@ -29,7 +32,8 @@ import java.util.List;
 
 public class IssueOverviewFragment extends ListFragment {
     private final String LOG_TAG = IssueOverviewFragment.class.getSimpleName();
-    final private String TRAINCOACH_ID = "traincoach_id";
+    private final String TRAINCOACH_ID = "traincoach_id";
+
     private OverviewListAdapter mOverviewListAdapter;
 
     @Override
@@ -44,37 +48,41 @@ public class IssueOverviewFragment extends ListFragment {
 
         //Calling backend (default= active issues called)
         fetchIssueData(RESTSingleton.ACTIVE_ISSUES_PARAM);
+
+        Log.v(LOG_TAG,"onCreate method ended");
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View root=inflater.inflate(R.layout.fragment_issue_overview,container);
-        String workplace_name="Gent";
-
-        return root;
+        Log.v(LOG_TAG,"onCreateView");
+        return inflater.inflate(R.layout.fragment_issue_overview,container,false);
     }
 
+    @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
+        /*
         Intent intent = new Intent(this.getActivity(), IssueDetailActivity.class);
         String traincoachId = "1"; //TODO Extract from clicked view
         intent.putExtra(TRAINCOACH_ID, traincoachId);
         startActivity(intent);
+        */
     }
 
 /** NETWORKING **/
     //No need for AsyncTask: volley takes care of networking on networking thread
     protected void fetchIssueData(String issueMode) {
-
+        Log.v(LOG_TAG,"Entering fetchIssueData");
         //Fetching the JSON file from server through REST
         try{
             String url = RESTSingleton.BASE_URL + RESTSingleton.OVERVIEW_PARAM + issueMode;
 
             //Creating JsonObjectRequest for REST call
             JsonObjectRequest jsObjRequest = new JsonObjectRequest
-                    (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+                    (Request.Method.GET, url,null, new Response.Listener<JSONObject>() {
 
                         public void onResponse(JSONObject response) {
+                                VolleyLog.v(LOG_TAG,"JSONObject response from REST:"+response.toString());
                                 JSONParser parser=new JSONParser();
                                 parser.execute(response);
                         }
@@ -82,16 +90,19 @@ public class IssueOverviewFragment extends ListFragment {
 
                         public void onErrorResponse(VolleyError error) {
                             error.fillInStackTrace();
+                            VolleyLog.e(error.getMessage());
                         }
                     });
 
             //Singleton handles call to REST
-            RESTSingleton.getInstance(getActivity()).addToRequestQueue(jsObjRequest);
+            RESTSingleton.getInstance(this.getContext().getApplicationContext())
+                    .addToRequestQueue(jsObjRequest);
 
         }catch(Exception e){
             e.printStackTrace();
             Log.e(LOG_TAG ,"Failed REST fetch");
         }
+        Log.v(LOG_TAG,"Ending fetchIssueData");
     }
 
     public class JSONParser extends AsyncTask<JSONObject,Void,List<String[]>>{
@@ -99,22 +110,27 @@ public class IssueOverviewFragment extends ListFragment {
         @Override
         protected List<String[]> doInBackground(JSONObject... jsonObjects) {
             JSONObject jsonObject=jsonObjects[0];
+            Log.v(LOG_TAG,"Entering JSONParser doInBackground Task");
 
             //The names of the REST JSON attributes
-            final String WORKPLACES="workplaces";
-            final String TRAINCOACHES="traincoaches";
+            final String WORKPLACE="workplace";
+            final String STATUS="status";
+            final String TRAINCOACH="traincoache";
+            final String DESCR="descr";
 
             //Each element in the list represents a listItem/row in the ListView
             //Each String-column respectivly represents the attribute from that listItem
             List<String[]> resultString=null;
             try {
-                JSONArray workplaces = jsonObject.getJSONArray(WORKPLACES);
-                JSONArray traincoaches = jsonObject.getJSONArray(TRAINCOACHES);
+                JSONArray workplace = jsonObject.getJSONArray(WORKPLACE);
+                JSONArray status = jsonObject.getJSONArray(STATUS);
+                JSONArray traincoach = jsonObject.getJSONArray(TRAINCOACH);
+                JSONArray descr = jsonObject.getJSONArray(DESCR);
 
-                if(workplaces.length() == traincoaches.length()) {
-                    resultString = new ArrayList<>(workplaces.length());
+                if(workplace.length() == traincoach.length()) {
+                    resultString = new ArrayList<>(workplace.length());
                 }else throw new JSONException("No equal-size data attributes in JSON");
-
+            Log.v(LOG_TAG,"JSON PARSED!!!"+resultString.toString());
             }catch(JSONException e){
                 e.printStackTrace();
                 Log.e(LOG_TAG,e.getMessage(), e);

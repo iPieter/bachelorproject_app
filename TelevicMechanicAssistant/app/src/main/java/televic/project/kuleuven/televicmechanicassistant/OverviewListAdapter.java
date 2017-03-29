@@ -8,7 +8,6 @@ import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +39,7 @@ public class OverviewListAdapter extends BaseAdapter {
         return i;
     }
 
+    //Inlezen van ListItem
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         //Check for avoiding Null pointer exception
@@ -58,12 +58,15 @@ public class OverviewListAdapter extends BaseAdapter {
                 (TextView) itemView.findViewById(R.id.item_header_status);
         TextView item_header_traincoach =
                 (TextView) itemView.findViewById(R.id.item_header_traincoach);
+        TextView item_content =
+                (TextView) itemView.findViewById(R.id.item_content);
 
         //Set datafields in the list item
         int counter = 0;
         item_header_workplace.setText(mDataList.get(position)[counter++]);
         item_header_status.setText(mDataList.get(position)[counter++]);
         item_header_traincoach.setText(mDataList.get(position)[counter++]);
+        item_content.setText(mDataList.get(position)[counter++]);
 
         return itemView;
     }
