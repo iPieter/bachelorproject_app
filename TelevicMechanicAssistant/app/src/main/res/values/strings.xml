@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Televic Mechanic Assistant</string>
+    <string name="title_activity_issue_detail">IssueDetailActivity</string>
+</resources>
