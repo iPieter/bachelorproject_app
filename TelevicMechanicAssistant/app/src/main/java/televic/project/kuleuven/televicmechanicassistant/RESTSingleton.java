@@ -18,8 +18,11 @@ public class RESTSingleton {
     private RequestQueue mRequestQueue;
     private ImageLoader mImageLoader;
     private static Context mCtx;
-    public final static String BASE_URL = "http://localhost";
-    public final static String OVERVIEW_REST_URL = BASE_URL + "rest/...";
+    public final static String BASE_URL = "http://localhost:8080/rest/app";
+    public final static String OVERVIEW_PARAM = "/overview"; //need mode after this url
+    public final static String ACTIVE_ISSUES_PARAM = "/active";
+    public final static String IN_PROGRESS_ISSUES_PARAM = "/in_progress";
+    public final static String ASSIGNED_ISSUES_PARAM = "/assigned";
 
     private RESTSingleton(Context context) {
         mCtx = context;

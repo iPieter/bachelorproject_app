@@ -9,8 +9,11 @@
     android:weightSum="1"
     android:orientation="vertical">
 
-    <ExpandableListView
+    <FrameLayout
+        android:id="@+id/overview_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
+
+    </FrameLayout>
 
 </LinearLayout>
