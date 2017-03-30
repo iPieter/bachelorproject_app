@@ -46,6 +46,7 @@ public class RESTSingleton{
                         cache.put(url, bitmap);
                     }
                 });
+        Log.v(LOG_TAG, "RESTSingleton intialized: current context = " + mCtx +", appcontext = "+ mCtx.getApplicationContext());
     }
 
     public static synchronized RESTSingleton getInstance(Context context) {

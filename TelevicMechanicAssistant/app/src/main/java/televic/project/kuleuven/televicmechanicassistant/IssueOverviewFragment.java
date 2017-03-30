@@ -1,6 +1,5 @@
 package televic.project.kuleuven.televicmechanicassistant;
 
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -22,9 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Matthias on 29/03/2017.
@@ -41,6 +38,13 @@ public class IssueOverviewFragment extends ListFragment {
         super.onCreate(savedInstanceState);
         // Add this line in order for this fragment to handle menu events.
         setHasOptionsMenu(true);
+        Log.v(LOG_TAG,"onCreate method ended");
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        Log.v(LOG_TAG,"onCreateView");
 
         //Setting up adapter
         mOverviewListAdapter =new OverviewListAdapter(this.getContext());
@@ -49,13 +53,7 @@ public class IssueOverviewFragment extends ListFragment {
         //Calling backend (default= active issues called)
         fetchIssueData(RESTSingleton.ACTIVE_ISSUES_PARAM);
 
-        Log.v(LOG_TAG,"onCreate method ended");
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        Log.v(LOG_TAG,"onCreateView");
+        Log.v(LOG_TAG,"onCreateView Ended");
         return inflater.inflate(R.layout.fragment_issue_overview,container,false);
     }
 
@@ -75,7 +73,9 @@ public class IssueOverviewFragment extends ListFragment {
         Log.v(LOG_TAG,"Entering fetchIssueData");
         //Fetching the JSON file from server through REST
         try{
-            String url = RESTSingleton.BASE_URL + RESTSingleton.OVERVIEW_PARAM + issueMode;
+            //String url = RESTSingleton.BASE_URL + RESTSingleton.OVERVIEW_PARAM + issueMode;
+            //test on Node.js server:
+            String url = "http://192.168.0.213:3000";
 
             //Creating JsonObjectRequest for REST call
             JsonObjectRequest jsObjRequest = new JsonObjectRequest
@@ -89,12 +89,31 @@ public class IssueOverviewFragment extends ListFragment {
                     }, new Response.ErrorListener() {
 
                         public void onErrorResponse(VolleyError error) {
+                            //TEST BEGIN
+                            String testString="{\n" +
+                                    "    \"workplace\" : \"test\",\n" +
+                                    "    \"status\": \"ASSIGNED\",\n" +
+                                    "    \"traincoache\": \"MATTREIN - WAGONTJE\",\n" +
+                                    "    \"descr\": \"Er is een trillingkje.\"\n" +
+                                    "}";
+                            JSONObject response;
+                            try {
+                                response = new JSONObject(testString);
+                                JSONParser parser=new JSONParser();
+                                parser.execute(response);
+                            }catch(Exception e){
+                                e.fillInStackTrace();
+                                Log.e(LOG_TAG,e.toString());
+                            }
+                            //TEST END
+
                             error.fillInStackTrace();
-                            VolleyLog.e(error.getMessage());
+                            VolleyLog.e("Error in RESTSingleton request:"+ error.networkResponse);
                         }
                     });
 
             //Singleton handles call to REST
+            Log.v(LOG_TAG ,"Calling RESTSingleton with context:" + this.getContext().getApplicationContext().toString());
             RESTSingleton.getInstance(this.getContext().getApplicationContext())
                     .addToRequestQueue(jsObjRequest);
 
@@ -102,7 +121,7 @@ public class IssueOverviewFragment extends ListFragment {
             e.printStackTrace();
             Log.e(LOG_TAG ,"Failed REST fetch");
         }
-        Log.v(LOG_TAG,"Ending fetchIssueData");
+        Log.v(LOG_TAG,"Ending fetchIssueData: REST JSONRequest is now handed to singleton");
     }
 
     public class JSONParser extends AsyncTask<JSONObject,Void,List<String[]>>{
