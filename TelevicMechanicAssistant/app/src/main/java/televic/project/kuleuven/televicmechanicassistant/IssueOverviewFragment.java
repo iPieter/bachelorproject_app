@@ -29,7 +29,6 @@ import java.util.List;
 
 public class IssueOverviewFragment extends ListFragment {
     private final String LOG_TAG = IssueOverviewFragment.class.getSimpleName();
-    private final String TRAINCOACH_ID = "traincoach_id";
 
     private OverviewListAdapter mOverviewListAdapter;
 
@@ -91,7 +90,8 @@ public class IssueOverviewFragment extends ListFragment {
                     }, new Response.ErrorListener() {
 
                         public void onErrorResponse(VolleyError error) {
-                            //TEST BEGIN
+                            /*
+                            //TODO TEST BEGIN
                             String testString = "{\n" +
                                     "    \"workplace\" : \"test\",\n" +
                                     "    \"status\": \"ASSIGNED\",\n" +
@@ -107,8 +107,8 @@ public class IssueOverviewFragment extends ListFragment {
                                 e.fillInStackTrace();
                                 Log.e(LOG_TAG, e.toString());
                             }
-                            //TEST END
-
+                            //TODO TEST END
+*/
                             error.fillInStackTrace();
                             VolleyLog.e("Error in RESTSingleton request:" + error.networkResponse);
                         }
