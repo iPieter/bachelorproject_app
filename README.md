@@ -1,5 +1,4 @@
-# bachelorproject_app
-
+# Televic Mechanic Assistance
 ## Overview Activity
 Consist of a fragment IssueOverviewFragment. This fragment dynamicly handles the REST request and JSONParsing for the list in this fragment. For the REST request Volley is used (see REST Singleton). The ListView needs an adapter to dynamicly load the listitems. Therefore a custom adapter OverviewListAdapter for this view is inherited from the BaseAdapter. We bind the adapter to the fragment by passing the context of the fragment. Thereafter we can initialize the LayoutInflater to access the layout items in the list, and give them the dynamicly loaded values.
 
