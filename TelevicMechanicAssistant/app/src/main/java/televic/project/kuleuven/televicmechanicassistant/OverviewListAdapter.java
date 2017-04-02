@@ -50,12 +50,12 @@ public class OverviewListAdapter extends BaseAdapter {
         Log.v(LOG_TAG,"Updating Listitem View");
 
         //Check for avoiding Null pointer exception
-        RelativeLayout itemView;
+        LinearLayout itemView;
         if (convertView == null) {
-            itemView = (RelativeLayout) mLayoutInflater
+            itemView = (LinearLayout) mLayoutInflater
                     .inflate(R.layout.item_issue_overview, parent, false);
         } else {
-            itemView = (RelativeLayout) convertView;
+            itemView = (LinearLayout) convertView;
         }
 
         //Collect (text)views from layout of list item
