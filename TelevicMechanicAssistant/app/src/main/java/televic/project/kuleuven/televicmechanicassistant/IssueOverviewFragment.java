@@ -14,6 +14,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONArray;
@@ -79,10 +80,12 @@ public class IssueOverviewFragment extends ListFragment {
             String url = "http://192.168.0.213:3000";
 
             //Creating JsonObjectRequest for REST call
-            JsonObjectRequest jsObjRequest = new JsonObjectRequest
-                    (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 
-                        public void onResponse(JSONObject response) {
+            //Unsure if getting a JSONArray or JSONObject, So we use the StringRequest
+            JsonArrayRequest jsObjRequest = new JsonArrayRequest
+                    (Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+
+                        public void onResponse(JSONArray response) {
                             VolleyLog.v(LOG_TAG, "JSONObject response from REST:" + response.toString());
                             JSONParser parser = new JSONParser();
                             parser.execute(response);
@@ -95,19 +98,19 @@ public class IssueOverviewFragment extends ListFragment {
                             String testString = "[{\n" +
                                     "    \"workplace\" : \"test\",\n" +
                                     "    \"status\": \"ASSIGNED\",\n" +
-                                    "    \"traincoache\": \"MATTREIN - WAGONTJE\",\n" +
+                                    "    \"traincoach\": \"MATTREIN - WAGONTJE\",\n" +
                                     "    \"descr\": \"Er is een trillingkje.\"\n" +
                                     "    },\n" +
                                     "{\n" +
                                     "    \"workplace\" : \"test2\",\n" +
                                     "    \"status\": \"ASSIGNED2\",\n" +
-                                    "    \"traincoache\": \"MATTREIN - WAGONTJE2\",\n" +
+                                    "    \"traincoach\": \"MATTREIN - WAGONTJE2\",\n" +
                                     "    \"descr\": \"Er is een trillingkje2.\"  \n" +
                                     "}]";
 
-                            JSONObject response;
+                            JSONArray response;
                             try {
-                                response = new JSONObject(testString);
+                                response = new JSONArray(testString);
                                 JSONParser parser = new JSONParser();
                                 parser.execute(response);
                             } catch (Exception e) {
@@ -133,46 +136,51 @@ public class IssueOverviewFragment extends ListFragment {
         Log.v(LOG_TAG, "Ending fetchIssueData: REST JSONRequest is now handed to singleton");
     }
 
-    public class JSONParser extends AsyncTask<JSONObject, Void, List<String[]>> {
+    public class JSONParser extends AsyncTask<JSONArray, Void, List<String[]>> {
 
         @Override
-        protected List<String[]> doInBackground(JSONObject... jsonObjects) {
-            JSONObject jsonObject = jsonObjects[0];
-            Log.v(LOG_TAG, "Entering JSONParser doInBackground Task");
+        protected List<String[]> doInBackground(JSONArray... jsonArrays) {
+            JSONArray listitems = jsonArrays[0];
+            Log.v(LOG_TAG, "Entering JSONParser doInBackground Task. ROOT JSONARRAY=" + listitems);
 
             //The names of the REST JSON attributes
             final int DATA_ITEM_COUNT = 4;                  //WARNING: addapt count to amount of Strings
-            final String ROOT = "listitems";
+            //final String ROOT = "no_root";
             final String WORKPLACE = "workplace";
             final String STATUS = "status";
-            final String TRAINCOACH = "traincoache";
+            final String TRAINCOACH = "traincoach";
             final String DESCR = "descr";
 
             //Each element in the list represents a listItem/row in the ListView
             //Each String-column respectivly represents the attribute from that listItem
             List<String[]> result = null;
             try {
-                JSONArray listitems = jsonObject.getJSONArray(ROOT);
                 result = new ArrayList<>(listitems.length());
 
                 String[] oneItemData;
                 for (int listItemIndex = 0; listItemIndex < listitems.length(); listItemIndex++) {
+                    Log.v(LOG_TAG, "Item " + listItemIndex + " being parsed ");
                     oneItemData = new String[DATA_ITEM_COUNT];
                     JSONObject oneItemJSON = listitems.getJSONObject(listItemIndex);
 
                     //Parsing data in fixed sequential order
-                    oneItemData[0] = oneItemJSON.getJSONObject(WORKPLACE).toString();
-                    oneItemData[1] = oneItemJSON.getJSONObject(STATUS).toString();
-                    oneItemData[2] = oneItemJSON.getJSONObject(TRAINCOACH).toString();
-                    oneItemData[3] = oneItemJSON.getJSONObject(DESCR).toString();
+                    oneItemData[0] = oneItemJSON.getString(WORKPLACE);
+                    oneItemData[1] = oneItemJSON.getString(STATUS);
+                    oneItemData[2] = oneItemJSON.getString(TRAINCOACH);
+                    oneItemData[3] = oneItemJSON.getString(DESCR);
 
                     //One ListItem filled with data, added to the list of ListItems
                     result.add(oneItemData);
+                    Log.v(LOG_TAG, "Item " + listItemIndex + " result:\n"
+                            + "String[0]="+result.get(listItemIndex)[0]+"\n"
+                            + "String[1]="+result.get(listItemIndex)[1]+"\n"
+                            + "String[2]="+result.get(listItemIndex)[2]+"\n"
+                            + "String[3]="+result.get(listItemIndex)[3]);
                 }
             } catch (JSONException e) {
                 Log.e(LOG_TAG, e.toString());
             }
-            Log.v(LOG_TAG, "JSON PARSED!!!" + result);
+            Log.v(LOG_TAG, "JSON PARSED");
             return result;
         }
 
