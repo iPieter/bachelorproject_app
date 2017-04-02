@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 
@@ -49,12 +50,12 @@ public class OverviewListAdapter extends BaseAdapter {
         Log.v(LOG_TAG,"Updating Listitem View");
 
         //Check for avoiding Null pointer exception
-        LinearLayout itemView;
+        RelativeLayout itemView;
         if (convertView == null) {
-            itemView = (LinearLayout) mLayoutInflater
+            itemView = (RelativeLayout) mLayoutInflater
                     .inflate(R.layout.item_issue_overview, parent, false);
         } else {
-            itemView = (LinearLayout) convertView;
+            itemView = (RelativeLayout) convertView;
         }
 
         //Collect (text)views from layout of list item
