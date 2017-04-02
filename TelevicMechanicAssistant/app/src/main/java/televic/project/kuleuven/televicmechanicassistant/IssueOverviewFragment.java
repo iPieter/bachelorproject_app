@@ -90,14 +90,21 @@ public class IssueOverviewFragment extends ListFragment {
                     }, new Response.ErrorListener() {
 
                         public void onErrorResponse(VolleyError error) {
-                            /*
+
                             //TODO TEST BEGIN
-                            String testString = "{\n" +
+                            String testString = "[{\n" +
                                     "    \"workplace\" : \"test\",\n" +
                                     "    \"status\": \"ASSIGNED\",\n" +
                                     "    \"traincoache\": \"MATTREIN - WAGONTJE\",\n" +
                                     "    \"descr\": \"Er is een trillingkje.\"\n" +
-                                    "}";
+                                    "    },\n" +
+                                    "{\n" +
+                                    "    \"workplace\" : \"test2\",\n" +
+                                    "    \"status\": \"ASSIGNED2\",\n" +
+                                    "    \"traincoache\": \"MATTREIN - WAGONTJE2\",\n" +
+                                    "    \"descr\": \"Er is een trillingkje2.\"  \n" +
+                                    "}]";
+
                             JSONObject response;
                             try {
                                 response = new JSONObject(testString);
@@ -108,7 +115,7 @@ public class IssueOverviewFragment extends ListFragment {
                                 Log.e(LOG_TAG, e.toString());
                             }
                             //TODO TEST END
-*/
+
                             error.fillInStackTrace();
                             VolleyLog.e("Error in RESTSingleton request:" + error.networkResponse);
                         }

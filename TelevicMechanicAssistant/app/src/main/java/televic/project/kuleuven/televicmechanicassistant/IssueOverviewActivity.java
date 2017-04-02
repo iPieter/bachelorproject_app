@@ -52,7 +52,7 @@ public class IssueOverviewActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
         //TODO On rotation of screen: link AsyncTask to new Activity of this class
+
     }
 }
