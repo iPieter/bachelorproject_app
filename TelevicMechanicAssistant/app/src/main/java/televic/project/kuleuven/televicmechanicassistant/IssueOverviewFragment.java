@@ -5,10 +5,12 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -17,6 +19,7 @@ import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
+import android.widget.FrameLayout.LayoutParams;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,16 +49,31 @@ public class IssueOverviewFragment extends ListFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         Log.v(LOG_TAG, "onCreateView");
+        View rootView= inflater.inflate(R.layout.fragment_issue_overview, container, false);
 
         //Setting up adapter
         mOverviewListAdapter = new OverviewListAdapter(this.getContext());
         setListAdapter(mOverviewListAdapter);
 
+
+        // Create a progress bar to display while the list loads
+        ProgressBar progressBar = new ProgressBar(this.getContext());
+        progressBar.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
+                LayoutParams.WRAP_CONTENT, Gravity.CENTER));
+        progressBar.setIndeterminate(true);
+        ListView listView=(ListView) rootView.findViewById(android.R.id.list);
+        listView.setEmptyView(progressBar);
+
+        // Must add the progress bar to the root of the layout
+        ViewGroup rootGroup = (ViewGroup) rootView.findViewById(android.R.id.content);
+        rootGroup.addView(progressBar);
+        Log.v(LOG_TAG,"Progressbar is set!");
+
         //Calling backend (default= active issues called)
         fetchIssueData(RESTSingleton.ACTIVE_ISSUES_PARAM);
 
         Log.v(LOG_TAG, "onCreateView Ended");
-        return inflater.inflate(R.layout.fragment_issue_overview, container, false);
+        return rootView;
     }
 
     @Override
@@ -96,11 +114,31 @@ public class IssueOverviewFragment extends ListFragment {
                         public void onErrorResponse(VolleyError error) {
 
                             //TODO TEST BEGIN
-                            String testString = "[]";
+                            String testString1 = "[]";
+
+                            String testString2 = "{\n" +
+                                    "    \"workplace\" : \"test\",\n" +
+                                    "    \"status\": \"ASSIGNED\",\n" +
+                                    "    \"traincoach\": \"MATTREIN - WAGONTJE\",\n" +
+                                    "    \"descr\": \"Er is een trillingkje.\"\n" +
+                                    "    },\n";
+
+                            String testString3 = "[{\n" +
+                                    "    \"workplace\" : \"test\",\n" +
+                                    "    \"status\": \"ASSIGNED\",\n" +
+                                    "    \"traincoach\": \"MATTREIN - WAGONTJE\",\n" +
+                                    "    \"descr\": \"Er is een trillingkje.\"\n" +
+                                    "    },\n" +
+                                    "{\n" +
+                                    "    \"workplace\" : \"test2\",\n" +
+                                    "    \"status\": \"ASSIGNED2\",\n" +
+                                    "    \"traincoach\": \"MATTREIN - WAGONTJE2\",\n" +
+                                    "    \"descr\": \"Er is een trillingkje2.\"  \n" +
+                                    "}]";
 
                             try {
                                 JSONParser parser = new JSONParser();
-                                parser.execute(testString);
+                                parser.execute(testString2);
                             } catch (Exception e) {
                                 e.fillInStackTrace();
                                 Log.e(LOG_TAG, e.toString());

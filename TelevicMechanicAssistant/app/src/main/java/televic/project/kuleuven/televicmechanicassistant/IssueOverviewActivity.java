@@ -25,6 +25,8 @@ public class IssueOverviewActivity extends AppCompatActivity {
 
         RESTSingleton.getInstance(getApplicationContext());
         Log.v(LOG_TAG,"Added application context in main activity");
+
+
     }
 
     @Override
