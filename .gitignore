@@ -2,3 +2,11 @@ TelevicMechanicAssistant/gradle/wrapper/gradle-wrapper.properties
 TelevicMechanicAssistant/gradle.properties
 TelevicMechanicAssistant/gradlew
 TelevicMechanicAssistant/app/proguard-rules.pro
+
+.idea/workspace.xml
+
+.idea/compiler.xml
+
+.idea/copyright/profiles_settings.xml
+
+.idea/misc.xml
