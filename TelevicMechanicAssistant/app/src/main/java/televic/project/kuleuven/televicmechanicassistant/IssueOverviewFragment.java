@@ -19,7 +19,9 @@ import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
+
 import android.widget.FrameLayout.LayoutParams;
+import android.widget.TextView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,7 +36,6 @@ import java.util.List;
 
 public class IssueOverviewFragment extends ListFragment {
     private final String LOG_TAG = IssueOverviewFragment.class.getSimpleName();
-
     private OverviewListAdapter mOverviewListAdapter;
 
     @Override
@@ -49,7 +50,7 @@ public class IssueOverviewFragment extends ListFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         Log.v(LOG_TAG, "onCreateView");
-        View rootView= inflater.inflate(R.layout.fragment_issue_overview, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_issue_overview, container, false);
 
         //Setting up adapter
         mOverviewListAdapter = new OverviewListAdapter(this.getContext());
@@ -58,16 +59,17 @@ public class IssueOverviewFragment extends ListFragment {
 
         // Create a progress bar to display while the list loads
         ProgressBar progressBar = new ProgressBar(this.getContext());
+        progressBar.setId(R.id.progressbar_loading);
         progressBar.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.WRAP_CONTENT, Gravity.CENTER));
         progressBar.setIndeterminate(true);
-        ListView listView=(ListView) rootView.findViewById(android.R.id.list);
+        ListView listView = (ListView) rootView.findViewById(android.R.id.list);
         listView.setEmptyView(progressBar);
 
         // Must add the progress bar to the root of the layout
         ViewGroup rootGroup = (ViewGroup) rootView.findViewById(android.R.id.content);
         rootGroup.addView(progressBar);
-        Log.v(LOG_TAG,"Progressbar is set!");
+        Log.v(LOG_TAG, "Progressbar is set!");
 
         //Calling backend (default= active issues called)
         fetchIssueData(RESTSingleton.ACTIVE_ISSUES_PARAM);
@@ -138,7 +140,7 @@ public class IssueOverviewFragment extends ListFragment {
 
                             try {
                                 JSONParser parser = new JSONParser();
-                                parser.execute(testString2);
+                                parser.execute(testString1);
                             } catch (Exception e) {
                                 e.fillInStackTrace();
                                 Log.e(LOG_TAG, e.toString());
@@ -160,6 +162,21 @@ public class IssueOverviewFragment extends ListFragment {
             Log.e(LOG_TAG, "Failed REST fetch");
         }
         Log.v(LOG_TAG, "Ending fetchIssueData: REST JSONRequest is now handed to singleton");
+    }
+
+    public void setEmptyText(String text) {
+        TextView textView = (TextView) getView().findViewById(android.R.id.empty);
+        textView.setText(text);
+    }
+
+    public void removeProgressBar(){
+        try {
+            ListView listView = (ListView) getView().findViewById(android.R.id.list);
+            ProgressBar progressBar = (ProgressBar) listView.findViewById(R.id.progressbar_loading);
+            listView.removeViewInLayout(progressBar);
+        }catch (Exception e){
+            Log.e(LOG_TAG,e.toString());
+        }
     }
 
     public class JSONParser extends AsyncTask<String, Void, List<String[]>> {
@@ -247,6 +264,10 @@ public class IssueOverviewFragment extends ListFragment {
         @Override
         protected void onPostExecute(List<String[]> result) {
             super.onPostExecute(result);
+            if (result.size() == 0) {
+                setEmptyText(getString(R.string.item_issue_overview_dataempty));
+                removeProgressBar();
+            }
             mOverviewListAdapter.updateView(result);
         }
     }
