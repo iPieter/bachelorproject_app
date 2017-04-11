@@ -16,6 +16,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -82,11 +83,11 @@ public class IssueOverviewFragment extends ListFragment {
             //Creating JsonObjectRequest for REST call
 
             //Unsure if getting a JSONArray or JSONObject, So we use the StringRequest
-            JsonArrayRequest jsObjRequest = new JsonArrayRequest
-                    (Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+            StringRequest jsObjRequest = new StringRequest
+                    (Request.Method.GET, url, new Response.Listener<String>() {
 
-                        public void onResponse(JSONArray response) {
-                            VolleyLog.v(LOG_TAG, "JSONObject response from REST:" + response.toString());
+                        public void onResponse(String response) {
+                            VolleyLog.v(LOG_TAG, "JSONObject response from REST:" + response);
                             JSONParser parser = new JSONParser();
                             parser.execute(response);
                         }
@@ -95,24 +96,11 @@ public class IssueOverviewFragment extends ListFragment {
                         public void onErrorResponse(VolleyError error) {
 
                             //TODO TEST BEGIN
-                            String testString = "[{\n" +
-                                    "    \"workplace\" : \"test\",\n" +
-                                    "    \"status\": \"ASSIGNED\",\n" +
-                                    "    \"traincoach\": \"MATTREIN - WAGONTJE\",\n" +
-                                    "    \"descr\": \"Er is een trillingkje.\"\n" +
-                                    "    },\n" +
-                                    "{\n" +
-                                    "    \"workplace\" : \"test2\",\n" +
-                                    "    \"status\": \"ASSIGNED2\",\n" +
-                                    "    \"traincoach\": \"MATTREIN - WAGONTJE2\",\n" +
-                                    "    \"descr\": \"Er is een trillingkje2.\"  \n" +
-                                    "}]";
+                            String testString = "[]";
 
-                            JSONArray response;
                             try {
-                                response = new JSONArray(testString);
                                 JSONParser parser = new JSONParser();
-                                parser.execute(response);
+                                parser.execute(testString);
                             } catch (Exception e) {
                                 e.fillInStackTrace();
                                 Log.e(LOG_TAG, e.toString());
@@ -136,16 +124,15 @@ public class IssueOverviewFragment extends ListFragment {
         Log.v(LOG_TAG, "Ending fetchIssueData: REST JSONRequest is now handed to singleton");
     }
 
-    public class JSONParser extends AsyncTask<JSONArray, Void, List<String[]>> {
+    public class JSONParser extends AsyncTask<String, Void, List<String[]>> {
 
         @Override
-        protected List<String[]> doInBackground(JSONArray... jsonArrays) {
-            JSONArray listitems = jsonArrays[0];
-            Log.v(LOG_TAG, "Entering JSONParser doInBackground Task. ROOT JSONARRAY=" + listitems);
+        protected List<String[]> doInBackground(String... jsonArrays) {
+            String response = jsonArrays[0];
+            Log.v(LOG_TAG, "Entering JSONParser doInBackground Task. ROOT JSONARRAY=" + response);
 
             //The names of the REST JSON attributes
             final int DATA_ITEM_COUNT = 4;                  //WARNING: addapt count to amount of Strings
-            //final String ROOT = "no_root";
             final String WORKPLACE = "workplace";
             final String STATUS = "status";
             final String TRAINCOACH = "traincoach";
@@ -154,9 +141,12 @@ public class IssueOverviewFragment extends ListFragment {
             //Each element in the list represents a listItem/row in the ListView
             //Each String-column respectivly represents the attribute from that listItem
             List<String[]> result = null;
+            //String response to JSONArray
             try {
+                JSONArray listitems = new JSONArray(response);
                 result = new ArrayList<>(listitems.length());
 
+                //Parsing JSON to result
                 String[] oneItemData;
                 for (int listItemIndex = 0; listItemIndex < listitems.length(); listItemIndex++) {
                     Log.v(LOG_TAG, "Item " + listItemIndex + " being parsed ");
@@ -172,15 +162,47 @@ public class IssueOverviewFragment extends ListFragment {
                     //One ListItem filled with data, added to the list of ListItems
                     result.add(oneItemData);
                     Log.v(LOG_TAG, "Item " + listItemIndex + " result:\n"
-                            + "String[0]="+result.get(listItemIndex)[0]+"\n"
-                            + "String[1]="+result.get(listItemIndex)[1]+"\n"
-                            + "String[2]="+result.get(listItemIndex)[2]+"\n"
-                            + "String[3]="+result.get(listItemIndex)[3]);
+                            + "String[0]=" + result.get(listItemIndex)[0] + "\n"
+                            + "String[1]=" + result.get(listItemIndex)[1] + "\n"
+                            + "String[2]=" + result.get(listItemIndex)[2] + "\n"
+                            + "String[3]=" + result.get(listItemIndex)[3]);
                 }
             } catch (JSONException e) {
-                Log.e(LOG_TAG, e.toString());
+                Log.w(LOG_TAG, "Cannot convert to JSONArray: " + response);
             }
-            Log.v(LOG_TAG, "JSON PARSED");
+
+            //String response to JSONObject (when only 1 item returned)
+            try {
+                JSONObject oneItemJSON = new JSONObject(response);
+                result = new ArrayList<>();
+
+                String[] oneItemData;
+                Log.v(LOG_TAG, "Item " + 0 + " being parsed ");
+                oneItemData = new String[DATA_ITEM_COUNT];
+
+                //Parsing data in fixed sequential order
+                oneItemData[0] = oneItemJSON.getString(WORKPLACE);
+                oneItemData[1] = oneItemJSON.getString(STATUS);
+                oneItemData[2] = oneItemJSON.getString(TRAINCOACH);
+                oneItemData[3] = oneItemJSON.getString(DESCR);
+
+                //One ListItem filled with data, added to the list of ListItems
+                result.add(oneItemData);
+                Log.v(LOG_TAG, "Item " + 0 + " result:\n"
+                        + "String[0]=" + result.get(0)[0] + "\n"
+                        + "String[1]=" + result.get(0)[1] + "\n"
+                        + "String[2]=" + result.get(0)[2] + "\n"
+                        + "String[3]=" + result.get(0)[3]);
+
+            } catch (JSONException e) {
+                Log.w(LOG_TAG, "Cannot convert to JSONObject: " + response);
+            }
+
+            if (result != null) {
+                Log.v(LOG_TAG, "JSON PARSED");
+            } else {
+                Log.e(LOG_TAG, "JSON PARSING FAILED");
+            }
             return result;
         }
 

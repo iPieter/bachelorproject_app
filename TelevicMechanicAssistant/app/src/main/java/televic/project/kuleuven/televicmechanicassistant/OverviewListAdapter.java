@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 
@@ -25,7 +24,7 @@ public class OverviewListAdapter extends BaseAdapter {
     private List<String[]> mDataList = new ArrayList<>();
 
     public OverviewListAdapter(Context context) {
-        Log.v(LOG_TAG,"Init OverviewListAdapter");
+        Log.v(LOG_TAG, "Init OverviewListAdapter");
         mLayoutInflater = LayoutInflater.from(context);
     }
 
@@ -47,7 +46,7 @@ public class OverviewListAdapter extends BaseAdapter {
     //Inlezen van ListItem
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        Log.v(LOG_TAG,"Updating Listitem View");
+        Log.v(LOG_TAG, "Updating Listitem View");
 
         //Check for avoiding Null pointer exception
         LinearLayout itemView;
@@ -59,7 +58,7 @@ public class OverviewListAdapter extends BaseAdapter {
         }
 
         //Collect (text)views from layout of list item
-        Log.v(LOG_TAG,"Fetching layout items from list");
+        Log.v(LOG_TAG, "Fetching layout items from list");
         TextView item_header_workplace =
                 (TextView) itemView.findViewById(R.id.item_header_workplace);
         TextView item_header_status =
@@ -70,14 +69,15 @@ public class OverviewListAdapter extends BaseAdapter {
                 (TextView) itemView.findViewById(R.id.item_content);
 
         //Set datafields in the list item
-        Log.v(LOG_TAG,"Setting datafields to list item");
+        Log.v(LOG_TAG, "Setting datafields to list item");
         int counter = 0;
         item_header_workplace.setText(mDataList.get(position)[counter++]);
         item_header_status.setText(mDataList.get(position)[counter++]);
         item_header_traincoach.setText(mDataList.get(position)[counter++]);
         item_content.setText(mDataList.get(position)[counter++]);
 
-        Log.v(LOG_TAG,"List item set!");
+        Log.v(LOG_TAG, "List item set!");
+
         return itemView;
     }
 
