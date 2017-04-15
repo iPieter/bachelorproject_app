@@ -168,8 +168,9 @@ public class IssueOverviewFragment extends ListFragment {
     }
 
     public void removeProgressBar(){
+        Log.v(LOG_TAG,"Trying to remove the progressbar");
         try {
-            ListView listView = (ListView) getView().findViewById(android.R.id.list);
+            ListView listView = (ListView) getListView().findViewById(android.R.id.list);
             ProgressBar progressBar = (ProgressBar) listView.findViewById(R.id.progressbar_loading);
             listView.removeViewInLayout(progressBar);
         }catch (Exception e){
@@ -223,31 +224,33 @@ public class IssueOverviewFragment extends ListFragment {
                 Log.w(LOG_TAG, "Cannot convert to JSONArray: " + response);
             }
 
-            //String response to JSONObject (when only 1 item returned)
-            try {
-                JSONObject oneItemJSON = new JSONObject(response);
-                result = new ArrayList<>();
+            if(result==null) {
+                //String response to JSONObject (when only 1 item returned)
+                try {
+                    JSONObject oneItemJSON = new JSONObject(response);
+                    result = new ArrayList<>();
 
-                IssueOverviewRowitem oneItemData;
-                Log.v(LOG_TAG, "Item " + 0 + " being parsed ");
-                oneItemData = new IssueOverviewRowitem();
+                    IssueOverviewRowitem oneItemData;
+                    Log.v(LOG_TAG, "Item " + 0 + " being parsed ");
+                    oneItemData = new IssueOverviewRowitem();
 
-                //Parsing data in fixed sequential order
-                oneItemData.setWorkplace(oneItemJSON.getString(WORKPLACE));
-                oneItemData.setStatus(oneItemJSON.getString(STATUS));
-                oneItemData.setTraincoach(oneItemJSON.getString(TRAINCOACH));
-                oneItemData.setDescription(oneItemJSON.getString(DESCR));
+                    //Parsing data in fixed sequential order
+                    oneItemData.setWorkplace(oneItemJSON.getString(WORKPLACE));
+                    oneItemData.setStatus(oneItemJSON.getString(STATUS));
+                    oneItemData.setTraincoach(oneItemJSON.getString(TRAINCOACH));
+                    oneItemData.setDescription(oneItemJSON.getString(DESCR));
 
-                //One ListItem filled with data, added to the list of ListItems
-                result.add(oneItemData);
-                Log.v(LOG_TAG, "Item " + 0 + " result:\n"
-                        + "String[0]=" + result.get(0).getWorkplace() + "\n"
-                        + "String[1]=" + result.get(0).getStatus() + "\n"
-                        + "String[2]=" + result.get(0).getTraincoach() + "\n"
-                        + "String[3]=" + result.get(0).getDescription());
+                    //One ListItem filled with data, added to the list of ListItems
+                    result.add(oneItemData);
+                    Log.v(LOG_TAG, "Item " + 0 + " result:\n"
+                            + "String[0]=" + result.get(0).getWorkplace() + "\n"
+                            + "String[1]=" + result.get(0).getStatus() + "\n"
+                            + "String[2]=" + result.get(0).getTraincoach() + "\n"
+                            + "String[3]=" + result.get(0).getDescription());
 
-            } catch (JSONException e) {
-                Log.w(LOG_TAG, "Cannot convert to JSONObject: " + response);
+                } catch (JSONException e) {
+                    Log.w(LOG_TAG, "Cannot convert to JSONObject: " + response);
+                }
             }
 
             if (result != null) {
