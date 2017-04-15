@@ -16,8 +16,6 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
-import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 
 import android.widget.FrameLayout.LayoutParams;
@@ -179,15 +177,14 @@ public class IssueOverviewFragment extends ListFragment {
         }
     }
 
-    public class JSONParser extends AsyncTask<String, Void, List<String[]>> {
+    public class JSONParser extends AsyncTask<String, Void, List<IssueOverviewRowitem>> {
 
         @Override
-        protected List<String[]> doInBackground(String... jsonArrays) {
+        protected List<IssueOverviewRowitem> doInBackground(String... jsonArrays) {
             String response = jsonArrays[0];
             Log.v(LOG_TAG, "Entering JSONParser doInBackground Task. ROOT JSONARRAY=" + response);
 
             //The names of the REST JSON attributes
-            final int DATA_ITEM_COUNT = 4;                  //WARNING: addapt count to amount of Strings
             final String WORKPLACE = "workplace";
             final String STATUS = "status";
             final String TRAINCOACH = "traincoach";
@@ -195,32 +192,32 @@ public class IssueOverviewFragment extends ListFragment {
 
             //Each element in the list represents a listItem/row in the ListView
             //Each String-column respectivly represents the attribute from that listItem
-            List<String[]> result = null;
+            List<IssueOverviewRowitem> result = null;
             //String response to JSONArray
             try {
                 JSONArray listitems = new JSONArray(response);
                 result = new ArrayList<>(listitems.length());
 
                 //Parsing JSON to result
-                String[] oneItemData;
+                IssueOverviewRowitem oneItemData;
                 for (int listItemIndex = 0; listItemIndex < listitems.length(); listItemIndex++) {
                     Log.v(LOG_TAG, "Item " + listItemIndex + " being parsed ");
-                    oneItemData = new String[DATA_ITEM_COUNT];
+                    oneItemData = new IssueOverviewRowitem();
                     JSONObject oneItemJSON = listitems.getJSONObject(listItemIndex);
 
                     //Parsing data in fixed sequential order
-                    oneItemData[0] = oneItemJSON.getString(WORKPLACE);
-                    oneItemData[1] = oneItemJSON.getString(STATUS);
-                    oneItemData[2] = oneItemJSON.getString(TRAINCOACH);
-                    oneItemData[3] = oneItemJSON.getString(DESCR);
+                    oneItemData.setWorkplace(oneItemJSON.getString(WORKPLACE));
+                    oneItemData.setStatus(oneItemJSON.getString(STATUS));
+                    oneItemData.setTraincoach(oneItemJSON.getString(TRAINCOACH));
+                    oneItemData.setDescription(oneItemJSON.getString(DESCR));
 
                     //One ListItem filled with data, added to the list of ListItems
                     result.add(oneItemData);
                     Log.v(LOG_TAG, "Item " + listItemIndex + " result:\n"
-                            + "String[0]=" + result.get(listItemIndex)[0] + "\n"
-                            + "String[1]=" + result.get(listItemIndex)[1] + "\n"
-                            + "String[2]=" + result.get(listItemIndex)[2] + "\n"
-                            + "String[3]=" + result.get(listItemIndex)[3]);
+                            + "String[0]=" + result.get(listItemIndex).getWorkplace() + "\n"
+                            + "String[1]=" + result.get(listItemIndex).getStatus() + "\n"
+                            + "String[2]=" + result.get(listItemIndex).getTraincoach() + "\n"
+                            + "String[3]=" + result.get(listItemIndex).getDescription());
                 }
             } catch (JSONException e) {
                 Log.w(LOG_TAG, "Cannot convert to JSONArray: " + response);
@@ -231,23 +228,23 @@ public class IssueOverviewFragment extends ListFragment {
                 JSONObject oneItemJSON = new JSONObject(response);
                 result = new ArrayList<>();
 
-                String[] oneItemData;
+                IssueOverviewRowitem oneItemData;
                 Log.v(LOG_TAG, "Item " + 0 + " being parsed ");
-                oneItemData = new String[DATA_ITEM_COUNT];
+                oneItemData = new IssueOverviewRowitem();
 
                 //Parsing data in fixed sequential order
-                oneItemData[0] = oneItemJSON.getString(WORKPLACE);
-                oneItemData[1] = oneItemJSON.getString(STATUS);
-                oneItemData[2] = oneItemJSON.getString(TRAINCOACH);
-                oneItemData[3] = oneItemJSON.getString(DESCR);
+                oneItemData.setWorkplace(oneItemJSON.getString(WORKPLACE));
+                oneItemData.setStatus(oneItemJSON.getString(STATUS));
+                oneItemData.setTraincoach(oneItemJSON.getString(TRAINCOACH));
+                oneItemData.setDescription(oneItemJSON.getString(DESCR));
 
                 //One ListItem filled with data, added to the list of ListItems
                 result.add(oneItemData);
                 Log.v(LOG_TAG, "Item " + 0 + " result:\n"
-                        + "String[0]=" + result.get(0)[0] + "\n"
-                        + "String[1]=" + result.get(0)[1] + "\n"
-                        + "String[2]=" + result.get(0)[2] + "\n"
-                        + "String[3]=" + result.get(0)[3]);
+                        + "String[0]=" + result.get(0).getWorkplace() + "\n"
+                        + "String[1]=" + result.get(0).getStatus() + "\n"
+                        + "String[2]=" + result.get(0).getTraincoach() + "\n"
+                        + "String[3]=" + result.get(0).getDescription());
 
             } catch (JSONException e) {
                 Log.w(LOG_TAG, "Cannot convert to JSONObject: " + response);
@@ -262,7 +259,7 @@ public class IssueOverviewFragment extends ListFragment {
         }
 
         @Override
-        protected void onPostExecute(List<String[]> result) {
+        protected void onPostExecute(List<IssueOverviewRowitem> result) {
             super.onPostExecute(result);
             if (result.size() == 0) {
                 setEmptyText(getString(R.string.item_issue_overview_dataempty));

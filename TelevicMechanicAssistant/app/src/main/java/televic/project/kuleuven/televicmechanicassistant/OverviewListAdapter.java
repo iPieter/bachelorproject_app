@@ -21,7 +21,7 @@ public class OverviewListAdapter extends BaseAdapter {
     private final String LOG_TAG = OverviewListAdapter.class.getSimpleName();
 
     private LayoutInflater mLayoutInflater;
-    private List<String[]> mDataList = new ArrayList<>();
+    private List<IssueOverviewRowitem> mDataList = new ArrayList<>();
 
     public OverviewListAdapter(Context context) {
         Log.v(LOG_TAG, "Init OverviewListAdapter");
@@ -70,18 +70,16 @@ public class OverviewListAdapter extends BaseAdapter {
 
         //Set datafields in the list item
         Log.v(LOG_TAG, "Setting datafields to list item");
-        int counter = 0;
-        item_header_workplace.setText(mDataList.get(position)[counter++]);
-        item_header_status.setText(mDataList.get(position)[counter++]);
-        item_header_traincoach.setText(mDataList.get(position)[counter++]);
-        item_content.setText(mDataList.get(position)[counter++]);
-
+        item_header_workplace.setText(mDataList.get(position).getWorkplace());
+        item_header_status.setText(mDataList.get(position).getStatus());
+        item_header_traincoach.setText(mDataList.get(position).getTraincoach());
+        item_content.setText(mDataList.get(position).getDescription());
         Log.v(LOG_TAG, "List item set!");
 
         return itemView;
     }
 
-    public void updateView(List<String[]> dataList) {
+    public void updateView(List<IssueOverviewRowitem> dataList) {
         mDataList = dataList;
         notifyDataSetChanged();
     }
