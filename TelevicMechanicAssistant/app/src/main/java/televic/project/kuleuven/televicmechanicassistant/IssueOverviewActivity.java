@@ -7,10 +7,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-
 public class IssueOverviewActivity extends AppCompatActivity {
     private final String LOG_TAG = IssueOverviewActivity.class.getSimpleName();
-    private final String TRAINCOACH_ID = "traincoach_id";
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,8 +23,6 @@ public class IssueOverviewActivity extends AppCompatActivity {
 
         RESTSingleton.getInstance(getApplicationContext());
         Log.v(LOG_TAG,"Added application context in main activity");
-
-
     }
 
     @Override
