@@ -24,5 +24,6 @@
             android:label="@string/title_activity_issue_detail"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
-
+    <uses-feature android:name="android.hardware.camera"
+                  android:required="true" />
 </manifest>
