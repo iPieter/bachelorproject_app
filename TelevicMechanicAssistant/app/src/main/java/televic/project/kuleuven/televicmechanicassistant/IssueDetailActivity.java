@@ -152,8 +152,7 @@ public class IssueDetailActivity extends AppCompatActivity {
             }
         };
 
-        RESTSingleton.getInstance(getApplicationContext())
-                .addToRequestQueue(multipartRequest);
+        RESTSingleton.getInstance(getApplicationContext()).addToRequestQueue(multipartRequest);
     }
 
     public void takePicture() {
