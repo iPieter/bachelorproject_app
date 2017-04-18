@@ -48,7 +48,7 @@ public class IssueProvider extends ContentProvider {
         matcher.addURI(authority, IssueContract.PATH_ISSUE, ISSUE);
         matcher.addURI(authority, IssueContract.PATH_ISSUE + "/*", ISSUE_WITH_ID);
         matcher.addURI(authority, IssueContract.PATH_ISSUE_ASSET, ISSUE_ASSET);
-        
+
         return matcher;
     }
 
@@ -67,22 +67,18 @@ public class IssueProvider extends ContentProvider {
     @Nullable
     @Override
     public String getType(@NonNull Uri uri) {
-        //TODO adapt to db
         // Use the Uri Matcher to determine what kind of URI this is.
         final int match = sUriMatcher.match(uri);
-/*
+
         switch (match) {
-            // Student: Uncomment and fill out these two cases
-//            case WEATHER_WITH_LOCATION_AND_DATE:
-//            case WEATHER_WITH_LOCATION:
-            case WEATHER:
-                return WeatherContract.WeatherEntry.CONTENT_TYPE;
-            case LOCATION:
-                return WeatherContract.LocationEntry.CONTENT_TYPE;
+            case ISSUE:
+                return IssueContract.IssueEntry.CONTENT_TYPE;
+            case ISSUE_WITH_ID:
+                return IssueContract.IssueEntry.CONTENT_TYPE;
+            case ISSUE_ASSET:
+                return IssueContract.IssueAssetEntry.CONTENT_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
-                */
-            return null;
         }
     }
 
