@@ -39,7 +39,7 @@ public class IssueContract {
         public static final String COLUMN_DESCRIPTION = "issue_description";
         public static final String COLUMN_STATUS = "status";
         public static final String COLUMN_OPERATOR = "operator";
-        public static final String COLUMN_DATA = "data";
+        public static final String COLUMN_DATA_ID = "data_id";
         public static final String COLUMN_ASSIGNED_TIME = "assigned_time";
         public static final String COLUMN_IN_PROGRESS_TIME = "in_progress_time";
         public static final String COLUMN_CLOSED_TIME = "closed_time";
@@ -67,7 +67,8 @@ public class IssueContract {
         public static final String COLUMN_DESCRIPTION = "asset_description";
         public static final String COLUMN_IMAGE_LOCATION = "image_location";
         public static final String COLUMN_POST_TIME = "post_time";
-        public static final String COLUMN_USER = "user";
+        public static final String COLUMN_USER_NAME = "user_name";
+        public static final String COLUMN_USER_EMAIL = "user_email";
         public static final String COLUMN_ISSUE_ID = "issue_id"; //Foreign key to Issue Table
 
         public static Uri buildIssueAssetUri(long id) {
