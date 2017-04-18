@@ -4,6 +4,7 @@ import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.support.annotation.NonNull;
@@ -22,7 +23,8 @@ public class IssueProvider extends ContentProvider {
     //The Codes for the UriMatcher, corresponding with a certain path
     static final int ISSUE = 100;
     static final int ISSUE_WITH_ID = 101;
-    static final int ISSUE_ASSET_WITH_ISSUE_ID = 300;
+    static final int ISSUE_ASSET = 300;
+    static final int ISSUE_ASSET_WITH_ISSUE_ID = 301;
 
     private static final SQLiteQueryBuilder sIssueAssetByIssueQueryBuilder;
 
@@ -47,6 +49,7 @@ public class IssueProvider extends ContentProvider {
         // For each new URI path, create corresponding code.
         matcher.addURI(authority, IssueContract.PATH_ISSUE, ISSUE);
         matcher.addURI(authority, IssueContract.PATH_ISSUE + "/*", ISSUE_WITH_ID);
+        matcher.addURI(authority, IssueContract.PATH_ISSUE_ASSET, ISSUE_ASSET);
         matcher.addURI(authority, IssueContract.PATH_ISSUE_ASSET+ "/*", ISSUE_ASSET_WITH_ISSUE_ID);
 
         return matcher;
@@ -153,6 +156,8 @@ public class IssueProvider extends ContentProvider {
                 return IssueContract.IssueEntry.CONTENT_TYPE;
             case ISSUE_WITH_ID:
                 return IssueContract.IssueEntry.CONTENT_ITEM_TYPE;
+            case ISSUE_ASSET:
+                return IssueContract.IssueAssetEntry.CONTENT_TYPE;
             case ISSUE_ASSET_WITH_ISSUE_ID:
                 return IssueContract.IssueAssetEntry.CONTENT_TYPE;
             default:
@@ -163,16 +168,128 @@ public class IssueProvider extends ContentProvider {
     @Nullable
     @Override
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues contentValues) {
-        return null;
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        final int match = sUriMatcher.match(uri);
+        Uri returnUri;
+
+        switch (match) {
+            case ISSUE: {
+                long _id = db.insert(IssueContract.IssueEntry.TABLE_NAME, null, contentValues);
+                if ( _id > 0 )
+                    returnUri = IssueContract.IssueEntry.buildIssueUri(_id);
+                else
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                break;
+            }
+            case ISSUE_ASSET: {
+                long _id = db.insert(IssueContract.IssueAssetEntry.TABLE_NAME, null, contentValues);
+                if ( _id > 0 )
+                    returnUri = IssueContract.IssueAssetEntry.buildIssueAssetUri(_id);
+                else
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                break;
+            }
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+        getContext().getContentResolver().notifyChange(uri, null);
+        return returnUri;
     }
 
     @Override
-    public int delete(@NonNull Uri uri, @Nullable String s, @Nullable String[] strings) {
-        return 0;
+    public int bulkInsert(Uri uri, ContentValues[] values) {
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        final int match = sUriMatcher.match(uri);
+        int returnCount;
+
+        switch (match) {
+            case ISSUE:
+                db.beginTransaction();
+                returnCount = 0;
+                try {
+                    for (ContentValues value : values) {
+                        long _id = db.insert(IssueContract.IssueEntry.TABLE_NAME, null, value);
+                        if (_id != -1) {
+                            returnCount++;
+                        }
+                    }
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+                getContext().getContentResolver().notifyChange(uri, null);
+                return returnCount;
+
+            case ISSUE_ASSET:
+                db.beginTransaction();
+                returnCount = 0;
+                try {
+                    for (ContentValues value : values) {
+                        long _id = db.insert(IssueContract.IssueAssetEntry.TABLE_NAME, null, value);
+                        if (_id != -1) {
+                            returnCount++;
+                        }
+                    }
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+                getContext().getContentResolver().notifyChange(uri, null);
+                return returnCount;
+
+            default:
+                return super.bulkInsert(uri, values);
+        }
     }
 
     @Override
-    public int update(@NonNull Uri uri, @Nullable ContentValues contentValues, @Nullable String s, @Nullable String[] strings) {
-        return 0;
+    public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        final int match = sUriMatcher.match(uri);
+        int rowsDeleted;
+        // this makes delete all rows return the number of rows deleted
+        if ( null == selection ) selection = "1";
+        switch (match) {
+            case ISSUE:
+                rowsDeleted = db.delete(
+                        IssueContract.IssueEntry.TABLE_NAME, selection, selectionArgs);
+                break;
+            case ISSUE_ASSET:
+                rowsDeleted = db.delete(
+                        IssueContract.IssueAssetEntry.TABLE_NAME, selection, selectionArgs);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+        // Because a null deletes all rows
+        if (rowsDeleted != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        return rowsDeleted;
+    }
+
+    @Override
+    public int update(@NonNull Uri uri, @Nullable ContentValues contentValues,
+                      @Nullable String selection, @Nullable String[] selectionArgs) {
+        final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
+        final int match = sUriMatcher.match(uri);
+        int rowsUpdated;
+
+        switch (match) {
+            case ISSUE:
+                rowsUpdated = db.update(
+                        IssueContract.IssueEntry.TABLE_NAME, contentValues, selection, selectionArgs);
+                break;
+            case ISSUE_ASSET:
+                rowsUpdated = db.update(
+                        IssueContract.IssueAssetEntry.TABLE_NAME, contentValues, selection, selectionArgs);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
+        if (rowsUpdated != 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+        return rowsUpdated;
     }
 }
