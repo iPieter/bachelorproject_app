@@ -1,5 +1,6 @@
 package televic.project.kuleuven.televicmechanicassistant;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -16,8 +17,6 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
-import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 
 import android.widget.FrameLayout.LayoutParams;
@@ -80,12 +79,9 @@ public class IssueOverviewFragment extends ListFragment {
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        /*
         Intent intent = new Intent(this.getActivity(), IssueDetailActivity.class);
-        String traincoachId = "1"; //TODO Extract from clicked view
-        intent.putExtra(TRAINCOACH_ID, traincoachId);
+        //TODO Extract from clicked view
         startActivity(intent);
-        */
     }
 
     /**

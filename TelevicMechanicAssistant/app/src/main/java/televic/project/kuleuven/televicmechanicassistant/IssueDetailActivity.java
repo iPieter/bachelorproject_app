@@ -13,4 +13,6 @@ public class IssueDetailActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
     }
 
+
+
 }
