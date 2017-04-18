@@ -27,8 +27,10 @@ public class IssueContract {
         public static final Uri CONTENT_URI =
                 BASE_CONTENT_URI.buildUpon().appendPath(PATH_ISSUE).build();
 
+        //Cursor: Zero Or more items
         public static final String CONTENT_TYPE =
                 ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_ISSUE;
+        //Cursor: One Item
         public static final String CONTENT_ITEM_TYPE =
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_ISSUE;
 
@@ -47,6 +49,14 @@ public class IssueContract {
         public static Uri buildIssueUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
+
+        public static int getIssueIdFromUri(Uri uri){
+            String idString = uri.getQueryParameter(_ID);
+            if(idString!=null && idString.length()>0){
+                return Integer.parseInt(idString);
+            }
+            return -1;
+        }
     }
 
     /* TABLE 2: Inner class that defines the table contents of the IssueAsset table */
@@ -55,8 +65,10 @@ public class IssueContract {
         public static final Uri CONTENT_URI =
                 BASE_CONTENT_URI.buildUpon().appendPath(PATH_ISSUE_ASSET).build();
 
+        //Cursor: Zero Or more items
         public static final String CONTENT_TYPE =
                 ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_ISSUE_ASSET;
+        //Cursor: One Item
         public static final String CONTENT_ITEM_TYPE =
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_ISSUE_ASSET;
 
@@ -73,6 +85,14 @@ public class IssueContract {
 
         public static Uri buildIssueAssetUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+
+        public static int getIssueIdFromUri(Uri uri){
+            String idString = uri.getQueryParameter(_ID);
+            if(idString!=null && idString.length()>0){
+                return Integer.parseInt(idString);
+            }
+            return -1;
         }
     }
 }
