@@ -29,6 +29,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import model.app.IssueOverviewRowitem;
+
 /**
  * Created by Matthias on 29/03/2017.
  */
@@ -36,6 +38,7 @@ import java.util.List;
 public class IssueOverviewFragment extends ListFragment {
     private final String LOG_TAG = IssueOverviewFragment.class.getSimpleName();
     private OverviewListAdapter mOverviewListAdapter;
+    private List<IssueOverviewRowitem> listItems;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -81,6 +84,8 @@ public class IssueOverviewFragment extends ListFragment {
     public void onListItemClick(ListView l, View v, int position, long id) {
         Intent intent = new Intent(this.getActivity(), IssueDetailActivity.class);
         //TODO Extract from clicked view
+
+        intent.putExtra(Intent.EXTRA_INTENT,listItems.get(position));
         startActivity(intent);
     }
 
@@ -180,6 +185,7 @@ public class IssueOverviewFragment extends ListFragment {
 
         @Override
         protected List<IssueOverviewRowitem> doInBackground(String... jsonArrays) {
+            /*
             String response = jsonArrays[0];
             Log.v(LOG_TAG, "Entering JSONParser doInBackground Task. ROOT JSONARRAY=" + response);
 
@@ -252,11 +258,15 @@ public class IssueOverviewFragment extends ListFragment {
             }
 
             if (result != null) {
+                listItems = result;
                 Log.v(LOG_TAG, "JSON PARSED");
             } else {
                 Log.e(LOG_TAG, "JSON PARSING FAILED");
-            }
-            return result;
+                listItems = new ArrayList<>();
+            }*/
+
+            return new ArrayList<IssueOverviewRowitem>();
+            //return result
         }
 
         @Override

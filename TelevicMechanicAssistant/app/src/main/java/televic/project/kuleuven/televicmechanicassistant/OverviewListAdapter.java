@@ -12,6 +12,8 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import model.app.IssueOverviewRowitem;
+
 /**
  * Created by Matthias on 29/03/2017.
  */
