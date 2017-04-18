@@ -136,7 +136,7 @@ public class IssueOverviewFragment extends ListFragment {
 
                             try {
                                 JSONParser parser = new JSONParser();
-                                parser.execute(testString1);
+                                parser.execute(testString3);
                             } catch (Exception e) {
                                 e.fillInStackTrace();
                                 Log.e(LOG_TAG, e.toString());
