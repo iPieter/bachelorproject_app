@@ -40,6 +40,14 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true">
 
+        <ImageView
+            android:id="@+id/image_preview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            app2:srcCompat="@android:drawable/ic_menu_camera"/>
+
         <EditText
             android:id="@+id/textfield_issueasset"
             android:layout_width="wrap_content"
@@ -53,33 +61,25 @@
             android:inputType="textPersonName"
             android:text="Beschrijving"/>
 
-        <Button
+        <ImageButton
+            android:id="@+id/button_camera"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app2:srcCompat="@android:drawable/ic_menu_camera"
+            android:layout_alignParentBottom="true"
+            android:layout_toRightOf="@+id/textfield_issueasset"
+            android:layout_toEndOf="@+id/textfield_issueasset"
+            android:layout_marginLeft="14dp"
+            android:layout_marginStart="14dp"/>
+
+        <ImageButton
             android:id="@+id/button_send"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_toEndOf="@+id/button_foto"
-            android:layout_toRightOf="@+id/button_foto"
-            android:text=">"/>
-
-        <Button
-            android:id="@+id/button_foto"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_toEndOf="@+id/textfield_issueasset"
-            android:layout_toRightOf="@+id/textfield_issueasset"
-            android:text="Foto"/>
-
-        <Button
-            android:id="@+id/button_view_data"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:layout_weight="1"
-            android:text="Bekijk data"/>
+            app2:srcCompat="@android:drawable/ic_menu_send"/>
 
     </RelativeLayout>
 
