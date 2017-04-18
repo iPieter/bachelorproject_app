@@ -19,6 +19,7 @@ public class IssueProvider extends ContentProvider {
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private IssueDbHelper mOpenHelper;
 
+    //The Codes for the UriMatcher, corresponding with a certain path
     static final int ISSUE = 100;
     static final int ISSUE_WITH_ID = 101;
     static final int ISSUE_ASSET = 300;
@@ -29,14 +30,26 @@ public class IssueProvider extends ContentProvider {
         sIssueAssetByIssueQueryBuilder = new SQLiteQueryBuilder();
 
         //This is an inner join which looks like
-        //weather INNER JOIN location ON weather.location_id = location._id
+        //issue INNER JOIN issue_asset ON issue_asset.issue_id = issue._id
         sIssueAssetByIssueQueryBuilder.setTables(
                 IssueContract.IssueEntry.TABLE_NAME + " INNER JOIN " +
-                        WeatherContract.LocationEntry.TABLE_NAME +
+                        IssueContract.IssueAssetEntry.TABLE_NAME +
                         " ON " + IssueContract.IssueAssetEntry.TABLE_NAME +
-                        "." + WeatherContract.WeatherEntry.COLUMN_LOC_KEY +
-                        " = " + WeatherContract.LocationEntry.TABLE_NAME +
-                        "." + WeatherContract.LocationEntry._ID);
+                        "." + IssueContract.IssueAssetEntry.COLUMN_ISSUE_ID +
+                        " = " + IssueContract.IssueEntry.TABLE_NAME +
+                        "." + IssueContract.IssueEntry._ID);
+    }
+
+    static UriMatcher buildUriMatcher() {
+        final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
+        final String authority = IssueContract.CONTENT_AUTHORITY;
+
+        // For each new URI path, create corresponding code.
+        matcher.addURI(authority, IssueContract.PATH_ISSUE, ISSUE);
+        matcher.addURI(authority, IssueContract.PATH_ISSUE + "/*", ISSUE_WITH_ID);
+        matcher.addURI(authority, IssueContract.PATH_ISSUE_ASSET, ISSUE_ASSET);
+        
+        return matcher;
     }
 
     @Override
