@@ -72,6 +72,7 @@ public class IssueDetailActivity extends AppCompatActivity {
     {
         super.onResume();
 
+        /*
         if( mCurrentPhotoPath != null ) {
             Log.i( LOG, "path:" + mCurrentPhotoPath );
             File imgFile = new  File( mCurrentPhotoPath );
@@ -82,6 +83,7 @@ public class IssueDetailActivity extends AppCompatActivity {
                 myImage.setImageBitmap(myBitmap);
             }
         }
+        */
     }
 
     public void sendIssueAsset() {

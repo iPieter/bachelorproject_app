@@ -29,6 +29,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <ExpandableListView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
     </RelativeLayout>
 
     <RelativeLayout
@@ -44,9 +47,10 @@
             android:id="@+id/image_preview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            app2:srcCompat="@android:drawable/ic_menu_camera"/>
+            app2:srcCompat="@android:drawable/ic_menu_camera"
+            android:layout_above="@+id/button_camera"
+            android:layout_alignLeft="@+id/textfield_issueasset"
+            android:layout_alignStart="@+id/textfield_issueasset"/>
 
         <EditText
             android:id="@+id/textfield_issueasset"
@@ -76,10 +80,10 @@
             android:id="@+id/button_send"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app2:srcCompat="@android:drawable/ic_menu_send"
             android:layout_alignParentBottom="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            app2:srcCompat="@android:drawable/ic_menu_send"/>
+            android:layout_toRightOf="@+id/button_camera"
+            android:layout_toEndOf="@+id/button_camera"/>
 
     </RelativeLayout>
 
