@@ -45,6 +45,10 @@ public class IssueContract {
         public static final String COLUMN_ASSIGNED_TIME = "assigned_time";
         public static final String COLUMN_IN_PROGRESS_TIME = "in_progress_time";
         public static final String COLUMN_CLOSED_TIME = "closed_time";
+        public static final String COLUMN_TRAINCOACH_NAME = "traincoach_name";
+        public static final String COLUMN_TRAINCOACH_ID = "traincoach_id"; //Needed to link REST request to eachother
+        public static final String COLUMN_WORKPLACE_NAME = "workplace_name";
+
 
         public static Uri buildIssueUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);

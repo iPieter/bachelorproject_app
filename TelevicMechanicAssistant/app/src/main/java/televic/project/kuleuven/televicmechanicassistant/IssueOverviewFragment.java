@@ -13,37 +13,29 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.VolleyLog;
-import com.android.volley.toolbox.StringRequest;
-
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.TextView;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import model.app.IssueOverviewRowitem;
 
-/**
- * Created by Matthias on 29/03/2017.
- */
-
+//MAIN LAUNCH Activity
 public class IssueOverviewFragment extends ListFragment {
     private final String LOG_TAG = IssueOverviewFragment.class.getSimpleName();
     private OverviewListAdapter mOverviewListAdapter;
-    private List<IssueOverviewRowitem> listItems;
+
+    private RESTRequestHandler mRestRequestHandler;
+    private JSONParserTask mJsonParserTask;
+    private CountDownLatch mCountDownLatch;
+
+    //TODO init currentUserId @login!!!
+    private int mCurrentUserId;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Add this line in order for this fragment to handle menu events.
         setHasOptionsMenu(true);
         Log.v(LOG_TAG, "onCreate method ended");
     }
@@ -54,10 +46,17 @@ public class IssueOverviewFragment extends ListFragment {
         Log.v(LOG_TAG, "onCreateView");
         View rootView = inflater.inflate(R.layout.fragment_issue_overview, container, false);
 
+        //INIT
+        mRestRequestHandler = new RESTRequestHandler(
+                this.getActivity().getApplicationContext(),
+                mCountDownLatch);
+        mJsonParserTask = new JSONParserTask();
+        mCountDownLatch = new CountDownLatch(RESTRequestHandler.REQUEST_COUNT);
+        mCurrentUserId = -1; //TODO
+
         //Setting up adapter
         mOverviewListAdapter = new OverviewListAdapter(this.getContext());
         setListAdapter(mOverviewListAdapter);
-
 
         // Create a progress bar to display while the list loads
         ProgressBar progressBar = new ProgressBar(this.getContext());
@@ -73,11 +72,25 @@ public class IssueOverviewFragment extends ListFragment {
         rootGroup.addView(progressBar);
         Log.v(LOG_TAG, "Progressbar is set!");
 
-        //Calling backend (default= active issues called)
-        fetchIssueData(RESTSingleton.ACTIVE_ISSUES_PARAM);
-
         Log.v(LOG_TAG, "onCreateView Ended");
         return rootView;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        //Calling backend
+        mRestRequestHandler.sendParallelRequest(mCurrentUserId);
+        try {
+            mCountDownLatch.await(); //await until all parallel requests have a response
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        //The order of these parameters is obligatory
+        mJsonParserTask.execute(
+                mRestRequestHandler.getIssueStringResponse(),
+                mRestRequestHandler.getWorkplaceStringResponse());
     }
 
     @Override
@@ -85,84 +98,8 @@ public class IssueOverviewFragment extends ListFragment {
         Intent intent = new Intent(this.getActivity(), IssueDetailActivity.class);
         //TODO Extract from clicked view
 
-        intent.putExtra(Intent.EXTRA_INTENT,listItems.get(position));
+        intent.putExtra(Intent.EXTRA_INTENT, listItems.get(position));
         startActivity(intent);
-    }
-
-    /**
-     * NETWORKING
-     **/
-    //No need for AsyncTask: volley takes care of networking on networking thread
-    protected void fetchIssueData(String issueMode) {
-        Log.v(LOG_TAG, "Entering fetchIssueData");
-        //Fetching the JSON file from server through REST
-        try {
-            //String url = RESTSingleton.BASE_URL + RESTSingleton.OVERVIEW_PARAM + issueMode;
-            //test on Node.js server:
-            String url = "http://192.168.0.213:3000";
-
-            //Creating JsonObjectRequest for REST call
-
-            //Unsure if getting a JSONArray or JSONObject, So we use the StringRequest
-            StringRequest jsObjRequest = new StringRequest
-                    (Request.Method.GET, url, new Response.Listener<String>() {
-
-                        public void onResponse(String response) {
-                            VolleyLog.v(LOG_TAG, "JSONObject response from REST:" + response);
-                            JSONParser parser = new JSONParser();
-                            parser.execute(response);
-                        }
-                    }, new Response.ErrorListener() {
-
-                        public void onErrorResponse(VolleyError error) {
-
-                            //TODO TEST BEGIN
-                            String testString1 = "[]";
-
-                            String testString2 = "{\n" +
-                                    "    \"workplace\" : \"test\",\n" +
-                                    "    \"status\": \"ASSIGNED\",\n" +
-                                    "    \"traincoach\": \"MATTREIN - WAGONTJE\",\n" +
-                                    "    \"descr\": \"Er is een trillingkje.\"\n" +
-                                    "    },\n";
-
-                            String testString3 = "[{\n" +
-                                    "    \"workplace\" : \"test\",\n" +
-                                    "    \"status\": \"ASSIGNED\",\n" +
-                                    "    \"traincoach\": \"MATTREIN - WAGONTJE\",\n" +
-                                    "    \"descr\": \"Er is een trillingkje.\"\n" +
-                                    "    },\n" +
-                                    "{\n" +
-                                    "    \"workplace\" : \"test2\",\n" +
-                                    "    \"status\": \"ASSIGNED2\",\n" +
-                                    "    \"traincoach\": \"MATTREIN - WAGONTJE2\",\n" +
-                                    "    \"descr\": \"Er is een trillingkje2.\"  \n" +
-                                    "}]";
-
-                            try {
-                                JSONParser parser = new JSONParser();
-                                parser.execute(testString1);
-                            } catch (Exception e) {
-                                e.fillInStackTrace();
-                                Log.e(LOG_TAG, e.toString());
-                            }
-                            //TODO TEST END
-
-                            error.fillInStackTrace();
-                            VolleyLog.e("Error in RESTSingleton request:" + error.networkResponse);
-                        }
-                    });
-
-            //Singleton handles call to REST
-            Log.v(LOG_TAG, "Calling RESTSingleton with context:" + this.getContext().getApplicationContext().toString());
-            RESTSingleton.getInstance(this.getContext().getApplicationContext())
-                    .addToRequestQueue(jsObjRequest);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.e(LOG_TAG, "Failed REST fetch");
-        }
-        Log.v(LOG_TAG, "Ending fetchIssueData: REST JSONRequest is now handed to singleton");
     }
 
     public void setEmptyText(String text) {
@@ -170,14 +107,14 @@ public class IssueOverviewFragment extends ListFragment {
         textView.setText(text);
     }
 
-    public void removeProgressBar(){
-        Log.v(LOG_TAG,"Trying to remove the progressbar");
+    public void removeProgressBar() {
+        Log.v(LOG_TAG, "Trying to remove the progressbar");
         try {
             ListView listView = (ListView) getListView().findViewById(android.R.id.list);
             ProgressBar progressBar = (ProgressBar) listView.findViewById(R.id.progressbar_loading);
             listView.removeViewInLayout(progressBar);
-        }catch (Exception e){
-            Log.e(LOG_TAG,e.toString());
+        } catch (Exception e) {
+            Log.e(LOG_TAG, e.toString());
         }
     }
 
@@ -263,10 +200,11 @@ public class IssueOverviewFragment extends ListFragment {
             } else {
                 Log.e(LOG_TAG, "JSON PARSING FAILED");
                 listItems = new ArrayList<>();
-            }*/
+            }
 
             return new ArrayList<IssueOverviewRowitem>();
             //return result
+            */
         }
 
         @Override

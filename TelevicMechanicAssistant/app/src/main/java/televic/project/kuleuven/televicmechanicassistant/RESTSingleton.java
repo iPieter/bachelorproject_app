@@ -18,10 +18,8 @@ public class RESTSingleton{
     private final String LOG_TAG = RESTSingleton.class.getSimpleName();
 
     public final static String BASE_URL = "http://192.168.0.213:3000";
-    public final static String OVERVIEW_PARAM = ""; //"/overview"; //need mode after this url
-    public final static String ACTIVE_ISSUES_PARAM = ""; //"/active";
-    public final static String IN_PROGRESS_ISSUES_PARAM = ""; //"/in_progress";
-    public final static String ASSIGNED_ISSUES_PARAM = ""; //"/assigned";
+    public final static String ISSUES_PATH = "issues/all_for_user";
+    public final static String WORKPLACE_PATH = "workplace/all_for_user";
 
     private static RESTSingleton mInstance = null;
     private RequestQueue mRequestQueue;
