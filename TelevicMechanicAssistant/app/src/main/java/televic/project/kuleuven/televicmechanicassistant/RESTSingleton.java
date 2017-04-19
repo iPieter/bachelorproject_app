@@ -17,7 +17,7 @@ import com.android.volley.toolbox.Volley;
 public class RESTSingleton{
     private final String LOG_TAG = RESTSingleton.class.getSimpleName();
 
-    public final static String BASE_URL = "http://192.168.0.213:3000";
+    public final static String BASE_URL = "http://10.108.0.153:3000";
     public final static String OVERVIEW_PARAM = ""; //"/overview"; //need mode after this url
     public final static String ACTIVE_ISSUES_PARAM = ""; //"/active";
     public final static String IN_PROGRESS_ISSUES_PARAM = ""; //"/in_progress";
