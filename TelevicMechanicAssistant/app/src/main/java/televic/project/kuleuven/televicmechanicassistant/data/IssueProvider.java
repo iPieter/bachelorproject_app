@@ -25,6 +25,7 @@ public class IssueProvider extends ContentProvider {
     static final int ISSUE_WITH_ID = 101;
     static final int ISSUE_ASSET = 300;
     static final int ISSUE_ASSET_WITH_ISSUE_ID = 301;
+    static final int TRAINCOACH = 400;
 
     private static final SQLiteQueryBuilder sIssueAssetByIssueQueryBuilder;
 
@@ -33,13 +34,19 @@ public class IssueProvider extends ContentProvider {
 
         //This is an inner join which looks like
         //issue INNER JOIN issue_asset ON issue_asset.issue_id = issue._id
+        //INNER JOIN
         sIssueAssetByIssueQueryBuilder.setTables(
                 IssueContract.IssueEntry.TABLE_NAME + " INNER JOIN " +
                         IssueContract.IssueAssetEntry.TABLE_NAME +
                         " ON " + IssueContract.IssueAssetEntry.TABLE_NAME +
                         "." + IssueContract.IssueAssetEntry.COLUMN_ISSUE_ID +
                         " = " + IssueContract.IssueEntry.TABLE_NAME +
-                        "." + IssueContract.IssueEntry._ID);
+                        "." + IssueContract.IssueEntry._ID + " INNER JOIN " +
+                        IssueContract.IssueEntry.TABLE_NAME +
+                        " ON " + IssueContract.IssueEntry.TABLE_NAME +
+                        "." + IssueContract.IssueEntry.COLUMN_TRAINCOACH_ID +
+                        " = " + IssueContract.TraincoachEntry.TABLE_NAME +
+                        "." + IssueContract.TraincoachEntry._ID);
     }
 
     static UriMatcher buildUriMatcher() {
@@ -51,6 +58,7 @@ public class IssueProvider extends ContentProvider {
         matcher.addURI(authority, IssueContract.PATH_ISSUE + "/*", ISSUE_WITH_ID);
         matcher.addURI(authority, IssueContract.PATH_ISSUE_ASSET, ISSUE_ASSET);
         matcher.addURI(authority, IssueContract.PATH_ISSUE_ASSET+ "/*", ISSUE_ASSET_WITH_ISSUE_ID);
+        matcher.addURI(authority, IssueContract.PATH_TRAINCOACH, TRAINCOACH);
 
         return matcher;
     }
@@ -160,6 +168,8 @@ public class IssueProvider extends ContentProvider {
                 return IssueContract.IssueAssetEntry.CONTENT_TYPE;
             case ISSUE_ASSET_WITH_ISSUE_ID:
                 return IssueContract.IssueAssetEntry.CONTENT_TYPE;
+            case TRAINCOACH:
+                return IssueContract.TraincoachEntry.CONTENT_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -185,6 +195,14 @@ public class IssueProvider extends ContentProvider {
                 long _id = db.insert(IssueContract.IssueAssetEntry.TABLE_NAME, null, contentValues);
                 if ( _id > 0 )
                     returnUri = IssueContract.IssueAssetEntry.buildIssueAssetUri(_id);
+                else
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                break;
+            }
+            case TRAINCOACH: {
+                long _id = db.insert(IssueContract.TraincoachEntry.TABLE_NAME, null, contentValues);
+                if ( _id > 0 )
+                    returnUri = IssueContract.TraincoachEntry.buildTraincoachUri(_id);
                 else
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 break;
@@ -237,6 +255,23 @@ public class IssueProvider extends ContentProvider {
                 getContext().getContentResolver().notifyChange(uri, null);
                 return returnCount;
 
+            case TRAINCOACH:
+                db.beginTransaction();
+                returnCount = 0;
+                try {
+                    for (ContentValues value : values) {
+                        long _id = db.insert(IssueContract.TraincoachEntry.TABLE_NAME, null, value);
+                        if (_id != -1) {
+                            returnCount++;
+                        }
+                    }
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+                getContext().getContentResolver().notifyChange(uri, null);
+                return returnCount;
+
             default:
                 return super.bulkInsert(uri, values);
         }
@@ -257,6 +292,10 @@ public class IssueProvider extends ContentProvider {
             case ISSUE_ASSET:
                 rowsDeleted = db.delete(
                         IssueContract.IssueAssetEntry.TABLE_NAME, selection, selectionArgs);
+                break;
+            case TRAINCOACH:
+                rowsDeleted = db.delete(
+                        IssueContract.TraincoachEntry.TABLE_NAME, selection, selectionArgs);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
@@ -283,6 +322,10 @@ public class IssueProvider extends ContentProvider {
             case ISSUE_ASSET:
                 rowsUpdated = db.update(
                         IssueContract.IssueAssetEntry.TABLE_NAME, contentValues, selection, selectionArgs);
+                break;
+            case TRAINCOACH:
+                rowsUpdated = db.update(
+                        IssueContract.TraincoachEntry.TABLE_NAME, contentValues, selection, selectionArgs);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);

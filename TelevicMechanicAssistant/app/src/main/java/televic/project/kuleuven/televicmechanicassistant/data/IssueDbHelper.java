@@ -33,6 +33,8 @@ public class IssueDbHelper extends SQLiteOpenHelper {
                 IssueContract.IssueEntry.COLUMN_ASSIGNED_TIME + " DATETIME NOT NULL, " +
                 IssueContract.IssueEntry.COLUMN_IN_PROGRESS_TIME + " DATETIME, " +
                 IssueContract.IssueEntry.COLUMN_CLOSED_TIME + " DATETIME, " +
+                IssueContract.IssueEntry.COLUMN_TRAINCOACH_NAME + " TEXT NOT NULL, " +
+                IssueContract.IssueEntry.COLUMN_TRAINCOACH_ID + " INTEGER NOT NULL "+
                 " );";
 
         //Create IssueAsset Table
@@ -47,7 +49,7 @@ public class IssueDbHelper extends SQLiteOpenHelper {
 
                 " FOREIGN KEY (" + IssueContract.IssueAssetEntry.COLUMN_ISSUE_ID +
                 ") REFERENCES " + IssueContract.IssueEntry.TABLE_NAME +
-                " (" + IssueContract.IssueEntry._ID + "), " +
+                " (" + IssueContract.IssueEntry._ID + ") " +
 
                 " );";
 
