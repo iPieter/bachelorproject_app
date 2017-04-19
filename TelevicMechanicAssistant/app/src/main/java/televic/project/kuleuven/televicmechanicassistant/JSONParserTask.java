@@ -31,7 +31,6 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
 
     public void parseIssueJSON(String jsonResponse) {
 
-
     }
 
     public void parseWorkplaceJSON(String jsonResponse) {

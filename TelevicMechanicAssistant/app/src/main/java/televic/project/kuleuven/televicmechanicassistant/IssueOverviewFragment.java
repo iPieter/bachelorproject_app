@@ -81,16 +81,20 @@ public class IssueOverviewFragment extends ListFragment {
         super.onStart();
 
         //Calling backend
-        mRestRequestHandler.sendParallelRequest(mCurrentUserId);
-        try {
-            mCountDownLatch.await(); //await until all parallel requests have a response
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if (mCurrentUserId >= 0) {
+            mRestRequestHandler.sendParallelRequest(mCurrentUserId);
+            try {
+                mCountDownLatch.await(); //await until all parallel requests have a response
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            //The order of these parameters is obligatory
+            mJsonParserTask.execute(
+                    mRestRequestHandler.getIssueStringResponse(),
+                    mRestRequestHandler.getWorkplaceStringResponse());
+        }else{
+            Log.e(LOG_TAG,"Current user id < 0");
         }
-        //The order of these parameters is obligatory
-        mJsonParserTask.execute(
-                mRestRequestHandler.getIssueStringResponse(),
-                mRestRequestHandler.getWorkplaceStringResponse());
     }
 
     @Override

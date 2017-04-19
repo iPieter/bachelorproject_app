@@ -60,7 +60,7 @@ public class RESTRequestHandler {
                         public void onResponse(String response) {
                             VolleyLog.v(LOG_TAG, "JSONObject response received from REST:" + response);
                             issueStringResponse = response;
-                            mCountDownLatch.notify();
+                            mCountDownLatch.countDown();
                         }
                     }, new Response.ErrorListener() {
 
@@ -95,7 +95,6 @@ public class RESTRequestHandler {
             String url = RESTSingleton.BASE_URL + "/" +
                     RESTSingleton.WORKPLACE_PATH + "/" + mCurrentUserId;
 
-
             //Creating JsonStringRequest for REST call
             //We do not know if getting a JSONArray or JSONObject, So we use the StringRequest
             StringRequest jsonStringRequest = new StringRequest
@@ -104,7 +103,7 @@ public class RESTRequestHandler {
                         public void onResponse(String response) {
                             VolleyLog.v(LOG_TAG, "JSONObject response received from REST:" + response);
                             workplaceStringResponse = response;
-                            mCountDownLatch.notify();
+                            mCountDownLatch.countDown();
                         }
                     }, new Response.ErrorListener() {
 
