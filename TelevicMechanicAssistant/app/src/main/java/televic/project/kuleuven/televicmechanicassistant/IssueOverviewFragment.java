@@ -94,7 +94,7 @@ public class IssueOverviewFragment extends ListFragment {
         try {
             //String url = RESTSingleton.BASE_URL + RESTSingleton.OVERVIEW_PARAM + issueMode;
             //test on Node.js server:
-            String url = "http://10.108.0.153:3003";
+            String url = "http://10.108.0.132:8088";
 
             //Creating JsonObjectRequest for REST call
 

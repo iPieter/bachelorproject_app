@@ -1,5 +1,6 @@
 package televic.project.kuleuven.televicmechanicassistant;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,8 +15,10 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.NoConnectionError;
@@ -27,7 +30,10 @@ import com.android.volley.VolleyError;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -79,7 +85,7 @@ public class IssueDetailActivity extends AppCompatActivity {
     }
 
     public void sendIssueAsset() {
-        String url = "http://10.108.0.153:8080/DWPProject-0.0.1-SNAPSHOT/rest/assets/issue";
+        String url = "http://10.108.0.132:8080/DWPProject-0.0.1-SNAPSHOT/rest/assets/issue";
         VolleyMultipartRequest multipartRequest = new VolleyMultipartRequest( Request.Method.POST, url, new Response.Listener<NetworkResponse >() {
             @Override
             public void onResponse(NetworkResponse response) {
@@ -95,10 +101,20 @@ public class IssueDetailActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+                mCurrentPhotoPath = null;
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                mCurrentPhotoPath = null;
+
+                Context context = getApplicationContext();
+                CharSequence text = "De boodschap kon niet verzonden worden, controleer u internetverbinding.";
+                int duration = Toast.LENGTH_LONG;
+
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
+
                 NetworkResponse networkResponse = error.networkResponse;
                 String errorMessage = "Unknown error";
                 if (networkResponse == null) {
@@ -138,7 +154,7 @@ public class IssueDetailActivity extends AppCompatActivity {
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
                 params.put( "api_token", "gh659gjhvdyudo973823tt9gvjf7i6ric75r76" );
-                params.put( "desc", "TEST" );
+                params.put( "desc", (( EditText)findViewById( R.id.textfield_issueasset )).getText().toString() );
                 params.put( "userID", "1" );
                 params.put( "issueID", "1" );
                 return params;
@@ -147,7 +163,31 @@ public class IssueDetailActivity extends AppCompatActivity {
             @Override
             protected Map<String, DataPart> getByteData() {
                 Map<String, DataPart> params = new HashMap<>();
-                params.put("file", new DataPart("file_cover.jpg", new byte[0], "image/jpeg"));
+                if( mCurrentPhotoPath != null ) {
+                    File file = new File( mCurrentPhotoPath );
+                    if( file.isFile() ) {
+                        int size = (int) file.length();
+                        byte[] bytes = new byte[size];
+                        try {
+                            BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
+                            buf.read(bytes, 0, bytes.length);
+                            buf.close();
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        params.put("file", new DataPart("file_cover.jpg", bytes, "image/jpeg"));
+                        Log.i( LOG, "SENDING TEXT + PICTURE" );
+                    } else {
+                        Log.i( LOG, "SENDING ONLY TEXT" );
+                        params.put("file", new DataPart("file_cover.jpg", new byte[0], "image/jpeg"));
+                    }
+                }else
+                {
+                    params.put("file", new DataPart("file_cover.jpg", new byte[0], "image/jpeg"));
+                    Log.i( LOG, "PICTURE PATH: " + mCurrentPhotoPath );
+                }
                 return params;
             }
         };
