@@ -51,8 +51,17 @@ public class IssueDbHelper extends SQLiteOpenHelper {
 
                 " );";
 
+        //Create Traincoach Table
+        final String SQL_CREATE_TRAINCOACH_TABLE = "CREATE TABLE " +
+                IssueContract.TraincoachEntry.TABLE_NAME + " (" +
+                IssueContract.TraincoachEntry._ID + " INTEGER PRIMARY KEY," +
+                IssueContract.TraincoachEntry.COLUMN_WORKPLACE_ID + " INTEGER NOT NULL, " +
+                IssueContract.TraincoachEntry.COLUMN_WORKPLACE_NAME + " TEXT NOT NULL, " +
+                " );";
+
         sqLiteDatabase.execSQL(SQL_CREATE_ISSUE_TABLE);
         sqLiteDatabase.execSQL(SQL_CREATE_ISSUE_ASSET_TABLE);
+        sqLiteDatabase.execSQL(SQL_CREATE_TRAINCOACH_TABLE);
     }
 
     @Override
@@ -60,6 +69,7 @@ public class IssueDbHelper extends SQLiteOpenHelper {
         //Database only serves as cache, so onUpgrade drop table
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + IssueContract.IssueEntry.TABLE_NAME);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + IssueContract.IssueAssetEntry.TABLE_NAME);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + IssueContract.TraincoachEntry.TABLE_NAME);
         onCreate(sqLiteDatabase);
     }
 }
