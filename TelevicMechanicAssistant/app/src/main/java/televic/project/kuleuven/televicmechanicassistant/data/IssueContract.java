@@ -20,6 +20,7 @@ public class IssueContract {
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
     public static final String PATH_ISSUE = "issue";
     public static final String PATH_ISSUE_ASSET = "issue_asset";
+    public static final String PATH_TRAINCOACH = "traincoach";
 
 
     /* TABLE 1: Inner class that defines the table contents of the Issue table */
@@ -97,6 +98,31 @@ public class IssueContract {
                 return Integer.parseInt(idString);
             }
             return -1;
+        }
+    }
+
+    /* TABLE 3: Inner class that defines the table contents of the Traincoach table */
+    //Table om per traincoach_id de bijhorende workplacename te krijgen
+    public static final class TraincoachEntry implements BaseColumns {
+        public static final Uri CONTENT_URI =
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_TRAINCOACH).build();
+
+        //Cursor: Zero Or more items
+        public static final String CONTENT_TYPE =
+                ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_TRAINCOACH;
+        //Cursor: One Item
+        public static final String CONTENT_ITEM_TYPE =
+                ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_TRAINCOACH;
+
+        // Table name
+        public static final String TABLE_NAME = "traincoach";
+
+        //Columns
+        public static final String COLUMN_WORKPLACE_ID = "workplace_id";
+        public static final String COLUMN_WORKPLACE_NAME = "workplace_name";
+
+        public static Uri buildTraincoachUri(long id) {
+            return ContentUris.withAppendedId(CONTENT_URI, id);
         }
     }
 }

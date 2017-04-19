@@ -122,6 +122,7 @@ public class IssueOverviewFragment extends ListFragment {
         }
     }
 
+    /*
     public class JSONParser extends AsyncTask<String, Void, List<IssueOverviewRowitem>> {
 
         @Override
@@ -208,7 +209,7 @@ public class IssueOverviewFragment extends ListFragment {
 
             return new ArrayList<IssueOverviewRowitem>();
             //return result
-            */
+
         }
 
         @Override
@@ -220,5 +221,5 @@ public class IssueOverviewFragment extends ListFragment {
             }
             mOverviewListAdapter.updateView(result);
         }
-    }
+    }*/
 }
