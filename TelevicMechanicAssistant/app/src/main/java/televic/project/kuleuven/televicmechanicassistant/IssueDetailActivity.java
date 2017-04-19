@@ -12,12 +12,14 @@ import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.android.volley.NetworkResponse;
@@ -36,16 +38,22 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import model.issue.IssueAsset;
+import model.user.User;
 
 public class IssueDetailActivity extends AppCompatActivity {
 
     private static final String LOG = "ISSUE_DETAIL";
     private static final int REQUEST_TAKE_PHOTO = 1;
 
-    String mCurrentPhotoPath;
+    private String mCurrentPhotoPath;
+    private IssueAssetListAdapter mListAdapter;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,6 +74,38 @@ public class IssueDetailActivity extends AppCompatActivity {
                 takePicture();
             }
         } );
+
+        mListAdapter = new IssueAssetListAdapter( getApplicationContext() );
+        ListView listView = (ListView) findViewById( R.id.issue_asset_link );
+        listView.setAdapter( mListAdapter );
+
+        User user = new User();
+        user.setName( "TEST" );
+
+        List<IssueAsset> assets = new ArrayList<>( );
+        IssueAsset asset = new IssueAsset();
+        asset.setId( 0 );
+        asset.setDescr( "test0" );
+        asset.setTime( new Date( ) );
+        asset.setUser( user );
+
+        IssueAsset asset1 = new IssueAsset();
+        asset1.setId( 1 );
+        asset1.setDescr( "test1" );
+        asset1.setTime( new Date( ) );
+        asset1.setUser( user );
+
+        IssueAsset asset2 = new IssueAsset();
+        asset2.setId( 2 );
+        asset2.setDescr( "test2" );
+        asset2.setTime( new Date( ) );
+        asset2.setUser( user );
+
+        assets.add( asset );
+        assets.add( asset1 );
+        assets.add( asset2 );
+
+        mListAdapter.updateView( assets );
     }
 
     public void onResume()

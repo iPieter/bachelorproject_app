@@ -53,15 +53,18 @@ public class IssueAssetListAdapter extends BaseAdapter
     @Override
     public View getView( int position, View convertView, ViewGroup parent )
     {
-        Log.v(LOG_TAG, "Updating Listitem View");
-
         //Check for avoiding Null pointer exception
         LinearLayout itemView;
         if (convertView == null) {
-            itemView = (LinearLayout) mLayoutInflater.inflate(R.layout.item_issue_overview, parent, false);
+            itemView = (LinearLayout) mLayoutInflater.inflate(R.layout.issue_asset, parent, false);
+            Log.i( LOG_TAG, "INFLATING WITH ITEM_ISSUE_OVERVIEW" );
         } else {
             itemView = (LinearLayout) convertView;
         }
+
+        Log.i( LOG_TAG, itemView.toString() );
+        Log.i( LOG_TAG, "" + itemView.getId() );
+
         ImageView issueAssetView = (ImageView) itemView.findViewById( R.id.issue_asset_image );
         TextView descriptionField = (TextView) itemView.findViewById( R.id.issue_asset_description );
         TextView authorField = (TextView) itemView.findViewById( R.id.issue_asset_author );
@@ -69,10 +72,20 @@ public class IssueAssetListAdapter extends BaseAdapter
 
         IssueAsset asset = mDataList.get( position );
 
+        Log.i( LOG_TAG, asset.toString() );
+
+        if( descriptionField == null || authorField == null || dateField == null )
+            Log.i( LOG_TAG, "FIELDS ARE NULL" );
+
         descriptionField.setText( asset.getDescr() );
         authorField.setText( asset.getUser().getName() );
         dateField.setText( asset.getTime().toString() );
 
         return itemView;
+    }
+
+    public void updateView(List<IssueAsset> dataList) {
+        mDataList = dataList;
+        notifyDataSetChanged();
     }
 }

@@ -102,6 +102,6 @@ public class IssueAsset
 	 * */
 	public String toString()
 	{
-		return descr + ":" + location;
+		return descr + ":" + user.getName() + ":" + time.toString() ;
 	}
 }
