@@ -10,19 +10,19 @@ import model.user.User;
 
 public class Issue implements Serializable
 {
-	//private int id;
+	private int id;
 	private String descr;
 	private IssueStatus status;
-	//private List<IssueAsset> assets = new ArrayList<IssueAsset>();
-	//private User mechanic;
+	private List<IssueAsset> assets = new ArrayList<IssueAsset>();
+	private User mechanic;
 	private User operator;
 	private ProcessedSensorData data;
 	private Date assignedTime;
 	private Date inProgressTime;
 	private Date closedTime;
 
-	//private double gpsLat;
-	//private double gpsLon;
+	private double gpsLat;
+	private double gpsLon;
 	
 	public Issue()
 	{
