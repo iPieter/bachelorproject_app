@@ -1,10 +1,12 @@
 package televic.project.kuleuven.televicmechanicassistant;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ListFragment;
+import android.support.v4.app.LoaderManager;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -17,20 +19,46 @@ import android.widget.FrameLayout.LayoutParams;
 import android.widget.TextView;
 import java.util.concurrent.CountDownLatch;
 
+import televic.project.kuleuven.televicmechanicassistant.data.IssueContract;
+
 
 //MAIN LAUNCH Activity
-public class IssueOverviewFragment extends ListFragment {
+public class IssueOverviewFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private final String LOG_TAG = IssueOverviewFragment.class.getSimpleName();
-    private OverviewListAdapter mOverviewListAdapter;
+    private boolean DEBUG_MODE=true;
 
+    private OverviewListAdapter mOverviewListAdapter;
     private RESTRequestHandler mRestRequestHandler;
     private JSONParserTask mJsonParserTask;
     private CountDownLatch mCountDownLatch;
-
     //TODO init currentUserId @login!!!
     private int mCurrentUserId;
 
-    private boolean DEBUG_MODE=true;
+    //Id of the loader
+    private static final int OVERVIEW_LOADER = 0;
+
+    //Values in Database needed in this activity
+    private static final String[] OVERVIEW_COLUMNS = {
+            IssueContract.IssueEntry.TABLE_NAME + "." + IssueContract.IssueEntry._ID,
+            IssueContract.IssueEntry.COLUMN_STATUS,
+            IssueContract.IssueEntry.COLUMN_DESCRIPTION,
+            IssueContract.IssueEntry.COLUMN_ASSIGNED_TIME,
+            IssueContract.IssueEntry.COLUMN_IN_PROGRESS_TIME,
+            IssueContract.IssueEntry.COLUMN_TRAINCOACH_NAME,
+            IssueContract.IssueEntry.COLUMN_OPERATOR,
+            IssueContract.TraincoachEntry.COLUMN_WORKPLACE_NAME,
+    };
+
+    // Depents on OVERVIEW_COLUMNS, if OVERVIEW_COLUMNS changes, so must these indexes!
+    static final int COL_ISSUE_ID = 0;
+    static final int COL_ISSUE_STATUS = 1;
+    static final int COL_ISSUE_DESCRIPTION = 2;
+    static final int COL_ISSUE_ASSIGNED_TIME = 3;
+    static final int COL_ISSUE_IN_PROGRESS_TIME = 4;
+    static final int COL_ISSUE_TRAINCOACH = 5;
+    static final int COL_ISSUE_OPERATOR = 6;
+    static final int COL_ISSUE_WORKPLACE = 7;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

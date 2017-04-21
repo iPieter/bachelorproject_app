@@ -103,18 +103,19 @@ public class OverviewListAdapter extends CursorAdapter {
     public void bindView(View view, Context context, Cursor cursor) {
         Log.v(LOG_TAG, "Updating Listitem View");
 
-        /*
+
         //Collect (text)views from layout of list item
         Log.v(LOG_TAG, "Fetching layout items from list");
         TextView item_header_workplace =
-                (TextView) itemView.findViewById(R.id.item_header_workplace);
+                (TextView) view.findViewById(R.id.item_header_workplace);
         TextView item_header_status =
-                (TextView) itemView.findViewById(R.id.item_header_status);
+                (TextView) view.findViewById(R.id.item_header_status);
         TextView item_header_traincoach =
-                (TextView) itemView.findViewById(R.id.item_header_traincoach);
+                (TextView) view.findViewById(R.id.item_header_traincoach);
         TextView item_content =
-                (TextView) itemView.findViewById(R.id.item_content);
+                (TextView) view.findViewById(R.id.item_content);
 
+        /* TODO bind to values cursor.toString(COLUMN IN MAIN_ACTIVITY)
         //Set datafields in the list item
         Log.v(LOG_TAG, "Setting datafields to list item");
         item_header_workplace.setText(mDataList.get(position).getWorkplace());
