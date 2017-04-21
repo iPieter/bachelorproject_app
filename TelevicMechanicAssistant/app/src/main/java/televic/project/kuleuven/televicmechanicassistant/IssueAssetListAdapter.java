@@ -88,11 +88,10 @@ public class IssueAssetListAdapter extends BaseAdapter
         PrettyTime prettyTime = new PrettyTime( new Locale( "nl" ) );
         dateField.setText( prettyTime.format( asset.getTime() ) );
 
-        if( asset.getLocation() == "" )
+        if( asset.getLocation().equals( "" ) )
             issueAssetView.setVisibility( View.GONE );
         else
             issueAssetView.setVisibility( View.VISIBLE );
-
         return itemView;
     }
 

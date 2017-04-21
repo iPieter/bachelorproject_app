@@ -56,6 +56,8 @@ public class IssueDetailActivity extends AppCompatActivity {
     private String mCurrentPhotoPath;
     private IssueAssetListAdapter mListAdapter;
     private ProgressDialog sendingDialog;
+    private List<IssueAsset> assets = new ArrayList<>( );
+    private User user;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,15 +83,21 @@ public class IssueDetailActivity extends AppCompatActivity {
         ListView listView = (ListView) findViewById( R.id.issue_asset_link );
         listView.setAdapter( mListAdapter );
 
-        User user = new User();
+        ProgressDialog loadingDialog = new ProgressDialog( this );
+        loadingDialog.setTitle( "Laden.." );
+        loadingDialog.setMessage( "De boodschappen worden geladen" );
+        loadingDialog.setCancelable( false );
+        loadingDialog.show();
+
+        user = new User();
         user.setName( "Jan Met De Pet" );
 
-        List<IssueAsset> assets = new ArrayList<>( );
         IssueAsset asset = new IssueAsset();
         asset.setId( 0 );
         asset.setDescr( "De wagon vertoont een afwijking aan zijn roll waarden. Controleer het onderstel vooraan." );
         asset.setTime( new Date( ) );
         asset.setUser( user );
+        asset.setLocation( "azerazer" );
 
         IssueAsset asset1 = new IssueAsset();
         asset1.setId( 1 );
@@ -99,19 +107,22 @@ public class IssueDetailActivity extends AppCompatActivity {
                 "Consectetur nesciunt vel excepturi asperiores earum est veritatis. Ducimus et sequi et voluptas aliquid vitae aut. Non dolor quasi non sunt inventore. Occaecati harum fuga est. Nemo et et illo modi est." );
         asset1.setTime( new Date( ) );
         asset1.setUser( user );
+        asset1.setLocation( "" );
 
         IssueAsset asset2 = new IssueAsset();
         asset2.setId( 2 );
         asset2.setDescr( "Test of de remmen nog goed werken." );
         asset2.setTime( new Date( ) );
         asset2.setUser( user );
-        asset2.setLocation( "" );
+        asset2.setLocation( "azerazerazr" );
 
         assets.add( asset );
         assets.add( asset1 );
         assets.add( asset2 );
 
         mListAdapter.updateView( assets );
+
+        loadingDialog.dismiss();
 
         sendingDialog = new ProgressDialog(this);
         sendingDialog.setTitle("Versturen");
@@ -141,12 +152,25 @@ public class IssueDetailActivity extends AppCompatActivity {
 
         sendingDialog.show();
 
-        String url = "http://10.108.0.132:8080/DWPProject-0.0.1-SNAPSHOT/rest/assets/issue";
+        String url = "http://192.168.1.4:8080/DWPProject-0.0.1-SNAPSHOT/rest/assets/issue";
         VolleyMultipartRequest multipartRequest = new VolleyMultipartRequest( Request.Method.POST, url, new Response.Listener<NetworkResponse >() {
             @Override
             public void onResponse(NetworkResponse response) {
                 String resultResponse = new String(response.data);
                 try {
+
+                    IssueAsset asset = new IssueAsset();
+                    if( mCurrentPhotoPath == null )
+                        asset.setLocation( "" );
+                    else
+                        asset.setLocation( "azeaze" );
+                    asset.setUser( user );
+                    asset.setDescr( (( EditText)findViewById( R.id.textfield_issueasset )).getText().toString() );
+                    asset.setTime( new Date( ) );
+
+                    assets.add( asset );
+                    mListAdapter.updateView( assets );
+
                     JSONObject result = new JSONObject(resultResponse);
                     String status = result.getString("status");
                     String message = result.getString("message");
@@ -159,6 +183,7 @@ public class IssueDetailActivity extends AppCompatActivity {
                 }
                 mCurrentPhotoPath = null;
                 removeProgress();
+                (( EditText)findViewById( R.id.textfield_issueasset )).setText( "" );
             }
         }, new Response.ErrorListener() {
             @Override
@@ -167,7 +192,7 @@ public class IssueDetailActivity extends AppCompatActivity {
                 removeProgress();
 
                 Context context = getApplicationContext();
-                CharSequence text = "De boodschap kon niet verzonden worden, controleer u internetverbinding.";
+                CharSequence text = "De boodschap kon niet verzonden worden, controleer of u internetverbinding werkt.";
                 int duration = Toast.LENGTH_LONG;
 
                 Toast toast = Toast.makeText(context, text, duration);

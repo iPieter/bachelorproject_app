@@ -29,7 +29,9 @@
         android:id="@+id/issue_asset_link"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:stackFromBottom="true"
+        android:transcriptMode="alwaysScroll"/>
 
     <RelativeLayout
         android:id="@+id/layout_add"
@@ -57,17 +59,17 @@
             android:layout_marginLeft="17dp"
             android:layout_marginStart="17dp"
             android:ems="10"
-            android:inputType="textPersonName"
-            android:text="Beschrijving"/>
+            android:hint="Boodschap"
+            android:inputType="textPersonName"/>
 
         <ImageButton
             android:id="@+id/button_camera"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
+            android:layout_alignTop="@+id/textfield_issueasset"
             android:layout_marginLeft="14dp"
             android:layout_marginStart="14dp"
-            android:layout_toEndOf="@+id/textfield_issueasset"
             android:layout_toRightOf="@+id/textfield_issueasset"
             app2:srcCompat="@android:drawable/ic_menu_camera"/>
 
@@ -76,7 +78,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_toEndOf="@+id/button_camera"
+            android:layout_alignTop="@+id/button_camera"
             android:layout_toRightOf="@+id/button_camera"
             app2:srcCompat="@android:drawable/ic_menu_send"/>
 
