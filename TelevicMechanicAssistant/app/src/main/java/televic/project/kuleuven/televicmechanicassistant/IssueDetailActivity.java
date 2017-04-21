@@ -1,5 +1,6 @@
 package televic.project.kuleuven.televicmechanicassistant;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -54,6 +55,7 @@ public class IssueDetailActivity extends AppCompatActivity {
 
     private String mCurrentPhotoPath;
     private IssueAssetListAdapter mListAdapter;
+    private ProgressDialog sendingDialog;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,32 +82,41 @@ public class IssueDetailActivity extends AppCompatActivity {
         listView.setAdapter( mListAdapter );
 
         User user = new User();
-        user.setName( "TEST" );
+        user.setName( "Jan Met De Pet" );
 
         List<IssueAsset> assets = new ArrayList<>( );
         IssueAsset asset = new IssueAsset();
         asset.setId( 0 );
-        asset.setDescr( "test0" );
+        asset.setDescr( "De wagon vertoont een afwijking aan zijn roll waarden. Controleer het onderstel vooraan." );
         asset.setTime( new Date( ) );
         asset.setUser( user );
 
         IssueAsset asset1 = new IssueAsset();
         asset1.setId( 1 );
-        asset1.setDescr( "test1" );
+        asset1.setDescr( "Voluptas molestiae quo voluptas ut ut totam quia. Quibusdam amet labore eos perspiciatis delectus doloribus. Ipsa maiores doloremque culpa iste.\n" +
+                "Velit rerum inventore quia sunt. Libero dolores rerum eos nulla explicabo voluptas ratione. Rem sit dolorem voluptate culpa perspiciatis omnis et enim. Sequi ab qui qui voluptatem in dolorem. Illum expedita odit libero enim expedita et doloribus.\n" +
+                "Vel deleniti et est consequuntur corporis repellendus molestiae consequatur. Sed nostrum est unde aut occaecati illo ut omnis. Perspiciatis optio est at. Doloremque perspiciatis dignissimos maiores assumenda vitae.\n" +
+                "Consectetur nesciunt vel excepturi asperiores earum est veritatis. Ducimus et sequi et voluptas aliquid vitae aut. Non dolor quasi non sunt inventore. Occaecati harum fuga est. Nemo et et illo modi est." );
         asset1.setTime( new Date( ) );
         asset1.setUser( user );
 
         IssueAsset asset2 = new IssueAsset();
         asset2.setId( 2 );
-        asset2.setDescr( "test2" );
+        asset2.setDescr( "Test of de remmen nog goed werken." );
         asset2.setTime( new Date( ) );
         asset2.setUser( user );
+        asset2.setLocation( "" );
 
         assets.add( asset );
         assets.add( asset1 );
         assets.add( asset2 );
 
         mListAdapter.updateView( assets );
+
+        sendingDialog = new ProgressDialog(this);
+        sendingDialog.setTitle("Versturen");
+        sendingDialog.setMessage("De boodschap wordt verstuurd.");
+        sendingDialog.setCancelable(false); // disable dismiss by tapping outside of the dialog
     }
 
     public void onResume()
@@ -127,6 +138,9 @@ public class IssueDetailActivity extends AppCompatActivity {
     }
 
     public void sendIssueAsset() {
+
+        sendingDialog.show();
+
         String url = "http://10.108.0.132:8080/DWPProject-0.0.1-SNAPSHOT/rest/assets/issue";
         VolleyMultipartRequest multipartRequest = new VolleyMultipartRequest( Request.Method.POST, url, new Response.Listener<NetworkResponse >() {
             @Override
@@ -144,11 +158,13 @@ public class IssueDetailActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
                 mCurrentPhotoPath = null;
+                removeProgress();
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 mCurrentPhotoPath = null;
+                removeProgress();
 
                 Context context = getApplicationContext();
                 CharSequence text = "De boodschap kon niet verzonden worden, controleer u internetverbinding.";
@@ -235,6 +251,11 @@ public class IssueDetailActivity extends AppCompatActivity {
         };
 
         RESTSingleton.getInstance(getApplicationContext()).addToRequestQueue(multipartRequest);
+    }
+
+    private void removeProgress()
+    {
+        sendingDialog.dismiss();
     }
 
     public void takePicture() {

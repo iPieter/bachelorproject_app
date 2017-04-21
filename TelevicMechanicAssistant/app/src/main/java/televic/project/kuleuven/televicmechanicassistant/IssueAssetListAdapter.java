@@ -10,9 +10,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.ocpsoft.prettytime.PrettyTime;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import model.issue.IssueAsset;
 
@@ -79,7 +84,14 @@ public class IssueAssetListAdapter extends BaseAdapter
 
         descriptionField.setText( asset.getDescr() );
         authorField.setText( asset.getUser().getName() );
-        dateField.setText( asset.getTime().toString() );
+
+        PrettyTime prettyTime = new PrettyTime( new Locale( "nl" ) );
+        dateField.setText( prettyTime.format( asset.getTime() ) );
+
+        if( asset.getLocation() == "" )
+            issueAssetView.setVisibility( View.GONE );
+        else
+            issueAssetView.setVisibility( View.VISIBLE );
 
         return itemView;
     }
