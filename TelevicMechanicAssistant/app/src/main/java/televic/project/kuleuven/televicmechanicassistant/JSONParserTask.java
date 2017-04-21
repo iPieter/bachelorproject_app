@@ -25,16 +25,11 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
     private Vector<ContentValues> mIssueAssetVector = null;
     private Vector<ContentValues> mWorkplaceVector = null;
 
-    //TestStrings For REST
-    //TODO DELETE STRINGS
-    static final String testString1 = "[]";
-
     //for each Issue/IssueAsset in StringResponse
     private final String ID = "id";
     private final String DESCRIPTION = "descr";
     private final String STATUS = "status";
     private final String ASSETS = "assets";
-    private final String MECHANIC = "mechanic";
     private final String OPERATOR = "operator";
     private final String DATA = "data";
     private final String ASSIGNED_TIME = "assignedTime";
@@ -43,6 +38,7 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
     private final String USER = "user";
     private final String NAME = "name";
     private final String TRAINCOACH = "traincoach";
+    private final String TRAINCOACHES = "traincoaches";
     private final String TYPE = "type";
     private final String TIME = "time";
     private final String EMAIL = "email";
@@ -56,16 +52,18 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
 
     @Override
     protected Void doInBackground(String... strings) {
+        Log.v(LOG_TAG,"START JSONPARSING background task");
         String issueStringResponse = strings[0];
         String workplaceStringResponse = strings[1];
 
         parseIssueJSON(issueStringResponse);
-        //writeIssuesToDatabase();
-        //writeIssueAssetsToDatabase();
+        writeIssuesToDatabase();
+        writeIssueAssetsToDatabase();
 
         parseWorkplaceJSON(workplaceStringResponse);
-        //writeWorkplacesToDatabase();
+        writeWorkplacesToDatabase();
 
+        Log.v(LOG_TAG,"COMPLETED JSONPARSING background task");
         return null;
     }
 
@@ -78,6 +76,7 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
      * @param jsonResponse String response from Volley
      */
     public void parseIssueJSON(String jsonResponse) {
+        Log.d(LOG_TAG, "entering parseIssueJSON");
         try {
             //Will cast Exception if only on item is present
             JSONArray issues = new JSONArray(jsonResponse);
@@ -102,7 +101,6 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
                 Log.e(LOG_TAG, "Cannot convert Issues to JSONObject: " + jsonResponse);
             }
         }
-
         Log.d(LOG_TAG, "Leaving parseIssueJSON");
     }
 
@@ -164,6 +162,7 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
 
             Log.d(LOG_TAG, "Leaving parseSingleIssue: Fetched ContentValues for IssueID = " + issue_id);
         } catch (JSONException e) {
+            Log.e(LOG_TAG, "parseSingleIssue FAILED!");
             e.printStackTrace();
         }
 
@@ -252,6 +251,7 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
      * @param jsonResponse raw REST response in String format
      */
     public void parseWorkplaceJSON(String jsonResponse) {
+        Log.d(LOG_TAG, "Entering parseWorkplaceJSON");
         try {
             //Will cast Exception if only on item is present
             JSONArray workplaces = new JSONArray(jsonResponse);
@@ -274,7 +274,7 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
             }
         }
 
-        Log.d(LOG_TAG, "Leaving parseIssueJSON");
+        Log.d(LOG_TAG, "Leaving parseWorkplaceJSON");
     }
 
     /**
@@ -288,7 +288,7 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
         String workplace_name;
 
         try {
-            JSONArray traincoaches = workplace.getJSONArray(TRAINCOACH);
+            JSONArray traincoaches = workplace.getJSONArray(TRAINCOACHES);
 
             workplace_id=workplace.getInt(ID);
             workplace_name=workplace.getString(NAME);
@@ -301,7 +301,7 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
             }
         } catch (JSONException e1) {
             try {
-                JSONObject traincoach = workplace.getJSONObject(TRAINCOACH);
+                JSONObject traincoach = workplace.getJSONObject(TRAINCOACHES);
 
                 workplace_id=workplace.getInt(ID);
                 workplace_name=workplace.getString(NAME);
@@ -339,5 +339,42 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
         }
 
         return contentValues;
+    }
+
+    /*--- WRTING TO DATABASE ---*/
+    public void writeIssuesToDatabase(){
+        Log.v(LOG_TAG,"DATABASE TRANSACTION to Issue-Table STARTED");
+        int rowsInserted = 0;
+        if ( mIssueVector.size() > 0 ) {
+            ContentValues[] cvArray = new ContentValues[mIssueVector.size()];
+            mIssueVector.toArray(cvArray);
+            rowsInserted = mContext.getContentResolver().bulkInsert(IssueContract.IssueEntry.CONTENT_URI, cvArray);
+        }
+
+        Log.v(LOG_TAG,"DATABASE TRANSACTION to Issue-Table COMPLETE: "+rowsInserted+" rows inserted!");
+    }
+
+    public void writeIssueAssetsToDatabase(){
+        Log.v(LOG_TAG,"DATABASE TRANSACTION to IssueAsset-Table STARTED");
+        int rowsInserted = 0;
+        if ( mIssueAssetVector.size() > 0 ) {
+            ContentValues[] cvArray = new ContentValues[mIssueAssetVector.size()];
+            mIssueAssetVector.toArray(cvArray);
+            rowsInserted = mContext.getContentResolver().bulkInsert(IssueContract.IssueAssetEntry.CONTENT_URI, cvArray);
+        }
+
+        Log.v(LOG_TAG,"DATABASE TRANSACTION to IssueAsset-Table COMPLETE: "+rowsInserted+" rows inserted!");
+    }
+
+    public void writeWorkplacesToDatabase(){
+        Log.v(LOG_TAG,"DATABASE TRANSACTION to Traincoach-Table STARTED");
+        int rowsInserted = 0;
+        if ( mWorkplaceVector.size() > 0 ) {
+            ContentValues[] cvArray = new ContentValues[mWorkplaceVector.size()];
+            mWorkplaceVector.toArray(cvArray);
+            rowsInserted = mContext.getContentResolver().bulkInsert(IssueContract.TraincoachEntry.CONTENT_URI, cvArray);
+        }
+
+        Log.v(LOG_TAG,"DATABASE TRANSACTION to Traincoach-Table COMPLETE: "+rowsInserted+" rows inserted!");
     }
 }

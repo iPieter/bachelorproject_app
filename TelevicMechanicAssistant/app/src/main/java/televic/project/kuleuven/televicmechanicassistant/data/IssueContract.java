@@ -10,6 +10,8 @@ import android.provider.BaseColumns;
  */
 
 public class IssueContract {
+    private static final String LOG_TAG = IssueContract.class.getSimpleName();
+
     /*
     How URI looks like:
     content://<Base_url>/<Table>/<Query>?<AdditionalQuery>

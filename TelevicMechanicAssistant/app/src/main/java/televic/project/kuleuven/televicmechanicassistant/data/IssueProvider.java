@@ -9,12 +9,14 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 /**
  * Created by Matthias on 18/04/2017.
  */
 
 public class IssueProvider extends ContentProvider {
+    private static final String LOG_TAG = IssueProvider.class.getSimpleName();
 
     // The URI Matcher used by this content provider.
     private static final UriMatcher sUriMatcher = buildUriMatcher();
@@ -30,6 +32,7 @@ public class IssueProvider extends ContentProvider {
     private static final SQLiteQueryBuilder sIssueAssetByIssueQueryBuilder;
 
     static{
+        Log.v(LOG_TAG,"Creating SQLiteQueryBuilder!");
         sIssueAssetByIssueQueryBuilder = new SQLiteQueryBuilder();
 
         //This is an inner join which looks like
@@ -47,6 +50,7 @@ public class IssueProvider extends ContentProvider {
                         "." + IssueContract.IssueEntry.COLUMN_TRAINCOACH_ID +
                         " = " + IssueContract.TraincoachEntry.TABLE_NAME +
                         "." + IssueContract.TraincoachEntry._ID);
+        Log.v(LOG_TAG,"SQLiteQueryBuilder builded!");
     }
 
     static UriMatcher buildUriMatcher() {
@@ -60,6 +64,7 @@ public class IssueProvider extends ContentProvider {
         matcher.addURI(authority, IssueContract.PATH_ISSUE_ASSET+ "/*", ISSUE_ASSET_WITH_ISSUE_ID);
         matcher.addURI(authority, IssueContract.PATH_TRAINCOACH, TRAINCOACH);
 
+        Log.v(LOG_TAG,"UriMatcher initialized");
         return matcher;
     }
 
@@ -75,7 +80,9 @@ public class IssueProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
+        Log.v(LOG_TAG,"entered onCreate");
         mOpenHelper = new IssueDbHelper(getContext());
+        Log.v(LOG_TAG,"leaving onCreate: IssueProvider created!");
         return true;
     }
 
@@ -216,6 +223,7 @@ public class IssueProvider extends ContentProvider {
 
     @Override
     public int bulkInsert(Uri uri, ContentValues[] values) {
+        Log.v(LOG_TAG,"entering bulkInsert");
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
         int returnCount;

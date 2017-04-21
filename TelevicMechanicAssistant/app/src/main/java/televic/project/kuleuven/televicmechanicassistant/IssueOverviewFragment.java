@@ -15,11 +15,8 @@ import android.widget.ProgressBar;
 
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.TextView;
-
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import model.app.IssueOverviewRowitem;
 
 //MAIN LAUNCH Activity
 public class IssueOverviewFragment extends ListFragment {
@@ -32,6 +29,8 @@ public class IssueOverviewFragment extends ListFragment {
 
     //TODO init currentUserId @login!!!
     private int mCurrentUserId;
+
+    private boolean DEBUG_MODE=true;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -50,9 +49,9 @@ public class IssueOverviewFragment extends ListFragment {
         mRestRequestHandler = new RESTRequestHandler(
                 this.getActivity().getApplicationContext(),
                 mCountDownLatch);
-        mJsonParserTask = new JSONParserTask();
+        mJsonParserTask = new JSONParserTask(this.getContext());
         mCountDownLatch = new CountDownLatch(RESTRequestHandler.REQUEST_COUNT);
-        mCurrentUserId = -1; //TODO
+        mCurrentUserId = 1; //TODO
 
         //Setting up adapter
         mOverviewListAdapter = new OverviewListAdapter(this.getContext());
@@ -82,11 +81,16 @@ public class IssueOverviewFragment extends ListFragment {
 
         //Calling backend
         if (mCurrentUserId >= 0) {
-            mRestRequestHandler.sendParallelRequest(mCurrentUserId);
-            try {
-                mCountDownLatch.await(); //await until all parallel requests have a response
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            if(DEBUG_MODE){
+                mRestRequestHandler.setIssueStringResponse(RESTRequestHandler.testStringIssue);
+                mRestRequestHandler.setWorkplaceStringResponse(RESTRequestHandler.testStringWorkplace);
+            }else {
+                mRestRequestHandler.sendParallelRequest(mCurrentUserId);
+                try {
+                    mCountDownLatch.await(); //await until all parallel requests have a response
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
             //The order of these parameters is obligatory
             mJsonParserTask.execute(
@@ -102,7 +106,7 @@ public class IssueOverviewFragment extends ListFragment {
         Intent intent = new Intent(this.getActivity(), IssueDetailActivity.class);
         //TODO Extract from clicked view
 
-        intent.putExtra(Intent.EXTRA_INTENT, listItems.get(position));
+        //intent.putExtra(Intent.EXTRA_INTENT, listItems.get(position));
         startActivity(intent);
     }
 
