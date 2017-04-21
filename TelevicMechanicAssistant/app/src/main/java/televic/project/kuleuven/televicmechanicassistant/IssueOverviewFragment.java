@@ -2,16 +2,23 @@ package televic.project.kuleuven.televicmechanicassistant;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
@@ -27,12 +34,17 @@ public class IssueOverviewFragment extends ListFragment implements LoaderManager
     private final String LOG_TAG = IssueOverviewFragment.class.getSimpleName();
     private boolean DEBUG_MODE=true;
 
-    private OverviewListAdapter mOverviewListAdapter;
     private RESTRequestHandler mRestRequestHandler;
     private JSONParserTask mJsonParserTask;
     private CountDownLatch mCountDownLatch;
     //TODO init currentUserId @login!!!
     private int mCurrentUserId;
+
+    //Passing to other activity
+    public static String ISSUE_ID_VALUE="issue_id_value987564321";
+
+    //The adapter used to populate the listview
+    private OverviewListAdapter mOverviewListAdapter;
 
     //Id of the loader
     private static final int OVERVIEW_LOADER = 0;
@@ -49,7 +61,7 @@ public class IssueOverviewFragment extends ListFragment implements LoaderManager
             IssueContract.TraincoachEntry.COLUMN_WORKPLACE_NAME,
     };
 
-    // Depents on OVERVIEW_COLUMNS, if OVERVIEW_COLUMNS changes, so must these indexes!
+    //Depends on OVERVIEW_COLUMNS, if OVERVIEW_COLUMNS changes, so must these indexes!
     static final int COL_ISSUE_ID = 0;
     static final int COL_ISSUE_STATUS = 1;
     static final int COL_ISSUE_DESCRIPTION = 2;
@@ -59,12 +71,26 @@ public class IssueOverviewFragment extends ListFragment implements LoaderManager
     static final int COL_ISSUE_OPERATOR = 6;
     static final int COL_ISSUE_WORKPLACE = 7;
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         Log.v(LOG_TAG, "onCreate method ended");
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.main_overview, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_refresh) {
+            handleOverviewData();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Nullable
@@ -82,8 +108,26 @@ public class IssueOverviewFragment extends ListFragment implements LoaderManager
         mCurrentUserId = 1; //TODO
 
         //Setting up adapter
-        mOverviewListAdapter = new OverviewListAdapter(this.getContext());
+        mOverviewListAdapter = new OverviewListAdapter(getActivity(),null,0);
         setListAdapter(mOverviewListAdapter);
+
+        // We'll call our MainActivity
+        getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                // CursorAdapter returns a cursor at the correct position for getItem(), or null
+                // if it cannot seek to that position.
+                Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
+                if (cursor != null) {
+                    Intent intent = new Intent(getActivity(), IssueDetailActivity.class)
+                            .putExtra(ISSUE_ID_VALUE,cursor.getInt(COL_ISSUE_ID));
+                    //.putExtra(CURRENT_MECHANIC_ID,mCurrentMechanic);
+                    //TODO in response in DetailActivity: int intValue = mIntent.getIntExtra(ISSUE_ID_VALUE, 0);
+                    startActivity(intent);
+                }
+            }
+        });
 
         // Create a progress bar to display while the list loads
         ProgressBar progressBar = new ProgressBar(this.getContext());
@@ -104,9 +148,28 @@ public class IssueOverviewFragment extends ListFragment implements LoaderManager
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onActivityCreated(Bundle savedInstanceState) {
+        getLoaderManager().initLoader(OVERVIEW_LOADER, null, this);
+        super.onActivityCreated(savedInstanceState);
+    }
 
+    public void setEmptyText(String text) {
+        TextView textView = (TextView) getView().findViewById(android.R.id.empty);
+        textView.setText(text);
+    }
+
+    public void removeProgressBar() {
+        Log.v(LOG_TAG, "Trying to remove the progressbar");
+        try {
+            ListView listView = (ListView) getListView().findViewById(android.R.id.list);
+            ProgressBar progressBar = (ProgressBar) listView.findViewById(R.id.progressbar_loading);
+            listView.removeViewInLayout(progressBar);
+        } catch (Exception e) {
+            Log.e(LOG_TAG, e.toString());
+        }
+    }
+
+    public void handleOverviewData(){
         //Calling backend
         if (mCurrentUserId >= 0) {
             if(DEBUG_MODE){
@@ -130,128 +193,28 @@ public class IssueOverviewFragment extends ListFragment implements LoaderManager
     }
 
     @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        Intent intent = new Intent(this.getActivity(), IssueDetailActivity.class);
-        //TODO Extract from clicked view
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        // Sort order =  Ascending, by Assigned Time
+        String sortOrder = IssueContract.IssueEntry.COLUMN_ASSIGNED_TIME + " ASC";
+        Uri allIssues = IssueContract.IssueEntry.CONTENT_URI;
 
-        //intent.putExtra(Intent.EXTRA_INTENT, listItems.get(position));
-        startActivity(intent);
+        return new CursorLoader(getActivity(),
+                allIssues,
+                OVERVIEW_COLUMNS,
+                null,
+                null,
+                sortOrder);
     }
 
-    public void setEmptyText(String text) {
-        TextView textView = (TextView) getView().findViewById(android.R.id.empty);
-        textView.setText(text);
+    @Override
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+        mOverviewListAdapter.swapCursor(cursor);
     }
 
-    public void removeProgressBar() {
-        Log.v(LOG_TAG, "Trying to remove the progressbar");
-        try {
-            ListView listView = (ListView) getListView().findViewById(android.R.id.list);
-            ProgressBar progressBar = (ProgressBar) listView.findViewById(R.id.progressbar_loading);
-            listView.removeViewInLayout(progressBar);
-        } catch (Exception e) {
-            Log.e(LOG_TAG, e.toString());
-        }
+    @Override
+    public void onLoaderReset(Loader<Cursor> cursorLoader) {
+        mOverviewListAdapter.swapCursor(null);
     }
 
-    /*
-    public class JSONParser extends AsyncTask<String, Void, List<IssueOverviewRowitem>> {
 
-        @Override
-        protected List<IssueOverviewRowitem> doInBackground(String... jsonArrays) {
-            /*
-            String response = jsonArrays[0];
-            Log.v(LOG_TAG, "Entering JSONParser doInBackground Task. ROOT JSONARRAY=" + response);
-
-            //The names of the REST JSON attributes
-            final String WORKPLACE = "workplace";
-            final String STATUS = "status";
-            final String TRAINCOACH = "traincoach";
-            final String DESCR = "descr";
-
-            //Each element in the list represents a listItem/row in the ListView
-            //Each String-column respectivly represents the attribute from that listItem
-            List<IssueOverviewRowitem> result = null;
-            //String response to JSONArray
-            try {
-                JSONArray listitems = new JSONArray(response);
-                result = new ArrayList<>(listitems.length());
-
-                //Parsing JSON to result
-                IssueOverviewRowitem oneItemData;
-                for (int listItemIndex = 0; listItemIndex < listitems.length(); listItemIndex++) {
-                    Log.v(LOG_TAG, "Item " + listItemIndex + " being parsed ");
-                    oneItemData = new IssueOverviewRowitem();
-                    JSONObject oneItemJSON = listitems.getJSONObject(listItemIndex);
-
-                    //Parsing data in fixed sequential order
-                    oneItemData.setWorkplace(oneItemJSON.getString(WORKPLACE));
-                    oneItemData.setStatus(oneItemJSON.getString(STATUS));
-                    oneItemData.setTraincoach(oneItemJSON.getString(TRAINCOACH));
-                    oneItemData.setDescription(oneItemJSON.getString(DESCR));
-
-                    //One ListItem filled with data, added to the list of ListItems
-                    result.add(oneItemData);
-                    Log.v(LOG_TAG, "Item " + listItemIndex + " result:\n"
-                            + "String[0]=" + result.get(listItemIndex).getWorkplace() + "\n"
-                            + "String[1]=" + result.get(listItemIndex).getStatus() + "\n"
-                            + "String[2]=" + result.get(listItemIndex).getTraincoach() + "\n"
-                            + "String[3]=" + result.get(listItemIndex).getDescription());
-                }
-            } catch (JSONException e) {
-                Log.w(LOG_TAG, "Cannot convert to JSONArray: " + response);
-            }
-
-            if(result==null) {
-                //String response to JSONObject (when only 1 item returned)
-                try {
-                    JSONObject oneItemJSON = new JSONObject(response);
-                    result = new ArrayList<>();
-
-                    IssueOverviewRowitem oneItemData;
-                    Log.v(LOG_TAG, "Item " + 0 + " being parsed ");
-                    oneItemData = new IssueOverviewRowitem();
-
-                    //Parsing data in fixed sequential order
-                    oneItemData.setWorkplace(oneItemJSON.getString(WORKPLACE));
-                    oneItemData.setStatus(oneItemJSON.getString(STATUS));
-                    oneItemData.setTraincoach(oneItemJSON.getString(TRAINCOACH));
-                    oneItemData.setDescription(oneItemJSON.getString(DESCR));
-
-                    //One ListItem filled with data, added to the list of ListItems
-                    result.add(oneItemData);
-                    Log.v(LOG_TAG, "Item " + 0 + " result:\n"
-                            + "String[0]=" + result.get(0).getWorkplace() + "\n"
-                            + "String[1]=" + result.get(0).getStatus() + "\n"
-                            + "String[2]=" + result.get(0).getTraincoach() + "\n"
-                            + "String[3]=" + result.get(0).getDescription());
-
-                } catch (JSONException e) {
-                    Log.w(LOG_TAG, "Cannot convert to JSONObject: " + response);
-                }
-            }
-
-            if (result != null) {
-                listItems = result;
-                Log.v(LOG_TAG, "JSON PARSED");
-            } else {
-                Log.e(LOG_TAG, "JSON PARSING FAILED");
-                listItems = new ArrayList<>();
-            }
-
-            return new ArrayList<IssueOverviewRowitem>();
-            //return result
-
-        }
-
-        @Override
-        protected void onPostExecute(List<IssueOverviewRowitem> result) {
-            super.onPostExecute(result);
-            if (result.size() == 0) {
-                setEmptyText(getString(R.string.item_issue_overview_dataempty));
-                removeProgressBar();
-            }
-            mOverviewListAdapter.updateView(result);
-        }
-    }*/
 }

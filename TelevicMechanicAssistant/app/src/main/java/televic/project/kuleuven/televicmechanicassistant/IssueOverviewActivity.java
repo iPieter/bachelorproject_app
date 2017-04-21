@@ -22,13 +22,13 @@ public class IssueOverviewActivity extends AppCompatActivity {
         }
 
         RESTSingleton.getInstance(getApplicationContext());
-        Log.v(LOG_TAG,"Added application context in main activity");
+        Log.v(LOG_TAG,"Added application context in main_overview activity");
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.main_overview, menu);
         return true;
     }
 
