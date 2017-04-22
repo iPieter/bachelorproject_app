@@ -5,7 +5,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ListFragment;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -28,7 +28,7 @@ import televic.project.kuleuven.televicmechanicassistant.data.IssueContract;
 
 
 //MAIN LAUNCH Activity
-public class IssueOverviewFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class IssueOverviewFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private final String LOG_TAG = IssueOverviewFragment.class.getSimpleName();
     private boolean DEBUG_MODE = true;
 
@@ -159,14 +159,15 @@ public class IssueOverviewFragment extends ListFragment implements LoaderManager
     }
 
     public void removeProgressBar() {
+        /*
         Log.v(LOG_TAG, "Trying to remove the progressbar");
         try {
-            ListView listView = (ListView) getListView().findViewById(android.R.id.list);
+            ListView listView = (ListView) getActivityfindViewById(android.R.id.list);
             ProgressBar progressBar = (ProgressBar) listView.findViewById(R.id.progressbar_loading);
             listView.removeViewInLayout(progressBar);
         } catch (Exception e) {
             Log.e(LOG_TAG, e.toString());
-        }
+        }*/
     }
 
     /**
