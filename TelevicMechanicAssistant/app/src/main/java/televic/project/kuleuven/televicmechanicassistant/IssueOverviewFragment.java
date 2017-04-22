@@ -1,48 +1,94 @@
 package televic.project.kuleuven.televicmechanicassistant;
 
 import android.content.Intent;
-import android.os.AsyncTask;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ListFragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
-
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.VolleyLog;
-import com.android.volley.toolbox.StringRequest;
 
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.TextView;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.concurrent.CountDownLatch;
 
-import java.util.ArrayList;
-import java.util.List;
+import televic.project.kuleuven.televicmechanicassistant.data.IssueContract;
 
-/**
- * Created by Matthias on 29/03/2017.
- */
 
-public class IssueOverviewFragment extends ListFragment {
+//MAIN LAUNCH Activity
+public class IssueOverviewFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private final String LOG_TAG = IssueOverviewFragment.class.getSimpleName();
+    private boolean DEBUG_MODE = false;
+
+    //TODO init currentUserId @login!!!
+    private int mCurrentUserId;
+
+    //Passing to other activity
+    public static String INTENT_ISSUE_ID = "issue_id_value987564321";
+
+    //The adapter used to populate the listview
     private OverviewListAdapter mOverviewListAdapter;
+
+    //Id of the loader
+    private static final int OVERVIEW_LOADER = 0;
+
+    //Values in Database needed in this activity
+    private static final String[] OVERVIEW_COLUMNS = {
+            IssueContract.IssueEntry.TABLE_NAME + "." + IssueContract.IssueEntry._ID,
+            IssueContract.IssueEntry.COLUMN_STATUS,
+            IssueContract.IssueEntry.COLUMN_DESCRIPTION,
+            IssueContract.IssueEntry.COLUMN_ASSIGNED_TIME,
+            IssueContract.IssueEntry.COLUMN_IN_PROGRESS_TIME,
+            IssueContract.IssueEntry.COLUMN_TRAINCOACH_NAME,
+            IssueContract.IssueEntry.COLUMN_OPERATOR,
+            IssueContract.TraincoachEntry.COLUMN_WORKPLACE_NAME,
+    };
+
+    //Depends on OVERVIEW_COLUMNS, if OVERVIEW_COLUMNS changes, so must these indexes!
+    static final int COL_ISSUE_ID = 0;
+    static final int COL_ISSUE_STATUS = 1;
+    static final int COL_ISSUE_DESCRIPTION = 2;
+    static final int COL_ISSUE_ASSIGNED_TIME = 3;
+    static final int COL_ISSUE_IN_PROGRESS_TIME = 4;
+    static final int COL_ISSUE_TRAINCOACH = 5;
+    static final int COL_ISSUE_OPERATOR = 6;
+    static final int COL_ISSUE_WORKPLACE = 7;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Add this line in order for this fragment to handle menu events.
         setHasOptionsMenu(true);
         Log.v(LOG_TAG, "onCreate method ended");
+    }
+
+    /**
+     * The action_refresh must be handled within the fragment,
+     * because the fragment handles the handleOverviewData() for the back-end.
+     * Other options in the menu are handled in the super Activity.
+     *
+     * @param item the selected item
+     * @return
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_refresh) {
+            handleOverviewData();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Nullable
@@ -51,10 +97,34 @@ public class IssueOverviewFragment extends ListFragment {
         Log.v(LOG_TAG, "onCreateView");
         View rootView = inflater.inflate(R.layout.fragment_issue_overview, container, false);
 
-        //Setting up adapter
-        mOverviewListAdapter = new OverviewListAdapter(this.getContext());
-        setListAdapter(mOverviewListAdapter);
+        //INIT
+        mCurrentUserId = 1; //TODO
 
+        //Setting up adapter
+        ListView listView = (ListView) rootView.findViewById(android.R.id.list);
+        mOverviewListAdapter = new OverviewListAdapter(getActivity(), null, 0);
+        listView.setAdapter(mOverviewListAdapter);
+        Log.v(LOG_TAG,"Adapter is set to listview in onCreateView");
+
+        // When item is clicked, a IssueDetailActivity will be started
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                Log.v(LOG_TAG,"Item Clicked!");
+                // CursorAdapter returns a cursor at the correct position for getItem(), or null
+                // if it cannot seek to that position.
+                Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
+                if (cursor != null) {
+                    Log.v(LOG_TAG,"Creating intent");
+                    Intent intent = new Intent(getActivity(), IssueDetailActivity.class)
+                            .putExtra(INTENT_ISSUE_ID, cursor.getInt(COL_ISSUE_ID));
+                    //.putExtra(CURRENT_MECHANIC_ID,mCurrentMechanic);
+                    //TODO in response in DetailActivity: int intValue = mIntent.getIntExtra(INTENT_ISSUE_ID, 0);
+                    startActivity(intent);
+                }
+            }
+        });
 
         // Create a progress bar to display while the list loads
         ProgressBar progressBar = new ProgressBar(this.getContext());
@@ -62,7 +132,6 @@ public class IssueOverviewFragment extends ListFragment {
         progressBar.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.WRAP_CONTENT, Gravity.CENTER));
         progressBar.setIndeterminate(true);
-        ListView listView = (ListView) rootView.findViewById(android.R.id.list);
         listView.setEmptyView(progressBar);
 
         // Must add the progress bar to the root of the layout
@@ -70,94 +139,18 @@ public class IssueOverviewFragment extends ListFragment {
         rootGroup.addView(progressBar);
         Log.v(LOG_TAG, "Progressbar is set!");
 
-        //Calling backend (default= active issues called)
-        fetchIssueData(RESTSingleton.ACTIVE_ISSUES_PARAM);
+        //Activating Back-End
+        handleOverviewData();
 
         Log.v(LOG_TAG, "onCreateView Ended");
         return rootView;
     }
 
     @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        Intent intent = new Intent(this.getActivity(), IssueDetailActivity.class);
-        //TODO Extract from clicked view
-        startActivity(intent);
-    }
-
-    /**
-     * NETWORKING
-     **/
-    //No need for AsyncTask: volley takes care of networking on networking thread
-    protected void fetchIssueData(String issueMode) {
-        Log.v(LOG_TAG, "Entering fetchIssueData");
-        //Fetching the JSON file from server through REST
-        try {
-            //String url = RESTSingleton.BASE_URL + RESTSingleton.OVERVIEW_PARAM + issueMode;
-            //test on Node.js server:
-            String url = "http://10.108.0.132:8088";
-
-            //Creating JsonObjectRequest for REST call
-
-            //Unsure if getting a JSONArray or JSONObject, So we use the StringRequest
-            StringRequest jsObjRequest = new StringRequest
-                    (Request.Method.GET, url, new Response.Listener<String>() {
-
-                        public void onResponse(String response) {
-                            VolleyLog.v(LOG_TAG, "JSONObject response from REST:" + response);
-                            JSONParser parser = new JSONParser();
-                            parser.execute(response);
-                        }
-                    }, new Response.ErrorListener() {
-
-                        public void onErrorResponse(VolleyError error) {
-
-                            //TODO TEST BEGIN
-                            String testString1 = "[]";
-
-                            String testString2 = "{\n" +
-                                    "    \"workplace\" : \"test\",\n" +
-                                    "    \"status\": \"ASSIGNED\",\n" +
-                                    "    \"traincoach\": \"MATTREIN - WAGONTJE\",\n" +
-                                    "    \"descr\": \"Er is een trillingkje.\"\n" +
-                                    "    },\n";
-
-                            String testString3 = "[{\n" +
-                                    "    \"workplace\" : \"test\",\n" +
-                                    "    \"status\": \"ASSIGNED\",\n" +
-                                    "    \"traincoach\": \"MATTREIN - WAGONTJE\",\n" +
-                                    "    \"descr\": \"Er is een trillingkje.\"\n" +
-                                    "    },\n" +
-                                    "{\n" +
-                                    "    \"workplace\" : \"test2\",\n" +
-                                    "    \"status\": \"ASSIGNED2\",\n" +
-                                    "    \"traincoach\": \"MATTREIN - WAGONTJE2\",\n" +
-                                    "    \"descr\": \"Er is een trillingkje2.\"  \n" +
-                                    "}]";
-
-                            try {
-                                JSONParser parser = new JSONParser();
-                                parser.execute(testString3);
-                            } catch (Exception e) {
-                                e.fillInStackTrace();
-                                Log.e(LOG_TAG, e.toString());
-                            }
-                            //TODO TEST END
-
-                            error.fillInStackTrace();
-                            VolleyLog.e("Error in RESTSingleton request:" + error.networkResponse);
-                        }
-                    });
-
-            //Singleton handles call to REST
-            Log.v(LOG_TAG, "Calling RESTSingleton with context:" + this.getContext().getApplicationContext().toString());
-            RESTSingleton.getInstance(this.getContext().getApplicationContext())
-                    .addToRequestQueue(jsObjRequest);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.e(LOG_TAG, "Failed REST fetch");
-        }
-        Log.v(LOG_TAG, "Ending fetchIssueData: REST JSONRequest is now handed to singleton");
+    public void onActivityCreated(Bundle savedInstanceState) {
+        getLoaderManager().initLoader(OVERVIEW_LOADER, null, this);
+        super.onActivityCreated(savedInstanceState);
+        Log.v(LOG_TAG,"Activity created and initLoader");
     }
 
     public void setEmptyText(String text) {
@@ -165,108 +158,79 @@ public class IssueOverviewFragment extends ListFragment {
         textView.setText(text);
     }
 
-    public void removeProgressBar(){
-        Log.v(LOG_TAG,"Trying to remove the progressbar");
+    public void removeProgressBar() {
+        /*
+        Log.v(LOG_TAG, "Trying to remove the progressbar");
         try {
-            ListView listView = (ListView) getListView().findViewById(android.R.id.list);
+            ListView listView = (ListView) getActivityfindViewById(android.R.id.list);
             ProgressBar progressBar = (ProgressBar) listView.findViewById(R.id.progressbar_loading);
             listView.removeViewInLayout(progressBar);
-        }catch (Exception e){
-            Log.e(LOG_TAG,e.toString());
+        } catch (Exception e) {
+            Log.e(LOG_TAG, e.toString());
+        }*/
+    }
+
+    /**
+     * Calling the backend in RESTRequestHandler and starts AsyncTask JSONParserTask
+     * to parse the REST response and write the parsed data to the database.
+     */
+    public void handleOverviewData() {
+        //INIT
+        JSONParserTask jsonParserTask = new JSONParserTask(getActivity());
+        CountDownLatch mCountDownLatch = new CountDownLatch(RESTRequestHandler.REQUEST_COUNT);
+        RESTRequestHandler mRestRequestHandler = new RESTRequestHandler(
+                this.getActivity().getApplicationContext(),
+                mCountDownLatch, jsonParserTask);
+
+        //Calling backend
+        if (mCurrentUserId >= 0) {
+            if (DEBUG_MODE) {
+                mRestRequestHandler.setIssueStringResponse(RESTRequestHandler.testStringIssue);
+                mRestRequestHandler.setWorkplaceStringResponse(RESTRequestHandler.testStringWorkplace);
+            } else {
+
+                mRestRequestHandler.sendParallelRequest(mCurrentUserId);
+                //try {
+                //    mCountDownLatch.await(); //await until all parallel requests have a response
+                //} catch (InterruptedException e) {
+                //    e.printStackTrace();
+                //}
+            }
+            //The order of these parameters is obligatory
+            //jsonParserTask.execute(
+            //        mRestRequestHandler.getIssueStringResponse(),
+            //        mRestRequestHandler.getWorkplaceStringResponse());
+        } else {
+            Log.e(LOG_TAG, "Current user id < 0");
         }
     }
 
-    public class JSONParser extends AsyncTask<String, Void, List<IssueOverviewRowitem>> {
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        Log.v(LOG_TAG, "Creating CursorLoader");
+        // Sort order =  Ascending, by Assigned Time
+        String sortOrder = IssueContract.IssueEntry.COLUMN_ASSIGNED_TIME + " ASC";
+        Uri allIssues = IssueContract.IssueEntry.CONTENT_URI;
+        Log.v(LOG_TAG, "CURSORLOADER URI: " + allIssues);
 
-        @Override
-        protected List<IssueOverviewRowitem> doInBackground(String... jsonArrays) {
-            String response = jsonArrays[0];
-            Log.v(LOG_TAG, "Entering JSONParser doInBackground Task. ROOT JSONARRAY=" + response);
+        return new CursorLoader(getActivity(),
+                allIssues,
+                OVERVIEW_COLUMNS,
+                null,
+                null,
+                sortOrder);
+    }
 
-            //The names of the REST JSON attributes
-            final String WORKPLACE = "workplace";
-            final String STATUS = "status";
-            final String TRAINCOACH = "traincoach";
-            final String DESCR = "descr";
+    @Override
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+        Log.v(LOG_TAG, "Loader onLoadFinished");
+        mOverviewListAdapter.swapCursor(cursor);
+        Log.v(LOG_TAG, "Loader cursor swapped, cursorCount = "+cursor.getCount());
+    }
 
-            //Each element in the list represents a listItem/row in the ListView
-            //Each String-column respectivly represents the attribute from that listItem
-            List<IssueOverviewRowitem> result = null;
-            //String response to JSONArray
-            try {
-                JSONArray listitems = new JSONArray(response);
-                result = new ArrayList<>(listitems.length());
-
-                //Parsing JSON to result
-                IssueOverviewRowitem oneItemData;
-                for (int listItemIndex = 0; listItemIndex < listitems.length(); listItemIndex++) {
-                    Log.v(LOG_TAG, "Item " + listItemIndex + " being parsed ");
-                    oneItemData = new IssueOverviewRowitem();
-                    JSONObject oneItemJSON = listitems.getJSONObject(listItemIndex);
-
-                    //Parsing data in fixed sequential order
-                    oneItemData.setWorkplace(oneItemJSON.getString(WORKPLACE));
-                    oneItemData.setStatus(oneItemJSON.getString(STATUS));
-                    oneItemData.setTraincoach(oneItemJSON.getString(TRAINCOACH));
-                    oneItemData.setDescription(oneItemJSON.getString(DESCR));
-
-                    //One ListItem filled with data, added to the list of ListItems
-                    result.add(oneItemData);
-                    Log.v(LOG_TAG, "Item " + listItemIndex + " result:\n"
-                            + "String[0]=" + result.get(listItemIndex).getWorkplace() + "\n"
-                            + "String[1]=" + result.get(listItemIndex).getStatus() + "\n"
-                            + "String[2]=" + result.get(listItemIndex).getTraincoach() + "\n"
-                            + "String[3]=" + result.get(listItemIndex).getDescription());
-                }
-            } catch (JSONException e) {
-                Log.w(LOG_TAG, "Cannot convert to JSONArray: " + response);
-            }
-
-            if(result==null) {
-                //String response to JSONObject (when only 1 item returned)
-                try {
-                    JSONObject oneItemJSON = new JSONObject(response);
-                    result = new ArrayList<>();
-
-                    IssueOverviewRowitem oneItemData;
-                    Log.v(LOG_TAG, "Item " + 0 + " being parsed ");
-                    oneItemData = new IssueOverviewRowitem();
-
-                    //Parsing data in fixed sequential order
-                    oneItemData.setWorkplace(oneItemJSON.getString(WORKPLACE));
-                    oneItemData.setStatus(oneItemJSON.getString(STATUS));
-                    oneItemData.setTraincoach(oneItemJSON.getString(TRAINCOACH));
-                    oneItemData.setDescription(oneItemJSON.getString(DESCR));
-
-                    //One ListItem filled with data, added to the list of ListItems
-                    result.add(oneItemData);
-                    Log.v(LOG_TAG, "Item " + 0 + " result:\n"
-                            + "String[0]=" + result.get(0).getWorkplace() + "\n"
-                            + "String[1]=" + result.get(0).getStatus() + "\n"
-                            + "String[2]=" + result.get(0).getTraincoach() + "\n"
-                            + "String[3]=" + result.get(0).getDescription());
-
-                } catch (JSONException e) {
-                    Log.w(LOG_TAG, "Cannot convert to JSONObject: " + response);
-                }
-            }
-
-            if (result != null) {
-                Log.v(LOG_TAG, "JSON PARSED");
-            } else {
-                Log.e(LOG_TAG, "JSON PARSING FAILED");
-            }
-            return result;
-        }
-
-        @Override
-        protected void onPostExecute(List<IssueOverviewRowitem> result) {
-            super.onPostExecute(result);
-            if (result.size() == 0) {
-                setEmptyText(getString(R.string.item_issue_overview_dataempty));
-                removeProgressBar();
-            }
-            mOverviewListAdapter.updateView(result);
-        }
+    @Override
+    public void onLoaderReset(Loader<Cursor> cursorLoader) {
+        Log.v(LOG_TAG, "Loader onLoaderReset");
+        mOverviewListAdapter.swapCursor(null);
     }
 }

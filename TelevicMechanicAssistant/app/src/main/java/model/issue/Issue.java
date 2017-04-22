@@ -1,5 +1,6 @@
 package model.issue;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -7,7 +8,7 @@ import java.util.List;
 import model.sensordata.ProcessedSensorData;
 import model.user.User;
 
-public class Issue
+public class Issue implements Serializable
 {
 	private int id;
 	private String descr;

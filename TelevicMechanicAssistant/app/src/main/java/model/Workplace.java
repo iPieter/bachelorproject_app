@@ -1,11 +1,12 @@
 package model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import model.user.User;
 
-public class Workplace
+public class Workplace  implements Serializable
 {
 	private int id;
 	private String name;
