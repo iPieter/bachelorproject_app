@@ -29,23 +29,23 @@ public class IssueProvider extends ContentProvider {
     static final int ISSUE_ASSET_WITH_ISSUE_ID = 301;
     static final int TRAINCOACH = 400;
 
-    private static final SQLiteQueryBuilder sIssueAssetByIssueQueryBuilder;
+    private static final SQLiteQueryBuilder sIssueAssetWorkplaceByIssueQueryBuilder;
 
     static{
         Log.v(LOG_TAG,"Creating SQLiteQueryBuilder!");
-        sIssueAssetByIssueQueryBuilder = new SQLiteQueryBuilder();
+        sIssueAssetWorkplaceByIssueQueryBuilder = new SQLiteQueryBuilder();
 
         //This is an inner join which looks like
         //issue INNER JOIN issue_asset ON issue_asset.issue_id = issue._id
-        //INNER JOIN
-        sIssueAssetByIssueQueryBuilder.setTables(
+        //      INNER JOIN traincoach ON issue.traincoach_id = traincoach._id
+        sIssueAssetWorkplaceByIssueQueryBuilder.setTables(
                 IssueContract.IssueEntry.TABLE_NAME + " INNER JOIN " +
                         IssueContract.IssueAssetEntry.TABLE_NAME +
                         " ON " + IssueContract.IssueAssetEntry.TABLE_NAME +
                         "." + IssueContract.IssueAssetEntry.COLUMN_ISSUE_ID +
                         " = " + IssueContract.IssueEntry.TABLE_NAME +
                         "." + IssueContract.IssueEntry._ID + " INNER JOIN " +
-                        IssueContract.IssueEntry.TABLE_NAME +
+                        IssueContract.TraincoachEntry.TABLE_NAME +
                         " ON " + IssueContract.IssueEntry.TABLE_NAME +
                         "." + IssueContract.IssueEntry.COLUMN_TRAINCOACH_ID +
                         " = " + IssueContract.TraincoachEntry.TABLE_NAME +
@@ -97,8 +97,7 @@ public class IssueProvider extends ContentProvider {
             // "issue"
             case ISSUE:
             {
-                retCursor = mOpenHelper.getReadableDatabase().query(
-                        IssueContract.IssueEntry.TABLE_NAME,
+                retCursor = sIssueAssetWorkplaceByIssueQueryBuilder.query(mOpenHelper.getReadableDatabase(),
                         projection,
                         selection,
                         selectionArgs,
@@ -133,7 +132,7 @@ public class IssueProvider extends ContentProvider {
         String selection = sIssueByIdSelection;
         String[] selectionArgs = new String[]{Integer.toString(issueId)};
 
-        return sIssueAssetByIssueQueryBuilder.query(mOpenHelper.getReadableDatabase(),
+        return sIssueAssetWorkplaceByIssueQueryBuilder.query(mOpenHelper.getReadableDatabase(),
                 projection,
                 selection,
                 selectionArgs,
@@ -150,7 +149,7 @@ public class IssueProvider extends ContentProvider {
         String selection = sIssueAssetByIssueSelection;
         String[] selectionArgs = new String[]{Integer.toString(issueId)};
 
-        return sIssueAssetByIssueQueryBuilder.query(mOpenHelper.getReadableDatabase(),
+        return sIssueAssetWorkplaceByIssueQueryBuilder.query(mOpenHelper.getReadableDatabase(),
                 projection,
                 selection,
                 selectionArgs,

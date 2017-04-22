@@ -35,9 +35,6 @@ public class IssueOverviewFragment extends ListFragment implements LoaderManager
     private final String LOG_TAG = IssueOverviewFragment.class.getSimpleName();
     private boolean DEBUG_MODE = true;
 
-    private RESTRequestHandler mRestRequestHandler;
-    private JSONParserTask mJsonParserTask;
-    private CountDownLatch mCountDownLatch;
     //TODO init currentUserId @login!!!
     private int mCurrentUserId;
 
@@ -109,11 +106,6 @@ public class IssueOverviewFragment extends ListFragment implements LoaderManager
         View rootView = inflater.inflate(R.layout.fragment_issue_overview, container, false);
 
         //INIT
-        mRestRequestHandler = new RESTRequestHandler(
-                this.getActivity().getApplicationContext(),
-                mCountDownLatch);
-        mJsonParserTask = new JSONParserTask(this.getContext());
-        mCountDownLatch = new CountDownLatch(RESTRequestHandler.REQUEST_COUNT);
         mCurrentUserId = 1; //TODO
 
         //Setting up adapter
@@ -121,7 +113,8 @@ public class IssueOverviewFragment extends ListFragment implements LoaderManager
         setListAdapter(mOverviewListAdapter);
 
         // When item is clicked, a IssueDetailActivity will be started
-        getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        ListView listView = (ListView) rootView.findViewById(android.R.id.list);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
@@ -144,13 +137,15 @@ public class IssueOverviewFragment extends ListFragment implements LoaderManager
         progressBar.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.WRAP_CONTENT, Gravity.CENTER));
         progressBar.setIndeterminate(true);
-        ListView listView = (ListView) rootView.findViewById(android.R.id.list);
         listView.setEmptyView(progressBar);
 
         // Must add the progress bar to the root of the layout
         ViewGroup rootGroup = (ViewGroup) rootView.findViewById(android.R.id.content);
         rootGroup.addView(progressBar);
         Log.v(LOG_TAG, "Progressbar is set!");
+
+        //Activating Back-End
+        handleOverviewData();
 
         Log.v(LOG_TAG, "onCreateView Ended");
         return rootView;
@@ -183,6 +178,13 @@ public class IssueOverviewFragment extends ListFragment implements LoaderManager
      * to parse the REST response and write the parsed data to the database.
      */
     public void handleOverviewData() {
+        //INIT
+        JSONParserTask jsonParserTask = new JSONParserTask(this.getContext());
+        CountDownLatch mCountDownLatch = new CountDownLatch(RESTRequestHandler.REQUEST_COUNT);
+        RESTRequestHandler mRestRequestHandler = new RESTRequestHandler(
+                this.getActivity().getApplicationContext(),
+                mCountDownLatch);
+
         //Calling backend
         if (mCurrentUserId >= 0) {
             if (DEBUG_MODE) {
@@ -197,7 +199,7 @@ public class IssueOverviewFragment extends ListFragment implements LoaderManager
                 }
             }
             //The order of these parameters is obligatory
-            mJsonParserTask.execute(
+            jsonParserTask.execute(
                     mRestRequestHandler.getIssueStringResponse(),
                     mRestRequestHandler.getWorkplaceStringResponse());
         } else {

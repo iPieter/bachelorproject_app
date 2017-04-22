@@ -1,6 +1,5 @@
 package televic.project.kuleuven.televicmechanicassistant;
 
-import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -28,7 +27,7 @@ public class IssueOverviewActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
+        // adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main_overview, menu);
         return true;
     }

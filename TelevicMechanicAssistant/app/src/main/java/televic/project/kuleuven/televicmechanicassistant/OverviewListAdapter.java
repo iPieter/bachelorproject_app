@@ -7,16 +7,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import model.app.IssueOverviewRowitem;
-
 /**
+ * OverviewListAdapter binds database rows to listItems in the ListView.
+ * This is specifically used by the IssueOverviewFragment
  * Created by Matthias on 29/03/2017.
  */
 
