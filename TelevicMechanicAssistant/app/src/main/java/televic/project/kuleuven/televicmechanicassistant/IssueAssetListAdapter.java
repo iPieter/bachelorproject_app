@@ -67,17 +67,12 @@ public class IssueAssetListAdapter extends BaseAdapter
             itemView = (LinearLayout) convertView;
         }
 
-        Log.i( LOG_TAG, itemView.toString() );
-        Log.i( LOG_TAG, "" + itemView.getId() );
-
         ImageView issueAssetView = (ImageView) itemView.findViewById( R.id.issue_asset_image );
         TextView descriptionField = (TextView) itemView.findViewById( R.id.issue_asset_description );
         TextView authorField = (TextView) itemView.findViewById( R.id.issue_asset_author );
         TextView dateField = (TextView) itemView.findViewById( R.id.issue_asset_date );
 
         IssueAsset asset = mDataList.get( position );
-
-        Log.i( LOG_TAG, asset.toString() );
 
         if( descriptionField == null || authorField == null || dateField == null )
             Log.i( LOG_TAG, "FIELDS ARE NULL" );
