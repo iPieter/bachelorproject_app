@@ -23,15 +23,17 @@ public class IssueProvider extends ContentProvider {
     private IssueDbHelper mOpenHelper;
 
     //The Codes for the UriMatcher, corresponding with a certain path
-    static final int ISSUE = 100;
+    static final int ISSUE = 100; //contains traincoach table for workplace info: see SQLiteQueryBuilder for JOIN!
     static final int ISSUE_WITH_ID = 101;
     static final int ISSUE_ASSET = 300;
     static final int ISSUE_ASSET_WITH_ISSUE_ID = 301;
     static final int TRAINCOACH = 400;
 
+    //JOINS used for queries
     private static final SQLiteQueryBuilder sIssueAssetWorkplaceByIssueQueryBuilder;
     private static final SQLiteQueryBuilder sWorkplaceByIssueQueryBuilder;
 
+    //Init of SQLiteQueryBuilder JOINS
     static {
         Log.v(LOG_TAG, "Creating SQLiteQueryBuilder!");
         sIssueAssetWorkplaceByIssueQueryBuilder = new SQLiteQueryBuilder();
@@ -66,7 +68,7 @@ public class IssueProvider extends ContentProvider {
                         " = " + IssueContract.TraincoachEntry.TABLE_NAME +
                         "." + IssueContract.TraincoachEntry._ID
         );
-        Log.v(LOG_TAG, "SQLiteQueryBuilder builded!");
+        Log.v(LOG_TAG, "SQLiteQueryBuilders builded!");
     }
 
     static UriMatcher buildUriMatcher() {
@@ -96,9 +98,9 @@ public class IssueProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        Log.v(LOG_TAG, "entered onCreate");
+        Log.d(LOG_TAG, "entered onCreate");
         mOpenHelper = new IssueDbHelper(getContext());
-        Log.v(LOG_TAG, "leaving onCreate: IssueProvider created!");
+        Log.d(LOG_TAG, "leaving onCreate: IssueProvider created!");
         return true;
     }
 
@@ -113,9 +115,8 @@ public class IssueProvider extends ContentProvider {
         switch (sUriMatcher.match(uri)) {
             // "issue"
             case ISSUE: {
-                Log.v(LOG_TAG, "QUERY: case ISSUE with Uri = " + uri +", projection = "+ projection
-                +",selection="+selection+",selectionArgs="+selectionArgs+",sortOrder="+sortOrder);
-
+                Log.v(LOG_TAG, "QUERY ISSUE");
+                //get All Issues With Workplace
                 retCursor = sWorkplaceByIssueQueryBuilder.query(mOpenHelper.getReadableDatabase(),
                         projection,
                         selection,
@@ -146,64 +147,6 @@ public class IssueProvider extends ContentProvider {
         Log.v(LOG_TAG, "QUERY cursor #rows = " + retCursor.getCount());
         retCursor.setNotificationUri(getContext().getContentResolver(), uri);
         return retCursor;
-    }
-
-    /**
-     * DEBUG PURPOSES
-     * TODO DELETE
-     */
-    public void countRowsInAllTables(){
-        String[] testprojection={IssueContract.IssueEntry._ID};
-        Cursor test1 = mOpenHelper.getReadableDatabase().query(
-                IssueContract.IssueEntry.TABLE_NAME,
-                testprojection,
-                null,
-                null,
-                null,
-                null,
-                null
-        );
-        Log.v(LOG_TAG,"QUERY TESTCURSOR: IssueTable #ROWS="+test1.getCount());
-
-        String[] testprojection2={IssueContract.IssueAssetEntry._ID};
-        Cursor test2 = mOpenHelper.getReadableDatabase().query(
-                IssueContract.IssueAssetEntry.TABLE_NAME,
-                testprojection2,
-                null,
-                null,
-                null,
-                null,
-                null
-        );
-        Log.v(LOG_TAG,"QUERY TESTCURSOR: IssueAssetTable #ROWS="+test2.getCount());
-
-        String[] testprojection3={IssueContract.TraincoachEntry._ID};
-        Cursor test3 = mOpenHelper.getReadableDatabase().query(
-                IssueContract.TraincoachEntry.TABLE_NAME,
-                testprojection3,
-                null,
-                null,
-                null,
-                null,
-                null
-        );
-        Log.v(LOG_TAG,"QUERY TESTCURSOR: TraincoachTable #ROWS="+test3.getCount());
-
-        //SELECT _id FROM issue INNER JOIN issue_asset ON issue_asset.issue_id = issue._id INNER JOIN traincoach ON issue.traincoach_id = traincoach._id
-        String[] testprojection4={IssueContract.IssueEntry._ID};
-        Cursor test4 = sIssueAssetWorkplaceByIssueQueryBuilder.query(mOpenHelper.getReadableDatabase(),
-                testprojection4,
-                null,
-                null,
-                null,
-                null,
-                null
-        );
-        Log.v(LOG_TAG,"QUERY TESTCURSOR: JOINED TABLES #ROWS="+test4.getCount());
-    }
-
-    private Cursor getAllIssues(Uri uri, String[] projection, String sortOrder) {
-
     }
 
     //Setup of query to fetch an Issue in Issue Table with specified parameter _ID
@@ -423,4 +366,62 @@ public class IssueProvider extends ContentProvider {
         }
         return rowsUpdated;
     }
+
+
+
+    /**
+     * DEBUG PURPOSES
+     * TODO DELETE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     */
+    public void countRowsInAllTables(){
+        String[] testprojection={IssueContract.IssueEntry._ID};
+        Cursor test1 = mOpenHelper.getReadableDatabase().query(
+                IssueContract.IssueEntry.TABLE_NAME,
+                testprojection,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+        Log.v(LOG_TAG,"QUERY TESTCURSOR: IssueTable #ROWS="+test1.getCount());
+
+        String[] testprojection2={IssueContract.IssueAssetEntry._ID};
+        Cursor test2 = mOpenHelper.getReadableDatabase().query(
+                IssueContract.IssueAssetEntry.TABLE_NAME,
+                testprojection2,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+        Log.v(LOG_TAG,"QUERY TESTCURSOR: IssueAssetTable #ROWS="+test2.getCount());
+
+        String[] testprojection3={IssueContract.TraincoachEntry._ID};
+        Cursor test3 = mOpenHelper.getReadableDatabase().query(
+                IssueContract.TraincoachEntry.TABLE_NAME,
+                testprojection3,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+        Log.v(LOG_TAG,"QUERY TESTCURSOR: TraincoachTable #ROWS="+test3.getCount());
+
+        //SELECT _id FROM issue INNER JOIN issue_asset ON issue_asset.issue_id = issue._id INNER JOIN traincoach ON issue.traincoach_id = traincoach._id
+        String[] testprojection4={IssueContract.IssueEntry._ID};
+        Cursor test4 = sIssueAssetWorkplaceByIssueQueryBuilder.query(mOpenHelper.getReadableDatabase(),
+                testprojection4,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+        Log.v(LOG_TAG,"QUERY TESTCURSOR: JOINED TABLES #ROWS="+test4.getCount());
+    }
+
+
 }
