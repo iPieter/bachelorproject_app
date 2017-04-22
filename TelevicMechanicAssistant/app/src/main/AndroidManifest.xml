@@ -2,6 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="televic.project.kuleuven.televicmechanicassistant">
 
+    <!-- FEATURES -->
+    <uses-feature android:name="android.hardware.camera"
+        android:required="true" />
+    <!-- PERMISSIONS -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="18" />
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
@@ -12,6 +18,7 @@
         android:theme="@style/AppTheme"
         android:screenOrientation="portrait">
 
+        <!-- ACTIVITIES -->
         <activity android:name=".IssueOverviewActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,10 +30,20 @@
             android:name=".IssueDetailActivity"
             android:label="@string/title_activity_issue_detail"
             android:theme="@style/AppTheme.NoActionBar"></activity>
+
+        <!-- PROVIDERS -->
         <provider
             android:authorities="televic.project.kuleuven.televicmechanicassistant"
             android:name=".data.IssueProvider"
             android:exported="false"/>
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="com.example.android.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"></meta-data>
+        </provider>
     </application>
-
 </manifest>
