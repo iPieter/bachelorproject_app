@@ -3,7 +3,6 @@ package televic.project.kuleuven.televicmechanicassistant;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ListFragment;
@@ -74,11 +73,6 @@ public class IssueOverviewFragment extends ListFragment implements LoaderManager
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
         Log.v(LOG_TAG, "onCreate method ended");
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.main_overview, menu);
     }
 
     /**
