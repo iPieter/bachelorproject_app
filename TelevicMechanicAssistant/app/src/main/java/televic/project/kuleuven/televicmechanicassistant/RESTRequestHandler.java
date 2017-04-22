@@ -371,7 +371,7 @@ public class RESTRequestHandler {
             "    \"name\": \"Luik\",\n" +
             "    \"traincoaches\": [\n" +
             "      {\n" +
-            "        \"id\": 10,\n" +
+            "        \"id\": 24,\n" +
             "        \"needsReview\": true,\n" +
             "        \"constructor\": \"Bombardier\",\n" +
             "        \"name\": \"15963\",\n" +

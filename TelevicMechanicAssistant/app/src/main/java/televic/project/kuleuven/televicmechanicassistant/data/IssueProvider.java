@@ -31,26 +31,29 @@ public class IssueProvider extends ContentProvider {
 
     private static final SQLiteQueryBuilder sIssueAssetWorkplaceByIssueQueryBuilder;
 
-    static{
-        Log.v(LOG_TAG,"Creating SQLiteQueryBuilder!");
+    static {
+        Log.v(LOG_TAG, "Creating SQLiteQueryBuilder!");
         sIssueAssetWorkplaceByIssueQueryBuilder = new SQLiteQueryBuilder();
 
         //This is an inner join which looks like
         //issue INNER JOIN issue_asset ON issue_asset.issue_id = issue._id
         //      INNER JOIN traincoach ON issue.traincoach_id = traincoach._id
         sIssueAssetWorkplaceByIssueQueryBuilder.setTables(
-                IssueContract.IssueEntry.TABLE_NAME + " INNER JOIN " +
+                IssueContract.IssueEntry.TABLE_NAME
+                        + " INNER JOIN " +
                         IssueContract.IssueAssetEntry.TABLE_NAME +
                         " ON " + IssueContract.IssueAssetEntry.TABLE_NAME +
                         "." + IssueContract.IssueAssetEntry.COLUMN_ISSUE_ID +
                         " = " + IssueContract.IssueEntry.TABLE_NAME +
-                        "." + IssueContract.IssueEntry._ID + " INNER JOIN " +
+                        "." + IssueContract.IssueEntry._ID
+                        + " INNER JOIN " +
                         IssueContract.TraincoachEntry.TABLE_NAME +
                         " ON " + IssueContract.IssueEntry.TABLE_NAME +
                         "." + IssueContract.IssueEntry.COLUMN_TRAINCOACH_ID +
                         " = " + IssueContract.TraincoachEntry.TABLE_NAME +
-                        "." + IssueContract.TraincoachEntry._ID);
-        Log.v(LOG_TAG,"SQLiteQueryBuilder builded!");
+                        "." + IssueContract.TraincoachEntry._ID
+                        );
+        Log.v(LOG_TAG, "SQLiteQueryBuilder builded!");
     }
 
     static UriMatcher buildUriMatcher() {
@@ -61,28 +64,28 @@ public class IssueProvider extends ContentProvider {
         matcher.addURI(authority, IssueContract.PATH_ISSUE, ISSUE);
         matcher.addURI(authority, IssueContract.PATH_ISSUE + "/*", ISSUE_WITH_ID);
         matcher.addURI(authority, IssueContract.PATH_ISSUE_ASSET, ISSUE_ASSET);
-        matcher.addURI(authority, IssueContract.PATH_ISSUE_ASSET+ "/*", ISSUE_ASSET_WITH_ISSUE_ID);
+        matcher.addURI(authority, IssueContract.PATH_ISSUE_ASSET + "/*", ISSUE_ASSET_WITH_ISSUE_ID);
         matcher.addURI(authority, IssueContract.PATH_TRAINCOACH, TRAINCOACH);
 
-        Log.v(LOG_TAG,"UriMatcher initialized");
+        Log.v(LOG_TAG, "UriMatcher initialized");
         return matcher;
     }
 
     //Issue._ID = ?
     private static final String sIssueByIdSelection =
-            IssueContract.IssueEntry.TABLE_NAME+
+            IssueContract.IssueEntry.TABLE_NAME +
                     "." + IssueContract.IssueEntry._ID + " = ? ";
 
     //IssueAsset.issueId = ?
     private static final String sIssueAssetByIssueSelection =
-            IssueContract.IssueAssetEntry.TABLE_NAME+
+            IssueContract.IssueAssetEntry.TABLE_NAME +
                     "." + IssueContract.IssueAssetEntry.COLUMN_ISSUE_ID + " = ? ";
 
     @Override
     public boolean onCreate() {
-        Log.v(LOG_TAG,"entered onCreate");
+        Log.v(LOG_TAG, "entered onCreate");
         mOpenHelper = new IssueDbHelper(getContext());
-        Log.v(LOG_TAG,"leaving onCreate: IssueProvider created!");
+        Log.v(LOG_TAG, "leaving onCreate: IssueProvider created!");
         return true;
     }
 
@@ -92,11 +95,14 @@ public class IssueProvider extends ContentProvider {
                         String sortOrder) {
         // Here's the switch statement that, given a URI, will determine what kind of request it is,
         // and query the database accordingly.
+        Log.v(LOG_TAG, "QUERY ATTEMPT");
         Cursor retCursor;
         switch (sUriMatcher.match(uri)) {
             // "issue"
-            case ISSUE:
-            {
+            case ISSUE: {
+                Log.v(LOG_TAG, "QUERY: case ISSUE with Uri = " + uri +", projection = "+ projection
+                +",selection="+selection+",selectionArgs="+selectionArgs+",sortOrder="+sortOrder);
+
                 retCursor = sIssueAssetWorkplaceByIssueQueryBuilder.query(mOpenHelper.getReadableDatabase(),
                         projection,
                         selection,
@@ -109,11 +115,13 @@ public class IssueProvider extends ContentProvider {
             }
             // "issue/*"
             case ISSUE_WITH_ID: {
+                Log.v(LOG_TAG, "QUERY ISSUE_WITH_ID");
                 retCursor = getIssueById(uri, projection, sortOrder);
                 break;
             }
             // "issue_asset/*"
             case ISSUE_ASSET_WITH_ISSUE_ID: {
+                Log.v(LOG_TAG, "QUERY ISSUE_ASSET_WITH_ISSUE_ID");
                 retCursor = getIssueAssetByIssueId(uri, projection, sortOrder);
                 break;
             }
@@ -121,8 +129,64 @@ public class IssueProvider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
+        //DEBUG: countRowsInAllTables();
+        Log.v(LOG_TAG, "QUERY cursor #rows = " + retCursor.getCount());
         retCursor.setNotificationUri(getContext().getContentResolver(), uri);
         return retCursor;
+    }
+
+    /**
+     * DEBUG PURPOSES
+     * TODO DELETE
+     */
+    public void countRowsInAllTables(){
+        String[] testprojection={IssueContract.IssueEntry._ID};
+        Cursor test1 = mOpenHelper.getReadableDatabase().query(
+                IssueContract.IssueEntry.TABLE_NAME,
+                testprojection,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+        Log.v(LOG_TAG,"QUERY TESTCURSOR: IssueTable #ROWS="+test1.getCount());
+
+        String[] testprojection2={IssueContract.IssueAssetEntry._ID};
+        Cursor test2 = mOpenHelper.getReadableDatabase().query(
+                IssueContract.IssueAssetEntry.TABLE_NAME,
+                testprojection2,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+        Log.v(LOG_TAG,"QUERY TESTCURSOR: IssueAssetTable #ROWS="+test2.getCount());
+
+        String[] testprojection3={IssueContract.TraincoachEntry._ID};
+        Cursor test3 = mOpenHelper.getReadableDatabase().query(
+                IssueContract.TraincoachEntry.TABLE_NAME,
+                testprojection3,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+        Log.v(LOG_TAG,"QUERY TESTCURSOR: TraincoachTable #ROWS="+test3.getCount());
+
+        //SELECT _id FROM issue INNER JOIN issue_asset ON issue_asset.issue_id = issue._id INNER JOIN traincoach ON issue.traincoach_id = traincoach._id
+        String[] testprojection4={IssueContract.IssueEntry._ID};
+        Cursor test4 = sIssueAssetWorkplaceByIssueQueryBuilder.query(mOpenHelper.getReadableDatabase(),
+                testprojection4,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+        Log.v(LOG_TAG,"QUERY TESTCURSOR: JOINED TABLES #ROWS="+test4.getCount());
     }
 
     //Setup of query to fetch an Issue in Issue Table with specified parameter _ID
@@ -191,7 +255,7 @@ public class IssueProvider extends ContentProvider {
         switch (match) {
             case ISSUE: {
                 long _id = db.insert(IssueContract.IssueEntry.TABLE_NAME, null, contentValues);
-                if ( _id > 0 )
+                if (_id > 0)
                     returnUri = IssueContract.IssueEntry.buildIssueUri(_id);
                 else
                     throw new android.database.SQLException("Failed to insert row into " + uri);
@@ -199,7 +263,7 @@ public class IssueProvider extends ContentProvider {
             }
             case ISSUE_ASSET: {
                 long _id = db.insert(IssueContract.IssueAssetEntry.TABLE_NAME, null, contentValues);
-                if ( _id > 0 )
+                if (_id > 0)
                     returnUri = IssueContract.IssueAssetEntry.buildIssueAssetUri(_id);
                 else
                     throw new android.database.SQLException("Failed to insert row into " + uri);
@@ -207,7 +271,7 @@ public class IssueProvider extends ContentProvider {
             }
             case TRAINCOACH: {
                 long _id = db.insert(IssueContract.TraincoachEntry.TABLE_NAME, null, contentValues);
-                if ( _id > 0 )
+                if (_id > 0)
                     returnUri = IssueContract.TraincoachEntry.buildTraincoachUri(_id);
                 else
                     throw new android.database.SQLException("Failed to insert row into " + uri);
@@ -222,7 +286,7 @@ public class IssueProvider extends ContentProvider {
 
     @Override
     public int bulkInsert(Uri uri, ContentValues[] values) {
-        Log.v(LOG_TAG,"entering bulkInsert");
+        Log.v(LOG_TAG, "entering bulkInsert");
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
         int returnCount;
@@ -290,7 +354,7 @@ public class IssueProvider extends ContentProvider {
         final int match = sUriMatcher.match(uri);
         int rowsDeleted;
         // this makes delete all rows return the number of rows deleted
-        if ( null == selection ) selection = "1";
+        if (null == selection) selection = "1";
         switch (match) {
             case ISSUE:
                 rowsDeleted = db.delete(

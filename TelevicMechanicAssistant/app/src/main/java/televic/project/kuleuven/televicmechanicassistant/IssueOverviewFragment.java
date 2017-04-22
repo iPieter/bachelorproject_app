@@ -103,11 +103,12 @@ public class IssueOverviewFragment extends ListFragment implements LoaderManager
         mCurrentUserId = 1; //TODO
 
         //Setting up adapter
+        ListView listView = (ListView) rootView.findViewById(android.R.id.list);
         mOverviewListAdapter = new OverviewListAdapter(getActivity(), null, 0);
-        setListAdapter(mOverviewListAdapter);
+        listView.setAdapter(mOverviewListAdapter);
+        Log.v(LOG_TAG,"Adapter is set to listview in onCreateView");
 
         // When item is clicked, a IssueDetailActivity will be started
-        ListView listView = (ListView) rootView.findViewById(android.R.id.list);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
@@ -149,6 +150,7 @@ public class IssueOverviewFragment extends ListFragment implements LoaderManager
     public void onActivityCreated(Bundle savedInstanceState) {
         getLoaderManager().initLoader(OVERVIEW_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
+        Log.v(LOG_TAG,"Activity created and initLoader");
     }
 
     public void setEmptyText(String text) {
@@ -173,7 +175,7 @@ public class IssueOverviewFragment extends ListFragment implements LoaderManager
      */
     public void handleOverviewData() {
         //INIT
-        JSONParserTask jsonParserTask = new JSONParserTask(this.getContext());
+        JSONParserTask jsonParserTask = new JSONParserTask(getActivity());
         CountDownLatch mCountDownLatch = new CountDownLatch(RESTRequestHandler.REQUEST_COUNT);
         RESTRequestHandler mRestRequestHandler = new RESTRequestHandler(
                 this.getActivity().getApplicationContext(),
@@ -203,10 +205,11 @@ public class IssueOverviewFragment extends ListFragment implements LoaderManager
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        Log.v(LOG_TAG, "Creating Loader");
+        Log.v(LOG_TAG, "Creating CursorLoader");
         // Sort order =  Ascending, by Assigned Time
         String sortOrder = IssueContract.IssueEntry.COLUMN_ASSIGNED_TIME + " ASC";
         Uri allIssues = IssueContract.IssueEntry.CONTENT_URI;
+        Log.v(LOG_TAG, "CURSORLOADER URI: " + allIssues);
 
         return new CursorLoader(getActivity(),
                 allIssues,
@@ -218,13 +221,14 @@ public class IssueOverviewFragment extends ListFragment implements LoaderManager
 
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+        Log.v(LOG_TAG, "Loader onLoadFinished");
         mOverviewListAdapter.swapCursor(cursor);
+        Log.v(LOG_TAG, "Loader cursor swapped, cursorCount = "+cursor.getCount());
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
+        Log.v(LOG_TAG, "Loader onLoaderReset");
         mOverviewListAdapter.swapCursor(null);
     }
-
-
 }

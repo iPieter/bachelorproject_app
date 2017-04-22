@@ -121,6 +121,7 @@ public class IssueContract {
         public static final String TABLE_NAME = "traincoach";
 
         //Columns
+        public static final String _ID = "traincoach_id";
         public static final String COLUMN_WORKPLACE_ID = "workplace_id";
         public static final String COLUMN_WORKPLACE_NAME = "workplace_name";
 

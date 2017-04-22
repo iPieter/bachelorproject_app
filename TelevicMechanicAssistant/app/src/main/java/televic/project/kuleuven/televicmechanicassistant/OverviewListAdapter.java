@@ -20,10 +20,13 @@ public class OverviewListAdapter extends CursorAdapter {
 
     public OverviewListAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
+        Log.v(LOG_TAG,"OverviewListAdapter Constructor called!");
+
     }
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
+        Log.v(LOG_TAG,"newView");
         View view = LayoutInflater.from(context).inflate(R.layout.item_issue_overview, parent, false);
         return view;
     }
