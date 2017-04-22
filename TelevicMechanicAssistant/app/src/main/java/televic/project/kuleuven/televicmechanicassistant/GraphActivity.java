@@ -54,24 +54,10 @@ public class GraphActivity extends AppCompatActivity
                 try
                 {
                     JSONArray yaw = response.getJSONArray( "yaw" );
-
-                    GraphView graphYaw = (GraphView) findViewById(R.id.graph_yaw );
-                    LineGraphSeries<DataPoint > seriesYaw = new LineGraphSeries<>();
-
-                    for( int i = 0; i < yaw.length(); i++ )
-                        seriesYaw.appendData( new DataPoint(  i, yaw.getDouble( i ) ), false, yaw.length() );
-
-                    graphYaw.addSeries(seriesYaw);
-
                     JSONArray roll = response.getJSONArray( "roll" );
 
-                    GraphView graphRoll = (GraphView) findViewById(R.id.graph_roll );
-                    LineGraphSeries<DataPoint > seriesRoll = new LineGraphSeries<>();
-
-                    for( int i = 0; i < roll.length(); i++ )
-                        seriesRoll.appendData( new DataPoint(  i, roll.getDouble( i ) ), false, roll.length() );
-
-                    graphRoll.addSeries(seriesRoll);
+                    createGraph( R.id.graph_yaw, yaw );
+                    createGraph( R.id.graph_roll, roll );
 
                 } catch ( JSONException e )
                 {
@@ -96,5 +82,26 @@ public class GraphActivity extends AppCompatActivity
         } );
 
         RESTSingleton.getInstance( getApplicationContext() ).addToRequestQueue( request );
+    }
+
+    private void createGraph( int id, JSONArray array ) throws JSONException
+    {
+        GraphView graphView = (GraphView) findViewById( id );
+
+        DataPoint [] points = new DataPoint[ array.length() ];
+        for( int i = 0; i < array.length(); i++ )
+            points[ i ] = new DataPoint( i, array.getDouble( i ) );
+
+        LineGraphSeries<DataPoint > seriesRoll = new LineGraphSeries<>( points );
+
+        graphView.getViewport().setXAxisBoundsManual(true);
+        graphView.getViewport().setMinX(500);
+        graphView.getViewport().setMaxX(1000);
+
+        // enable scaling and scrolling
+        graphView.getViewport().setScalable(true);
+        graphView.getViewport().setScalableY(true);
+
+        graphView.addSeries(seriesRoll);
     }
 }

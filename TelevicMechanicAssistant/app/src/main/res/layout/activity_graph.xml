@@ -12,7 +12,8 @@
         android:id="@+id/textView2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Yaw"/>
+        android:text="Yaw"
+        android:textAlignment="center"/>
 
     <com.jjoe64.graphview.GraphView
         android:layout_width="match_parent"
@@ -23,7 +24,8 @@
         android:id="@+id/textView3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Roll"/>
+        android:text="Roll"
+        android:textAlignment="center"/>
 
     <com.jjoe64.graphview.GraphView
         android:layout_width="match_parent"
