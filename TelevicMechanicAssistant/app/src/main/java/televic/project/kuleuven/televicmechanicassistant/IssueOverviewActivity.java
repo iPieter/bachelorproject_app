@@ -1,5 +1,6 @@
 package televic.project.kuleuven.televicmechanicassistant;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,11 +19,11 @@ public class IssueOverviewActivity extends AppCompatActivity {
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.overview_container, new IssueOverviewFragment())
                     .commit();
-            Log.v(LOG_TAG,"Fragment transaction ended");
+            Log.v(LOG_TAG, "Fragment transaction ended");
         }
 
         RESTSingleton.getInstance(getApplicationContext());
-        Log.v(LOG_TAG,"Added application context in main_overview activity");
+        Log.v(LOG_TAG, "Added application context in main_overview activity");
     }
 
     @Override
@@ -41,6 +42,8 @@ public class IssueOverviewActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.action_settings) {
+            //TODO create settings
+            //startActivity(new Intent(this,SettingsActivity.class));
             return true;
         }
 

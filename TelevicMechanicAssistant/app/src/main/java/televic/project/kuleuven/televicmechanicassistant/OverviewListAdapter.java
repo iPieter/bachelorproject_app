@@ -23,72 +23,6 @@ import model.app.IssueOverviewRowitem;
 public class OverviewListAdapter extends CursorAdapter {
     private final String LOG_TAG = OverviewListAdapter.class.getSimpleName();
 
-    /*
-    private LayoutInflater mLayoutInflater;
-    private List<IssueOverviewRowitem> mDataList = new ArrayList<>();
-
-    public OverviewListAdapter(Context context) {
-        Log.v(LOG_TAG, "Init OverviewListAdapter");
-        mLayoutInflater = LayoutInflater.from(context);
-    }
-
-    @Override
-    public int getCount() {
-        return mDataList.size();
-    }
-
-    @Override
-    public Object getItem(int i) {
-        return mDataList.get(i);
-    }
-
-    @Override
-    public long getItemId(int i) {
-        return i;
-    }
-
-    //Inlezen van ListItem
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        Log.v(LOG_TAG, "Updating Listitem View");
-
-
-        //Check for avoiding Null pointer exception
-        LinearLayout itemView;
-        if (convertView == null) {
-            itemView = (LinearLayout) mLayoutInflater
-                    .inflate(R.layout.item_issue_overview, parent, false);
-        } else {
-            itemView = (LinearLayout) convertView;
-        }
-
-        //Collect (text)views from layout of list item
-        Log.v(LOG_TAG, "Fetching layout items from list");
-        TextView item_header_workplace =
-                (TextView) itemView.findViewById(R.id.item_header_workplace);
-        TextView item_header_status =
-                (TextView) itemView.findViewById(R.id.item_header_status);
-        TextView item_header_traincoach =
-                (TextView) itemView.findViewById(R.id.item_header_traincoach);
-        TextView item_content =
-                (TextView) itemView.findViewById(R.id.item_content);
-        /*
-        //Set datafields in the list item
-        Log.v(LOG_TAG, "Setting datafields to list item");
-        item_header_workplace.setText(mDataList.get(position).getWorkplace());
-        item_header_status.setText(mDataList.get(position).getStatus());
-        item_header_traincoach.setText(mDataList.get(position).getTraincoach());
-        item_content.setText(mDataList.get(position).getDescription());
-        Log.v(LOG_TAG, "List item set!");
-
-        return itemView;
-    }
-
-    public void updateView(List<IssueOverviewRowitem> dataList) {
-        mDataList = dataList;
-        notifyDataSetChanged();
-    }*/
-
     public OverviewListAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
     }
@@ -99,10 +33,15 @@ public class OverviewListAdapter extends CursorAdapter {
         return view;
     }
 
+    /**
+     * Binding the views in the ListView to Rows in the database, using the cursor.
+     * @param view The view returned in newView
+     * @param context
+     * @param cursor Cursor that is used to iterate over Database Rows
+     */
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         Log.v(LOG_TAG, "Updating Listitem View");
-
 
         //Collect (text)views from layout of list item
         Log.v(LOG_TAG, "Fetching layout items from list");
@@ -115,14 +54,12 @@ public class OverviewListAdapter extends CursorAdapter {
         TextView item_content =
                 (TextView) view.findViewById(R.id.item_content);
 
-        /* TODO bind to values cursor.toString(COLUMN IN MAIN_ACTIVITY)
         //Set datafields in the list item
-        Log.v(LOG_TAG, "Setting datafields to list item");
-        item_header_workplace.setText(mDataList.get(position).getWorkplace());
-        item_header_status.setText(mDataList.get(position).getStatus());
-        item_header_traincoach.setText(mDataList.get(position).getTraincoach());
-        item_content.setText(mDataList.get(position).getDescription());
+        Log.v(LOG_TAG, "Binding datafields to list item");
+        item_header_workplace.setText(cursor.getString(IssueOverviewFragment.COL_ISSUE_WORKPLACE));
+        item_header_status.setText(cursor.getString(IssueOverviewFragment.COL_ISSUE_STATUS));
+        item_header_traincoach.setText(cursor.getString(IssueOverviewFragment.COL_ISSUE_TRAINCOACH));
+        item_content.setText(cursor.getString(IssueOverviewFragment.COL_ISSUE_DESCRIPTION));
         Log.v(LOG_TAG, "List item set!");
-        */
     }
 }

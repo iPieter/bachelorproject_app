@@ -24,6 +24,7 @@ import android.widget.ProgressBar;
 
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.TextView;
+
 import java.util.concurrent.CountDownLatch;
 
 import televic.project.kuleuven.televicmechanicassistant.data.IssueContract;
@@ -32,7 +33,7 @@ import televic.project.kuleuven.televicmechanicassistant.data.IssueContract;
 //MAIN LAUNCH Activity
 public class IssueOverviewFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private final String LOG_TAG = IssueOverviewFragment.class.getSimpleName();
-    private boolean DEBUG_MODE=true;
+    private boolean DEBUG_MODE = true;
 
     private RESTRequestHandler mRestRequestHandler;
     private JSONParserTask mJsonParserTask;
@@ -41,7 +42,7 @@ public class IssueOverviewFragment extends ListFragment implements LoaderManager
     private int mCurrentUserId;
 
     //Passing to other activity
-    public static String ISSUE_ID_VALUE="issue_id_value987564321";
+    public static String ISSUE_ID_VALUE = "issue_id_value987564321";
 
     //The adapter used to populate the listview
     private OverviewListAdapter mOverviewListAdapter;
@@ -83,6 +84,14 @@ public class IssueOverviewFragment extends ListFragment implements LoaderManager
         inflater.inflate(R.menu.main_overview, menu);
     }
 
+    /**
+     * The action_refresh must be handled within the fragment,
+     * because the fragment handles the handleOverviewData() for the back-end.
+     * Other options in the menu are handled in the super Activity.
+     *
+     * @param item the selected item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -108,10 +117,10 @@ public class IssueOverviewFragment extends ListFragment implements LoaderManager
         mCurrentUserId = 1; //TODO
 
         //Setting up adapter
-        mOverviewListAdapter = new OverviewListAdapter(getActivity(),null,0);
+        mOverviewListAdapter = new OverviewListAdapter(getActivity(), null, 0);
         setListAdapter(mOverviewListAdapter);
 
-        // We'll call our MainActivity
+        // When item is clicked, a IssueDetailActivity will be started
         getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
@@ -121,7 +130,7 @@ public class IssueOverviewFragment extends ListFragment implements LoaderManager
                 Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
                 if (cursor != null) {
                     Intent intent = new Intent(getActivity(), IssueDetailActivity.class)
-                            .putExtra(ISSUE_ID_VALUE,cursor.getInt(COL_ISSUE_ID));
+                            .putExtra(ISSUE_ID_VALUE, cursor.getInt(COL_ISSUE_ID));
                     //.putExtra(CURRENT_MECHANIC_ID,mCurrentMechanic);
                     //TODO in response in DetailActivity: int intValue = mIntent.getIntExtra(ISSUE_ID_VALUE, 0);
                     startActivity(intent);
@@ -169,13 +178,17 @@ public class IssueOverviewFragment extends ListFragment implements LoaderManager
         }
     }
 
-    public void handleOverviewData(){
+    /**
+     * Calling the backend in RESTRequestHandler and starts AsyncTask JSONParserTask
+     * to parse the REST response and write the parsed data to the database.
+     */
+    public void handleOverviewData() {
         //Calling backend
         if (mCurrentUserId >= 0) {
-            if(DEBUG_MODE){
+            if (DEBUG_MODE) {
                 mRestRequestHandler.setIssueStringResponse(RESTRequestHandler.testStringIssue);
                 mRestRequestHandler.setWorkplaceStringResponse(RESTRequestHandler.testStringWorkplace);
-            }else {
+            } else {
                 mRestRequestHandler.sendParallelRequest(mCurrentUserId);
                 try {
                     mCountDownLatch.await(); //await until all parallel requests have a response
@@ -187,13 +200,14 @@ public class IssueOverviewFragment extends ListFragment implements LoaderManager
             mJsonParserTask.execute(
                     mRestRequestHandler.getIssueStringResponse(),
                     mRestRequestHandler.getWorkplaceStringResponse());
-        }else{
-            Log.e(LOG_TAG,"Current user id < 0");
+        } else {
+            Log.e(LOG_TAG, "Current user id < 0");
         }
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        Log.v(LOG_TAG, "Creating Loader");
         // Sort order =  Ascending, by Assigned Time
         String sortOrder = IssueContract.IssueEntry.COLUMN_ASSIGNED_TIME + " ASC";
         Uri allIssues = IssueContract.IssueEntry.CONTENT_URI;
