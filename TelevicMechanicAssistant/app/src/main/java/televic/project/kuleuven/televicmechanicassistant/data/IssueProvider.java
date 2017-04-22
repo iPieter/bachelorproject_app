@@ -30,10 +30,12 @@ public class IssueProvider extends ContentProvider {
     static final int TRAINCOACH = 400;
 
     private static final SQLiteQueryBuilder sIssueAssetWorkplaceByIssueQueryBuilder;
+    private static final SQLiteQueryBuilder sWorkplaceByIssueQueryBuilder;
 
     static {
         Log.v(LOG_TAG, "Creating SQLiteQueryBuilder!");
         sIssueAssetWorkplaceByIssueQueryBuilder = new SQLiteQueryBuilder();
+        sWorkplaceByIssueQueryBuilder = new SQLiteQueryBuilder();
 
         //This is an inner join which looks like
         //issue INNER JOIN issue_asset ON issue_asset.issue_id = issue._id
@@ -53,6 +55,17 @@ public class IssueProvider extends ContentProvider {
                         " = " + IssueContract.TraincoachEntry.TABLE_NAME +
                         "." + IssueContract.TraincoachEntry._ID
                         );
+
+        //issue INNER JOIN traincoach ON issue.traincoach_id = traincoach._id
+        sWorkplaceByIssueQueryBuilder.setTables(
+                IssueContract.IssueEntry.TABLE_NAME
+                        + " INNER JOIN " +
+                        IssueContract.TraincoachEntry.TABLE_NAME +
+                        " ON " + IssueContract.IssueEntry.TABLE_NAME +
+                        "." + IssueContract.IssueEntry.COLUMN_TRAINCOACH_ID +
+                        " = " + IssueContract.TraincoachEntry.TABLE_NAME +
+                        "." + IssueContract.TraincoachEntry._ID
+        );
         Log.v(LOG_TAG, "SQLiteQueryBuilder builded!");
     }
 
@@ -103,7 +116,7 @@ public class IssueProvider extends ContentProvider {
                 Log.v(LOG_TAG, "QUERY: case ISSUE with Uri = " + uri +", projection = "+ projection
                 +",selection="+selection+",selectionArgs="+selectionArgs+",sortOrder="+sortOrder);
 
-                retCursor = sIssueAssetWorkplaceByIssueQueryBuilder.query(mOpenHelper.getReadableDatabase(),
+                retCursor = sWorkplaceByIssueQueryBuilder.query(mOpenHelper.getReadableDatabase(),
                         projection,
                         selection,
                         selectionArgs,
@@ -187,6 +200,10 @@ public class IssueProvider extends ContentProvider {
                 null
         );
         Log.v(LOG_TAG,"QUERY TESTCURSOR: JOINED TABLES #ROWS="+test4.getCount());
+    }
+
+    private Cursor getAllIssues(Uri uri, String[] projection, String sortOrder) {
+
     }
 
     //Setup of query to fetch an Issue in Issue Table with specified parameter _ID
