@@ -12,8 +12,6 @@ import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,7 +36,7 @@ public class IssueOverviewFragment extends ListFragment implements LoaderManager
     private int mCurrentUserId;
 
     //Passing to other activity
-    public static String ISSUE_ID_VALUE = "issue_id_value987564321";
+    public static String INTENT_ISSUE_ID = "issue_id_value987564321";
 
     //The adapter used to populate the listview
     private OverviewListAdapter mOverviewListAdapter;
@@ -113,14 +111,16 @@ public class IssueOverviewFragment extends ListFragment implements LoaderManager
 
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                Log.v(LOG_TAG,"Item Clicked!");
                 // CursorAdapter returns a cursor at the correct position for getItem(), or null
                 // if it cannot seek to that position.
                 Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
                 if (cursor != null) {
+                    Log.v(LOG_TAG,"Creating intent");
                     Intent intent = new Intent(getActivity(), IssueDetailActivity.class)
-                            .putExtra(ISSUE_ID_VALUE, cursor.getInt(COL_ISSUE_ID));
+                            .putExtra(INTENT_ISSUE_ID, cursor.getInt(COL_ISSUE_ID));
                     //.putExtra(CURRENT_MECHANIC_ID,mCurrentMechanic);
-                    //TODO in response in DetailActivity: int intValue = mIntent.getIntExtra(ISSUE_ID_VALUE, 0);
+                    //TODO in response in DetailActivity: int intValue = mIntent.getIntExtra(INTENT_ISSUE_ID, 0);
                     startActivity(intent);
                 }
             }

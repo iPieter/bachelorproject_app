@@ -29,11 +29,11 @@ public class IssueProvider extends ContentProvider {
     static final int ISSUE_ASSET_WITH_ISSUE_ID = 301;
     static final int TRAINCOACH = 400;
 
-    //JOINS used for queries
+    //SQLiteQueryBuilder JOINS used for QUERIES (NOT for inserts,deletes,updates)
     private static final SQLiteQueryBuilder sIssueAssetWorkplaceByIssueQueryBuilder;
     private static final SQLiteQueryBuilder sWorkplaceByIssueQueryBuilder;
 
-    //Init of SQLiteQueryBuilder JOINS
+    //Init of the SQLiteQueryBuilder JOINS
     static {
         Log.v(LOG_TAG, "Creating SQLiteQueryBuilder!");
         sIssueAssetWorkplaceByIssueQueryBuilder = new SQLiteQueryBuilder();
