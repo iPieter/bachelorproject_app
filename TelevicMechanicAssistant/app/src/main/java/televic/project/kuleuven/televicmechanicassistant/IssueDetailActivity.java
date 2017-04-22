@@ -4,8 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -13,10 +11,8 @@ import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -29,6 +25,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -50,12 +47,14 @@ import model.user.User;
 
 public class IssueDetailActivity extends AppCompatActivity {
 
+    private static final String url = "http://192.168.1.4:8080/DWPProject-0.0.1-SNAPSHOT/rest/assets/issue";
     private static final String LOG = "ISSUE_DETAIL";
     private static final int REQUEST_TAKE_PHOTO = 1;
 
     private String mCurrentPhotoPath;
     private IssueAssetListAdapter mListAdapter;
     private ProgressDialog sendingDialog;
+    private ProgressDialog loadingDialog;
     private List<IssueAsset> assets = new ArrayList<>( );
     private User user;
 
@@ -83,7 +82,7 @@ public class IssueDetailActivity extends AppCompatActivity {
         ListView listView = (ListView) findViewById( R.id.issue_asset_link );
         listView.setAdapter( mListAdapter );
 
-        ProgressDialog loadingDialog = new ProgressDialog( this );
+        loadingDialog = new ProgressDialog( this );
         loadingDialog.setTitle( "Laden.." );
         loadingDialog.setMessage( "De boodschappen worden geladen" );
         loadingDialog.setCancelable( false );
@@ -92,7 +91,7 @@ public class IssueDetailActivity extends AppCompatActivity {
         user = new User();
         user.setName( "Jan Met De Pet" );
 
-        IssueAsset asset = new IssueAsset();
+        final IssueAsset asset = new IssueAsset();
         asset.setId( 0 );
         asset.setDescr( "De wagon vertoont een afwijking aan zijn roll waarden. Controleer het onderstel vooraan." );
         asset.setTime( new Date( ) );
@@ -120,9 +119,35 @@ public class IssueDetailActivity extends AppCompatActivity {
         assets.add( asset1 );
         assets.add( asset2 );
 
-        mListAdapter.updateView( assets );
+        //mListAdapter.updateView( assets );
 
-        loadingDialog.dismiss();
+        ImageRequest request = new ImageRequest( url + "/7", new Response.Listener< Bitmap >()
+        {
+            @Override
+            public void onResponse( Bitmap response )
+            {
+                removeLoadingProgress();
+                asset.setBitmap( response );
+                mListAdapter.updateView( assets );
+            }
+        }, 350, 350, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565, new Response.ErrorListener()
+        {
+            @Override
+            public void onErrorResponse( VolleyError error )
+            {
+                removeLoadingProgress();
+
+                Context context = getApplicationContext();
+                CharSequence text = "De afbeeldingen konden niet geladen worden, probeer later opnieuw.";
+                int duration = Toast.LENGTH_LONG;
+
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
+
+                mListAdapter.updateView( assets );
+            }
+        } );
+        RESTSingleton.getInstance(getApplicationContext()).addToRequestQueue(request);
 
         sendingDialog = new ProgressDialog(this);
         sendingDialog.setTitle("Versturen");
@@ -152,7 +177,6 @@ public class IssueDetailActivity extends AppCompatActivity {
 
         sendingDialog.show();
 
-        String url = "http://192.168.1.4:8080/DWPProject-0.0.1-SNAPSHOT/rest/assets/issue";
         VolleyMultipartRequest multipartRequest = new VolleyMultipartRequest( Request.Method.POST, url, new Response.Listener<NetworkResponse >() {
             @Override
             public void onResponse(NetworkResponse response) {
@@ -281,6 +305,10 @@ public class IssueDetailActivity extends AppCompatActivity {
     private void removeProgress()
     {
         sendingDialog.dismiss();
+    }
+
+    private void removeLoadingProgress() {
+        loadingDialog.dismiss();
     }
 
     public void takePicture() {
