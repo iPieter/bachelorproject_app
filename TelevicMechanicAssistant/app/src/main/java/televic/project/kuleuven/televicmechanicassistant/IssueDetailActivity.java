@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -63,6 +64,18 @@ public class IssueDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_issue_detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        Button button = new Button( this );
+        button.setText( "Grafieken" );
+        button.setOnClickListener( new View.OnClickListener()
+        {
+            @Override
+            public void onClick( View v )
+            {
+                openGraph();
+            }
+        } );
+        toolbar.addView( button );
 
         ImageButton buttonSend = (ImageButton) findViewById( R.id.button_send );
         buttonSend.setOnClickListener( new View.OnClickListener() {
@@ -153,6 +166,13 @@ public class IssueDetailActivity extends AppCompatActivity {
         sendingDialog.setTitle("Versturen");
         sendingDialog.setMessage("De boodschap wordt verstuurd.");
         sendingDialog.setCancelable(false); // disable dismiss by tapping outside of the dialog
+
+    }
+
+    private void openGraph() {
+        Intent intent = new Intent( this, GraphActivity.class  );
+        intent.putExtra( "psdid", "1" );
+        startActivity( intent );
     }
 
     public void onResume()
