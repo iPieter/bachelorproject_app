@@ -16,6 +16,8 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -43,9 +45,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
-
-import model.issue.IssueAsset;
 import televic.project.kuleuven.televicmechanicassistant.data.IssueContract;
 
 public class IssueDetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -102,16 +101,6 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         mCurrentUserId = Utility.getLocalUserId(this);
 
         //INIT buttons
-        Button button = new Button(this);
-        button.setText("Grafieken");
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                goToGraphActivity();
-            }
-        });
-        toolbar.addView(button);
-
         ImageButton buttonSend = (ImageButton) findViewById(R.id.button_send);
         buttonSend.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -149,6 +138,30 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         sendingDialog.setTitle("Versturen");
         sendingDialog.setMessage("De boodschap wordt verstuurd.");
         sendingDialog.setCancelable(false); // disable dismiss by tapping outside of the dialog
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main_overview, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_settings) {
+            //TODO create settings
+            //startActivity(new Intent(this,SettingsActivity.class));
+            return true;
+        }
+        if(id == R.id.action_graphs){
+            goToGraphActivity();
+
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     private void goToGraphActivity() {
