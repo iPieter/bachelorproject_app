@@ -4,8 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 
 import android.os.Build;
@@ -27,6 +26,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -39,14 +39,7 @@ import java.util.Map;
  * nieuwe token aanvragen + sign in
  */
 public class LoginActivity extends AppCompatActivity {
-
-    /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
+    private final String LOG_TAG = LoginActivity.class.getSimpleName();
 
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
@@ -65,7 +58,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         //Redirect directly if a local TOKEN is present
-        //TODO OVERAL BIJ ERROR 401 moet TOKEN verwijderd worden! anders oneindige lus.
+        //TODO OVERAL BIJ ERROR 401 moet TOKEN verwijderd worden! anders oneindige redirect lus.
         String token = Utility.getLocalToken(getApplicationContext());
         if (token != null) {
             goToOverviewPage();
@@ -256,9 +249,11 @@ public class LoginActivity extends AppCompatActivity {
      * If new login or login with TOKEN succesful: we redirect to the IssueOverviewActivity
      */
     public void goToOverviewPage() {
-
+        Log.v(LOG_TAG,"Creating intent");
+        Intent intent = new Intent(getApplicationContext(), IssueOverviewActivity.class);
+        startActivity(intent);
     }
-    
+
 
     public class UserLoginHandler {
         private final String LOG_TAG = UserLoginHandler.class.getSimpleName();
@@ -267,32 +262,25 @@ public class LoginActivity extends AppCompatActivity {
         private String mPassword;
         private Context mContext;
 
+        //For parsing JSON responses
+        private final String JSON_TOKEN = "token";
+        private final String JSON_ID = "id";
+        private final String JSON_NAME = "name";
+        private final String JSON_USER = "owner";
+
+
         public UserLoginHandler(Context context, String email, String password) {
             this.mEmail = email;
             this.mPassword = password;
             this.mContext = context;
         }
 
-        //REST request for Issue data
-        public void tryServerLogin() {
-            Log.v(LOG_TAG, "Entered fetchIssueData");
-
-            //Login when no token is present locally
-            if (newLoginAttempt()) {
-                goToOverviewPage();
-            } else {
-                //Display Error msg: Login Failed, Try Again.
-            }
-
-            Log.v(LOG_TAG, "Leaving UserLoginHandler");
-        }
-
         /**
-         * If no TOKEN is present locally. We try a new login attempt to request a new TOKEN.
+         * We try a new login attempt to request a new TOKEN.
          *
          * @return (1) true if attempt successful (2) false if attempt unsuccessful
          */
-        public boolean newLoginAttempt() {
+        public void tryServerLogin() {
             //The user can obtain a token by making a POST-request to the following url:
             //$(base_url)/rest/login
             String url = RESTSingleton.BASE_URL + "/" + RESTSingleton.LOGIN_PATH;
@@ -300,11 +288,26 @@ public class LoginActivity extends AppCompatActivity {
             try {
                 //Creating JsonStringRequest for REST call
                 JsonObjectRequest jsObjRequest = new JsonObjectRequest
-                        (Request.Method.HEAD, url, null, new Response.Listener<JSONObject>() {
+                        (Request.Method.POST, url, null, new Response.Listener<JSONObject>() {
 
                             public void onResponse(JSONObject response) {
                                 VolleyLog.v(LOG_TAG, "JSONObject response received from REST:" + response);
-                                saveToken();
+
+                                int user_id;
+                                String user_name;
+                                String token;
+                                try{
+                                    token = response.getString(JSON_TOKEN);
+
+                                    JSONObject user = response.getJSONObject(JSON_USER);
+                                    user_id=user.getInt(JSON_ID);
+                                    user_name=user.getString(JSON_NAME);
+
+                                    Utility.putLocalToken(mContext,token);
+                                    Utility.putLocalUserInfo(mContext,user_id,user_name);
+                                }catch(JSONException e){
+                                    e.printStackTrace();
+                                }
                                 goToOverviewPage();
                             }
                         }, new Response.ErrorListener() {
