@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -20,6 +21,9 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class GraphActivity extends AppCompatActivity
 {
@@ -49,8 +53,6 @@ public class GraphActivity extends AppCompatActivity
             {
                 loadingDialog.dismiss();
 
-                Log.i( LOG_TAG, response.toString() );
-
                 try
                 {
                     JSONArray yaw = response.getJSONArray( "yaw" );
@@ -79,9 +81,23 @@ public class GraphActivity extends AppCompatActivity
                 Toast toast = Toast.makeText(context, text, duration);
                 toast.show();
             }
-        } );
+        } ){
+            @Override
+            public Map< String, String > getHeaders() throws AuthFailureError
+            {
+                HashMap<String, String> params = new HashMap<>( );
+                params.put( "Authorization", "Bearer " + Utility.getLocalToken( getContext() ) );
+
+                return params;
+            }
+        };
 
         RESTSingleton.getInstance( getApplicationContext() ).addToRequestQueue( request );
+    }
+
+    private Context getContext()
+    {
+        return this.getApplicationContext();
     }
 
     private void createGraph( int id, JSONArray array ) throws JSONException
