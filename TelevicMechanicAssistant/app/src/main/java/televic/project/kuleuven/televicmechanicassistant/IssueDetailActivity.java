@@ -57,7 +57,8 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     //Members
     private String mCurrentPhotoPath;
     private IssueAssetListAdapter mListAdapter;
-    private int mCurrentUserId;
+    private HashMap<Integer, Bitmap> mImageMap;
+    private int mCurrentUserId; //TODO init
 
     //GUI components
     private ProgressDialog sendingDialog;
@@ -91,6 +92,9 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //INIT current user
+        mCurrentUserId = Utility.getLocalUserId(this);
+        
         //INIT buttons
         Button button = new Button(this);
         button.setText("Grafieken");
@@ -116,8 +120,11 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
             }
         });
 
+        //INIT mImageMap
+        mImageMap = new HashMap<>();
+
         //INIT adapter
-        mListAdapter = new IssueAssetListAdapter(getApplicationContext());
+        mListAdapter = new IssueAssetListAdapter(getApplicationContext(), null, 0);
         ListView listView = (ListView) findViewById(R.id.issue_asset_link);
         listView.setAdapter(mListAdapter);
 
@@ -136,8 +143,6 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         sendingDialog.setTitle("Versturen");
         sendingDialog.setMessage("De boodschap wordt verstuurd.");
         sendingDialog.setCancelable(false); // disable dismiss by tapping outside of the dialog
-
-        //staticDataLoading();
     }
 
     private void goToGraphActivity(int data_id) {
@@ -168,6 +173,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
             @Override
             public void onResponse(Bitmap response) {
                 removeLoadingProgress();
+                //TODO link image to tupple: in hashmap bijhouden OF imagenaam, die wordt opgeslaan
                 asset.setBitmap(response);
                 mListAdapter.updateView(assets);
             }
@@ -383,13 +389,15 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        mListAdapter.swapCursor(cursor);
+        Log.v(LOG_TAG, "onLoadFinished: Loader cursor swapped, cursorCount = " + cursor.getCount());
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-
+        Log.v(LOG_TAG, "Loader onLoaderReset");
+        mListAdapter.swapCursor(null);
     }
 
     /*
