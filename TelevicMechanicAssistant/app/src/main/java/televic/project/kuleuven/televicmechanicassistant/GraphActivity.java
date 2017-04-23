@@ -23,7 +23,7 @@ import org.json.JSONObject;
 
 public class GraphActivity extends AppCompatActivity
 {
-    private static final String url = "http://192.168.1.4:8080/DWPProject-0.0.1-SNAPSHOT/rest/processed_data";
+    private static final String url = RESTSingleton.BASE_URL + "/processed_data";
     private static final String LOG_TAG = "GRAPH_ACTIVITY";
     private ProgressDialog loadingDialog;
 
