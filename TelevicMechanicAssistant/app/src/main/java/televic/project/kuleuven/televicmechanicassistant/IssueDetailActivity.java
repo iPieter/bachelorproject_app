@@ -48,7 +48,7 @@ import java.util.Map;
 import model.issue.IssueAsset;
 import televic.project.kuleuven.televicmechanicassistant.data.IssueContract;
 
-public class IssueDetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
+public class IssueDetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     private final String LOG_TAG = IssueDetailActivity.class.getSimpleName();
 
     private static final String url = RESTSingleton.BASE_URL + "/assets/issue";
@@ -92,42 +92,43 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         setSupportActionBar(toolbar);
 
         //INIT buttons
-        Button button = new Button( this );
-        button.setText( "Grafieken" );
-        button.setOnClickListener( new View.OnClickListener()
-        {
+        Button button = new Button(this);
+        button.setText("Grafieken");
+        button.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick( View v )
-            {
+            public void onClick(View v) {
                 goToGraphActivity();
             }
-        } );
-        toolbar.addView( button );
+        });
+        toolbar.addView(button);
 
-        ImageButton buttonSend = (ImageButton) findViewById( R.id.button_send );
-        buttonSend.setOnClickListener( new View.OnClickListener() {
-            public void onClick( View v ) {
+        ImageButton buttonSend = (ImageButton) findViewById(R.id.button_send);
+        buttonSend.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
                 postIssueAsset();
             }
-        } );
+        });
 
-        ImageButton buttonCamera = (ImageButton) findViewById( R.id.button_camera );
-        buttonCamera.setOnClickListener( new View.OnClickListener() {
-            public void onClick( View v ) {
+        ImageButton buttonCamera = (ImageButton) findViewById(R.id.button_camera);
+        buttonCamera.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
                 takePicture();
             }
-        } );
+        });
 
         //INIT adapter
-        mListAdapter = new IssueAssetListAdapter( getApplicationContext() );
-        ListView listView = (ListView) findViewById( R.id.issue_asset_link );
-        listView.setAdapter( mListAdapter );
+        mListAdapter = new IssueAssetListAdapter(getApplicationContext());
+        ListView listView = (ListView) findViewById(R.id.issue_asset_link);
+        listView.setAdapter(mListAdapter);
+
+        //INIT loader
+        getSupportLoaderManager().initLoader(DETAIL_LOADER, null, this);
 
         //INIT loading dialog
-        loadingDialog = new ProgressDialog( this );
-        loadingDialog.setTitle( "Laden.." );
-        loadingDialog.setMessage( "De boodschappen worden geladen" );
-        loadingDialog.setCancelable( false );
+        loadingDialog = new ProgressDialog(this);
+        loadingDialog.setTitle("Laden..");
+        loadingDialog.setMessage("De boodschappen worden geladen");
+        loadingDialog.setCancelable(false);
         loadingDialog.show();
 
         //INIT sending dialog
@@ -139,14 +140,13 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         //staticDataLoading();
     }
 
-    private void goToGraphActivity( int data_id ) {
-        Intent intent = new Intent( this, GraphActivity.class  );
-        intent.putExtra( "psdid", "1" ); //TODO give data id!
-        startActivity( intent );
+    private void goToGraphActivity(int data_id) {
+        Intent intent = new Intent(this, GraphActivity.class);
+        intent.putExtra("psdid", "1"); //TODO give data id!
+        startActivity(intent);
     }
 
-    public void onResume()
-    {
+    public void onResume() {
         super.onResume();
 
         /*
@@ -163,21 +163,17 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         */
     }
 
-    public void fetchIssueAssetImage(){
-        ImageRequest request = new ImageRequest( url + "/7", new Response.Listener< Bitmap >()
-        {
+    public void fetchIssueAssetImage() {
+        ImageRequest request = new ImageRequest(url + "/7", new Response.Listener<Bitmap>() {
             @Override
-            public void onResponse( Bitmap response )
-            {
+            public void onResponse(Bitmap response) {
                 removeLoadingProgress();
-                asset.setBitmap( response );
-                mListAdapter.updateView( assets );
+                asset.setBitmap(response);
+                mListAdapter.updateView(assets);
             }
-        }, 350, 350, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565, new Response.ErrorListener()
-        {
+        }, 350, 350, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565, new Response.ErrorListener() {
             @Override
-            public void onErrorResponse( VolleyError error )
-            {
+            public void onErrorResponse(VolleyError error) {
                 removeLoadingProgress();
 
                 Context context = getApplicationContext();
@@ -187,9 +183,9 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                 Toast toast = Toast.makeText(context, text, duration);
                 toast.show();
 
-                mListAdapter.updateView( assets );
+                mListAdapter.updateView(assets);
             }
-        } );
+        });
         RESTSingleton.getInstance(getApplicationContext()).addToRequestQueue(request);
     }
 
@@ -197,37 +193,37 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
 
         sendingDialog.show();
 
-        VolleyMultipartRequest multipartRequest = new VolleyMultipartRequest( Request.Method.POST, url, new Response.Listener<NetworkResponse >() {
+        VolleyMultipartRequest multipartRequest = new VolleyMultipartRequest(Request.Method.POST, url, new Response.Listener<NetworkResponse>() {
             @Override
             public void onResponse(NetworkResponse response) {
                 String resultResponse = new String(response.data);
                 try {
 
                     IssueAsset asset = new IssueAsset();
-                    if( mCurrentPhotoPath == null )
-                        asset.setLocation( "" );
+                    if (mCurrentPhotoPath == null)
+                        asset.setLocation("");
                     else
-                        asset.setLocation( "azeaze" );
-                    asset.setUser( user );
-                    asset.setDescr( (( EditText)findViewById( R.id.textfield_issueasset )).getText().toString() );
-                    asset.setTime( new Date( ) );
+                        asset.setLocation("azeaze");
+                    asset.setUser(user);
+                    asset.setDescr(((EditText) findViewById(R.id.textfield_issueasset)).getText().toString());
+                    asset.setTime(new Date());
 
-                    assets.add( asset );
-                    mListAdapter.updateView( assets );
+                    assets.add(asset);
+                    mListAdapter.updateView(assets);
 
                     JSONObject result = new JSONObject(resultResponse);
                     String status = result.getString("status");
                     String message = result.getString("message");
 
-                    Log.i(LOG_TAG, status );
-                    Log.i(LOG_TAG, message );
+                    Log.i(LOG_TAG, status);
+                    Log.i(LOG_TAG, message);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
                 mCurrentPhotoPath = null;
                 removeProgress();
-                (( EditText)findViewById( R.id.textfield_issueasset )).setText( "" );
+                ((EditText) findViewById(R.id.textfield_issueasset)).setText("");
             }
         }, new Response.ErrorListener() {
             @Override
@@ -263,11 +259,11 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                         if (networkResponse.statusCode == 404) {
                             errorMessage = "Resource not found";
                         } else if (networkResponse.statusCode == 401) {
-                            errorMessage = message+" Please login again";
+                            errorMessage = message + " Please login again";
                         } else if (networkResponse.statusCode == 400) {
-                            errorMessage = message+ " Check your inputs";
+                            errorMessage = message + " Check your inputs";
                         } else if (networkResponse.statusCode == 500) {
-                            errorMessage = message+" Something is getting wrong";
+                            errorMessage = message + " Something is getting wrong";
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -280,19 +276,19 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
-                params.put( "api_token", "gh659gjhvdyudo973823tt9gvjf7i6ric75r76" );
-                params.put( "desc", (( EditText)findViewById( R.id.textfield_issueasset )).getText().toString() );
-                params.put( "userID", "1" );
-                params.put( "issueID", "1" );
+                params.put("api_token", "gh659gjhvdyudo973823tt9gvjf7i6ric75r76");
+                params.put("desc", ((EditText) findViewById(R.id.textfield_issueasset)).getText().toString());
+                params.put("userID", "1");
+                params.put("issueID", "1");
                 return params;
             }
 
             @Override
             protected Map<String, DataPart> getByteData() {
                 Map<String, DataPart> params = new HashMap<>();
-                if( mCurrentPhotoPath != null ) {
-                    File file = new File( mCurrentPhotoPath );
-                    if( file.isFile() ) {
+                if (mCurrentPhotoPath != null) {
+                    File file = new File(mCurrentPhotoPath);
+                    if (file.isFile()) {
                         int size = (int) file.length();
                         byte[] bytes = new byte[size];
                         try {
@@ -305,15 +301,14 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                             e.printStackTrace();
                         }
                         params.put("file", new DataPart("file_cover.jpg", bytes, "image/jpeg"));
-                        Log.i(LOG_TAG, "SENDING TEXT + PICTURE" );
+                        Log.i(LOG_TAG, "SENDING TEXT + PICTURE");
                     } else {
-                        Log.i(LOG_TAG, "SENDING ONLY TEXT" );
+                        Log.i(LOG_TAG, "SENDING ONLY TEXT");
                         params.put("file", new DataPart("file_cover.jpg", new byte[0], "image/jpeg"));
                     }
-                }else
-                {
+                } else {
                     params.put("file", new DataPart("file_cover.jpg", new byte[0], "image/jpeg"));
-                    Log.i(LOG_TAG, "PICTURE PATH: " + mCurrentPhotoPath );
+                    Log.i(LOG_TAG, "PICTURE PATH: " + mCurrentPhotoPath);
                 }
                 return params;
             }
@@ -322,8 +317,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         RESTSingleton.getInstance(getApplicationContext()).addToRequestQueue(multipartRequest);
     }
 
-    private void removeProgress()
-    {
+    private void removeProgress() {
         sendingDialog.dismiss();
     }
 
@@ -341,7 +335,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                 photoFile = createImageFile();
             } catch (IOException ex) {
                 // Error occurred while creating the File
-                Log.e( "ISSUE_DETAIL", ex.getMessage() );
+                Log.e("ISSUE_DETAIL", ex.getMessage());
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
@@ -354,12 +348,11 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         }
     }
 
-    private File createImageFile() throws IOException
-    {
+    private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getExternalFilesDir( Environment.DIRECTORY_PICTURES);
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
