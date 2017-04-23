@@ -42,7 +42,7 @@ public class Utility {
                 .getSharedPreferences(SHARED_PREF, PRIVATE_MODE);
 
         //Returning null if USER_ID_TAG not present
-        int id = pref.getInt(USER_ID_TAG, null);
+        int id = pref.getInt(USER_ID_TAG, -1);
 
         return id;
     }
