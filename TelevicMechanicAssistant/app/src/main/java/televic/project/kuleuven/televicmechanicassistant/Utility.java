@@ -1,6 +1,7 @@
 package televic.project.kuleuven.televicmechanicassistant;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
 
@@ -18,6 +19,10 @@ public class Utility {
     public static final String TOKEN_TAG = "token_login";
     public static final String USER_ID_TAG = "user_id";
     public static final String USER_NAME_TAG = "user_name";
+
+    //ErrorCodes Http
+    public static final int UNAUTHORIZED = 401;
+
 
 
     /**
@@ -89,5 +94,4 @@ public class Utility {
         editor.apply();
         Log.v(LOG_TAG,"SHARED_PREF: user info saved: id="+user_id+", name="+user_name);
     }
-
 }

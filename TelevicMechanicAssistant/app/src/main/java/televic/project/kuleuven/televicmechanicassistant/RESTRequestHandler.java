@@ -2,23 +2,20 @@ package televic.project.kuleuven.televicmechanicassistant;
 
 import android.content.Context;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-import android.net.Uri;
+import android.content.Intent;
 import android.util.Log;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
-import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.StringRequest;
-
-import org.json.JSONArray;
 
 /**
  * Created by Matthias on 19/04/2017.
@@ -53,6 +50,12 @@ public class RESTRequestHandler {
 
     public void setParserTask( JSONParserTask task ) {
         parserTask = task;
+    }
+
+    public void redirectToLogin(){
+        Log.v(LOG_TAG,"Redirecting to Login");
+        Intent intent=new Intent(mContext ,LoginActivity.class);
+        mContext.startActivity(intent);
     }
 
     /**
@@ -91,6 +94,13 @@ public class RESTRequestHandler {
                         public void onErrorResponse(VolleyError error) {
                             error.fillInStackTrace();
                             VolleyLog.e("Error in RESTSingleton request:" + error.networkResponse);
+
+                            NetworkResponse networkResponse = error.networkResponse;
+                            if (networkResponse != null) {
+                                if(networkResponse.statusCode == Utility.UNAUTHORIZED){
+                                    redirectToLogin();
+                                }
+                            }
                         }
                     });
 
@@ -141,6 +151,13 @@ public class RESTRequestHandler {
                 public void onErrorResponse(VolleyError error) {
                     error.fillInStackTrace();
                     VolleyLog.e("Error in RESTSingleton request:" + error.networkResponse);
+
+                    NetworkResponse networkResponse = error.networkResponse;
+                    if (networkResponse != null) {
+                        if(networkResponse.statusCode == Utility.UNAUTHORIZED){
+                            redirectToLogin();
+                        }
+                    }
                 }
             }){
                 @Override
