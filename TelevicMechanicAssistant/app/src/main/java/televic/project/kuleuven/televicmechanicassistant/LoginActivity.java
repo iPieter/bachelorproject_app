@@ -64,6 +64,16 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        //Redirect directly if valid TOKEN
+        mAuthTask = new UserLoginHandler(getApplicationContext(), null, null);
+        String token = mAuthTask.getLocalToken();
+        if (token != null) {
+            if (mAuthTask.isTokenValid(token)) {
+                mAuthTask.goToOverviewPage();
+            }
+        }
+
         // Set up the login form.
         mEmailView = (TextView) findViewById(R.id.email);
         mPasswordView = (EditText) findViewById(R.id.password);
@@ -351,17 +361,13 @@ public class LoginActivity extends AppCompatActivity {
         public void tryServerLogin() {
             Log.v(LOG_TAG, "Entered fetchIssueData");
 
-            String token = getLocalToken();
-            if (token != null && isTokenValid()) {
+            //Login when no token is present locally
+            if (newLoginAttempt()) {
                 goToOverviewPage();
             } else {
-                //Login when no token is present locally
-                if (newLoginAttempt()) {
-                    goToOverviewPage();
-                } else {
-                    //Display Error msg: Login Failed, Try Again.
-                }
+                //Display Error msg: Login Failed, Try Again.
             }
+
             Log.v(LOG_TAG, "Leaving UserLoginHandler");
         }
 
@@ -398,24 +404,25 @@ public class LoginActivity extends AppCompatActivity {
          *
          * @return
          */
-        public boolean isTokenValid() {
-            try {
+        public boolean isTokenValid(String token) {
+            String url = RESTSingleton.BASE_URL + "/" + RESTSingleton.ISSUES_PATH;
 
+            try {
                 //Creating JsonStringRequest for REST call
                 JsonObjectRequest jsObjRequest = new JsonObjectRequest
-                        (Request.Method.POST, url, null, new Response.Listener<JSONObject>() {
+                        (Request.Method.HEAD, url, null, new Response.Listener<JSONObject>() {
 
                             public void onResponse(JSONObject response) {
                                 VolleyLog.v(LOG_TAG, "JSONObject response received from REST:" + response);
-                                //TODO Redirect to OverviewActivity and store TOKEN
                                 saveToken();
+                                goToOverviewPage();
                             }
                         }, new Response.ErrorListener() {
 
                             public void onErrorResponse(VolleyError error) {
                                 error.fillInStackTrace();
                                 VolleyLog.e("Error in RESTSingleton request:" + error.networkResponse);
-                                if (error.networkResponse)
+                                if (error.networkResponse == Volley.)
                             }
                         }) {
                     @Override
@@ -431,10 +438,7 @@ public class LoginActivity extends AppCompatActivity {
                 Log.v(LOG_TAG, "Calling RESTSingleton with context:" + mContext);
                 RESTSingleton.getInstance(mContext).addToRequestQueue(jsObjRequest);
 
-            } catch (
-                    Exception e)
-
-            {
+            } catch (Exception e) {
                 e.printStackTrace();
                 Log.e(LOG_TAG, "Failed REST user login");
             }
