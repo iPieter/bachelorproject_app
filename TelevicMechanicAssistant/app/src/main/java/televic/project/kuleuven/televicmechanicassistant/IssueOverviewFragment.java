@@ -119,7 +119,6 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
                     Log.v(LOG_TAG,"Creating intent");
                     Intent intent = new Intent(getActivity(), IssueDetailActivity.class)
                             .putExtra(INTENT_ISSUE_ID, cursor.getInt(COL_ISSUE_ID));
-                    //.putExtra(CURRENT_MECHANIC_ID,mCurrentMechanic);
                     //TODO in response in DetailActivity: int intValue = mIntent.getIntExtra(INTENT_ISSUE_ID, 0);
                     startActivity(intent);
                 }

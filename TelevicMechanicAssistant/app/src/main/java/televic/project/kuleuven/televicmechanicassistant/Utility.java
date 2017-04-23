@@ -88,6 +88,6 @@ public class Utility {
         editor.putString(USER_NAME_TAG, user_name);
         editor.apply();
         Log.v(LOG_TAG,"SHARED_PREF: user info saved: id="+user_id+", name="+user_name);
-
     }
+
 }

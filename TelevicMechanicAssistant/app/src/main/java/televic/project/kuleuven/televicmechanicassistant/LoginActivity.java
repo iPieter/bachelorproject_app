@@ -185,13 +185,13 @@ public class LoginActivity extends AppCompatActivity {
             mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
-    
+
     /**
      * If new login or login with TOKEN succesful: we redirect to the IssueOverviewActivity
      */
     public void goToOverviewPage() {
         Log.v(LOG_TAG,"Creating intent: goToOverviewPage");
-        Intent intent = new Intent(getApplicationContext(), IssueOverviewActivity.class);
+        Intent intent = new Intent(this, IssueOverviewActivity.class);
         startActivity(intent);
     }
 
