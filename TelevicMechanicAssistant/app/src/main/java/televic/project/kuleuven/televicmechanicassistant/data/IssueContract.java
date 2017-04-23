@@ -23,7 +23,7 @@ public class IssueContract {
     public static final String PATH_ISSUE = "issue";
     public static final String PATH_ISSUE_ASSET = "issue_asset";
     public static final String PATH_TRAINCOACH = "traincoach";
-
+    public static final String PATH_WITH_IMG = "with_img";
 
     /* TABLE 1: Inner class that defines the table contents of the Issue table */
     public static final class IssueEntry implements BaseColumns {
@@ -93,6 +93,12 @@ public class IssueContract {
 
         public static Uri buildIssueAssetUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+
+        public static Uri buildIssueAssetWithImgUri(long id){
+            Uri uri = IssueContract.IssueAssetEntry.CONTENT_URI
+                    .buildUpon().appendPath(IssueContract.PATH_WITH_IMG).build();
+            return ContentUris.withAppendedId(uri, id);
         }
 
         public static int getIssueIdFromUri(Uri uri){

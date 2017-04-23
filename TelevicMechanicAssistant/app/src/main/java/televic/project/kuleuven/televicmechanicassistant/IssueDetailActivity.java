@@ -152,9 +152,12 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         sendingDialog.setCancelable(false); // disable dismiss by tapping outside of the dialog
 
         //Calling Backend
-        //TODO fetch all Images of those issueAssets that have an Image
-        Cursor issueAssetsCursor; //QUERY
-        fetchIssueAssetImages(issueAssetsCursor);
+        //Fetching all Images of those issueAssets that have an Image
+        Uri assetsWithImgUri = IssueContract.IssueAssetEntry
+                .buildIssueAssetWithImgUri(mIssueId);
+        Cursor assetsWithImgCursor = getContentResolver().query(
+                assetsWithImgUri,REST_COLUMNS,null,null,null);
+        fetchIssueAssetImages(assetsWithImgCursor);
     }
 
     @Override

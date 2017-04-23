@@ -27,6 +27,7 @@ public class IssueProvider extends ContentProvider {
     static final int ISSUE_WITH_ID = 101;
     static final int ISSUE_ASSET = 300;
     static final int ISSUE_ASSET_WITH_ISSUE_ID = 301;
+    static final int ISSUE_ASSET_WITH_ISSUE_ID_AND_IMG = 302;
     static final int TRAINCOACH = 400;
 
     //SQLiteQueryBuilder JOINS used for QUERIES (NOT for inserts,deletes,updates)
@@ -80,6 +81,8 @@ public class IssueProvider extends ContentProvider {
         matcher.addURI(authority, IssueContract.PATH_ISSUE + "/*", ISSUE_WITH_ID);
         matcher.addURI(authority, IssueContract.PATH_ISSUE_ASSET, ISSUE_ASSET);
         matcher.addURI(authority, IssueContract.PATH_ISSUE_ASSET + "/*", ISSUE_ASSET_WITH_ISSUE_ID);
+        matcher.addURI(authority, IssueContract.PATH_ISSUE_ASSET + "/"
+                + IssueContract.PATH_WITH_IMG + "/*" , ISSUE_ASSET_WITH_ISSUE_ID_AND_IMG);
         matcher.addURI(authority, IssueContract.PATH_TRAINCOACH, TRAINCOACH);
 
         Log.v(LOG_TAG, "UriMatcher initialized");
@@ -94,6 +97,13 @@ public class IssueProvider extends ContentProvider {
     //IssueAsset.issueId = ?
     private static final String sIssueAssetByIssueSelection =
             IssueContract.IssueAssetEntry.TABLE_NAME +
+                    "." + IssueContract.IssueAssetEntry.COLUMN_ISSUE_ID + " = ? ";
+
+    //IssueAsset.COLUMN_IMAGE_LOCATION = ?
+    private static final String sIssueAssetByIssueAndImgSelection =
+            IssueContract.IssueAssetEntry.TABLE_NAME +
+                    "." + IssueContract.IssueAssetEntry.COLUMN_IMAGE_LOCATION + " = ? AND " +
+                    IssueContract.IssueAssetEntry.TABLE_NAME +
                     "." + IssueContract.IssueAssetEntry.COLUMN_ISSUE_ID + " = ? ";
 
     @Override
@@ -140,6 +150,13 @@ public class IssueProvider extends ContentProvider {
                 break;
             }
 
+            // "issue_asset/with_img/*"
+            case ISSUE_ASSET_WITH_ISSUE_ID_AND_IMG: {
+                Log.v(LOG_TAG, "QUERY ISSUE_ASSET_WITH_ISSUE_ID_AND_IMG");
+                retCursor = getIssueAssetByIssueIdAndImg(uri, projection, sortOrder);
+                break;
+            }
+
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -172,6 +189,24 @@ public class IssueProvider extends ContentProvider {
 
         String selection = sIssueAssetByIssueSelection;
         String[] selectionArgs = new String[]{Integer.toString(issueId)};
+
+        return sIssueAssetWorkplaceByIssueQueryBuilder.query(mOpenHelper.getReadableDatabase(),
+                projection,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                sortOrder
+        );
+    }
+
+    //Setup of query to ask all IssueAssets for certain parameter IssueId
+    // and check if IMAGE_LOCATION="IMG"
+    private Cursor getIssueAssetByIssueIdAndImg(Uri uri, String[] projection, String sortOrder) {
+        int issueId = IssueContract.IssueAssetEntry.getIssueIdFromUri(uri);
+
+        String selection = sIssueAssetByIssueAndImgSelection;
+        String[] selectionArgs = new String[]{"IMG",Integer.toString(issueId)};
 
         return sIssueAssetWorkplaceByIssueQueryBuilder.query(mOpenHelper.getReadableDatabase(),
                 projection,
