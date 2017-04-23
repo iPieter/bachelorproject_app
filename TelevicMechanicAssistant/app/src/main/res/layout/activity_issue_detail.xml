@@ -1,45 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/lib/televic.project.kuleuven.televicmechanicassistant"
     xmlns:app2="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/issue_detail_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="televic.project.kuleuven.televicmechanicassistant.IssueDetailActivity">
+    tools:context="televic.project.kuleuven.televicmechanicassistant.IssueDetailActivity"
+    android:orientation="vertical"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:theme="@style/AppTheme.AppBarOverlay"
+        android:id="@+id/appBarLayout">
 
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            app2:title="Berichten"
+            app:popupTheme="@style/AppTheme.PopupOverlay"/>
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_issue_detail"
-             android:id="@+id/include"/>
-
-    <RelativeLayout
+    <ListView
+        android:id="@+id/issue_asset_link"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <ExpandableListView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-    </RelativeLayout>
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:stackFromBottom="true"
+        android:transcriptMode="alwaysScroll"/>
 
     <RelativeLayout
         android:id="@+id/layout_add"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/textView2"
-        android:layout_alignBottom="@+id/textView2"
+        android:layout_height="47dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true">
 
@@ -47,10 +47,10 @@
             android:id="@+id/image_preview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app2:srcCompat="@android:drawable/ic_menu_camera"
             android:layout_above="@+id/button_camera"
             android:layout_alignLeft="@+id/textfield_issueasset"
-            android:layout_alignStart="@+id/textfield_issueasset"/>
+            android:layout_alignStart="@+id/textfield_issueasset"
+            app2:srcCompat="@android:drawable/ic_menu_camera"/>
 
         <EditText
             android:id="@+id/textfield_issueasset"
@@ -62,29 +62,29 @@
             android:layout_marginLeft="17dp"
             android:layout_marginStart="17dp"
             android:ems="10"
-            android:inputType="textPersonName"
-            android:text="Beschrijving"/>
+            android:hint="Boodschap"
+            android:inputType="textPersonName"/>
 
         <ImageButton
             android:id="@+id/button_camera"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app2:srcCompat="@android:drawable/ic_menu_camera"
             android:layout_alignParentBottom="true"
-            android:layout_toRightOf="@+id/textfield_issueasset"
-            android:layout_toEndOf="@+id/textfield_issueasset"
+            android:layout_alignTop="@+id/textfield_issueasset"
             android:layout_marginLeft="14dp"
-            android:layout_marginStart="14dp"/>
+            android:layout_marginStart="14dp"
+            android:layout_toRightOf="@+id/textfield_issueasset"
+            app2:srcCompat="@android:drawable/ic_menu_camera"/>
 
         <ImageButton
             android:id="@+id/button_send"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app2:srcCompat="@android:drawable/ic_menu_send"
             android:layout_alignParentBottom="true"
+            android:layout_alignTop="@+id/button_camera"
             android:layout_toRightOf="@+id/button_camera"
-            android:layout_toEndOf="@+id/button_camera"/>
+            app2:srcCompat="@android:drawable/ic_menu_send"/>
 
     </RelativeLayout>
 
-</android.support.design.widget.CoordinatorLayout>
+</LinearLayout>

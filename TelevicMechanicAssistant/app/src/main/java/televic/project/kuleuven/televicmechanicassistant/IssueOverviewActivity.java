@@ -7,6 +7,21 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class IssueOverviewActivity extends AppCompatActivity {
     private final String LOG_TAG = IssueOverviewActivity.class.getSimpleName();
 
@@ -21,7 +36,6 @@ public class IssueOverviewActivity extends AppCompatActivity {
             Log.v(LOG_TAG, "Fragment transaction ended");
         }
 
-        RESTSingleton.getInstance(getApplicationContext());
         Log.v(LOG_TAG, "Added application context in main_overview activity");
     }
 
