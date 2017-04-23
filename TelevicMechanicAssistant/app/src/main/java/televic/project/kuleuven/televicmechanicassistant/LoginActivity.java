@@ -34,12 +34,11 @@ import java.util.Map;
 
 /**
  * A login screen that offers login via email/password.
+ * Als de user zelfs geen token heeft locaal: blijf op signin page, anders redirect naar MainPage
+ * en dan op de MainPage als 401 ->
+ * nieuwe token aanvragen + sign in
  */
 public class LoginActivity extends AppCompatActivity {
-
-    public static final String TOKEN_TAG = "token_login";
-    public static final String SHARED_PREF = "main_shared_pref";
-    public static final int PRIVATE_MODE = 0;
 
     /**
      * A dummy authentication store containing known user names and passwords.
@@ -65,13 +64,11 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        //Redirect directly if valid TOKEN
-        mAuthTask = new UserLoginHandler(getApplicationContext(), null, null);
-        String token = mAuthTask.getLocalToken();
+        //Redirect directly if a local TOKEN is present
+        //TODO OVERAL BIJ ERROR 401 moet TOKEN verwijderd worden! anders oneindige lus.
+        String token = Utility.getLocalToken(getApplicationContext());
         if (token != null) {
-            if (mAuthTask.isTokenValid(token)) {
-                mAuthTask.goToOverviewPage();
-            }
+            goToOverviewPage();
         }
 
         // Set up the login form.
@@ -99,51 +96,6 @@ public class LoginActivity extends AppCompatActivity {
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
     }
-/*
-    private void populateAutoComplete() {
-        if (!mayRequestContacts()) {
-            return;
-        }
-
-        getLoaderManager().initLoader(0, null, this);
-    }
-*/
-    /*private boolean mayRequestContacts() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
-        }
-        if (checkSelfPermission(READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        }
-        if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
-            Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(android.R.string.ok, new View.OnClickListener() {
-                        @Override
-                        @TargetApi(Build.VERSION_CODES.M)
-                        public void onClick(View v) {
-                            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-                        }
-                    });
-        } else {
-            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-        }
-        return false;
-    }*/
-
-    /*
-    /**
-     * Callback received when a permissions request has been completed.
-     *
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_READ_CONTACTS) {
-            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                populateAutoComplete();
-            }
-        }
-    }*/
-
 
     /**
      * Attempts to sign in or register the account specified by the login form.
@@ -240,51 +192,8 @@ public class LoginActivity extends AppCompatActivity {
             mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
-/*
-    @Override
-    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        return new CursorLoader(this,
-                // Retrieve data rows for the device user's 'profile' contact.
-                Uri.withAppendedPath(ContactsContract.Profile.CONTENT_URI,
-                        ContactsContract.Contacts.Data.CONTENT_DIRECTORY), ProfileQuery.PROJECTION,
 
-                // Select only email addresses.
-                ContactsContract.Contacts.Data.MIMETYPE +
-                        " = ?", new String[]{ContactsContract.CommonDataKinds.Email
-                .CONTENT_ITEM_TYPE},
-
-                // Show primary email addresses first. Note that there won't be
-                // a primary email address if the user hasn't specified one.
-                ContactsContract.Contacts.Data.IS_PRIMARY + " DESC");
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        List<String> emails = new ArrayList<>();
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            emails.add(cursor.getString(ProfileQuery.ADDRESS));
-            cursor.moveToNext();
-        }
-
-        addEmailsToAutoComplete(emails);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> cursorLoader) {
-
-    }
-
-
-    private interface ProfileQuery {
-        String[] PROJECTION = {
-                ContactsContract.CommonDataKinds.Email.ADDRESS,
-                ContactsContract.CommonDataKinds.Email.IS_PRIMARY,
-        };
-
-        int ADDRESS = 0;
-        int IS_PRIMARY = 1;
-    }*/
+    /*
 
     /**
      * Represents an asynchronous login/registration task used to authenticate
@@ -343,6 +252,13 @@ public class LoginActivity extends AppCompatActivity {
             showProgress(false);
         }
     }*/
+    /**
+     * If new login or login with TOKEN succesful: we redirect to the IssueOverviewActivity
+     */
+    public void goToOverviewPage() {
+
+    }
+    
 
     public class UserLoginHandler {
         private final String LOG_TAG = UserLoginHandler.class.getSimpleName();
@@ -372,40 +288,14 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         /**
-         * Fetching locally stored TOKEN in sharedPreferences.
+         * If no TOKEN is present locally. We try a new login attempt to request a new TOKEN.
          *
-         * @return null if no TOKEN present
+         * @return (1) true if attempt successful (2) false if attempt unsuccessful
          */
-        public String getLocalToken() {
-            SharedPreferences pref = mContext.getApplicationContext()
-                    .getSharedPreferences(SHARED_PREF, PRIVATE_MODE);
-
-            //Returning null if TOKEN_TAG not present
-            String token = pref.getString(TOKEN_TAG, null);
-
-            return token;
-        }
-
-        /**
-         * Putting TOKEN in sharedPreferences.
-         * Overwrites if TOKEN_TAG already present.
-         */
-        public void putLocalToken(String token) {
-            SharedPreferences pref = mContext.getApplicationContext().getSharedPreferences("MyPref", 0);
-
-            Editor editor = pref.edit();
-            editor.putString(TOKEN_TAG, token);
-            editor.apply();
-        }
-
-        /**
-         * Checking on server-side of TOKEN is valid.
-         * We send a HEAD request. If response code is "200 OK", than TOKEN is valid.
-         *
-         * @return
-         */
-        public boolean isTokenValid(String token) {
-            String url = RESTSingleton.BASE_URL + "/" + RESTSingleton.ISSUES_PATH;
+        public boolean newLoginAttempt() {
+            //The user can obtain a token by making a POST-request to the following url:
+            //$(base_url)/rest/login
+            String url = RESTSingleton.BASE_URL + "/" + RESTSingleton.LOGIN_PATH;
 
             try {
                 //Creating JsonStringRequest for REST call
@@ -442,24 +332,6 @@ public class LoginActivity extends AppCompatActivity {
                 e.printStackTrace();
                 Log.e(LOG_TAG, "Failed REST user login");
             }
-        }
-
-        /**
-         * If no TOKEN is present locally. We try a new login attempt to request a new TOKEN.
-         *
-         * @return (1) true if attempt successful (2) false if attempt unsuccessful
-         */
-        public boolean newLoginAttempt() {
-            //The user can obtain a token by making a POST-request to the following url:
-            //$(base_url)/rest/login
-            String url = RESTSingleton.BASE_URL + "/" + RESTSingleton.LOGIN_PATH;
-        }
-
-        /**
-         * If new login or login with TOKEN succesful: we redirect to the IssueOverviewActivity
-         */
-        public void goToOverviewPage() {
-
         }
 
 
