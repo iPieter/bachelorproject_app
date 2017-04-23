@@ -175,6 +175,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     }
 
     public void fetchIssueAssetImage() {
+        /* TODO
         ImageRequest request = new ImageRequest(url + "/7", new Response.Listener<Bitmap>() {
             @Override
             public void onResponse(Bitmap response) {
@@ -197,10 +198,15 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
             }
         });
         RESTSingleton.getInstance(getApplicationContext()).addToRequestQueue(request);
+    */
     }
 
+    /**
+     * The user can upload a new IssueAsset with picture and description to the server.
+     * Also locally on the app, the list must be updated.
+     */
     public void postIssueAsset() {
-
+        /*
         sendingDialog.show();
 
         VolleyMultipartRequest multipartRequest = new VolleyMultipartRequest(Request.Method.POST, url, new Response.Listener<NetworkResponse>() {
@@ -290,7 +296,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                 params.put("api_token", Utility.getLocalToken(getApplicationContext()));
                 params.put("desc", ((EditText) findViewById(R.id.textfield_issueasset)).getText().toString());
                 params.put("userID", String.valueOf(Utility.getLocalUserId(getApplicationContext())));
-                params.put("issueID", mIssueId);
+                params.put("issueID", String.valueOf(mIssueId));
                 return params;
             }
 
@@ -326,7 +332,8 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         };
 
         RESTSingleton.getInstance(getApplicationContext()).addToRequestQueue(multipartRequest);
-    }
+    */}
+
 
     private void removeProgress() {
         sendingDialog.dismiss();
