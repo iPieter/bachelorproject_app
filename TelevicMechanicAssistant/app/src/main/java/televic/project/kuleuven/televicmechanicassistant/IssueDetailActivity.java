@@ -3,12 +3,15 @@ package televic.project.kuleuven.televicmechanicassistant;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.FileProvider;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -46,7 +49,7 @@ import java.util.Map;
 import model.issue.IssueAsset;
 import model.user.User;
 
-public class IssueDetailActivity extends AppCompatActivity {
+public class IssueDetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
 
     private static final String url = RESTSingleton.BASE_URL + "/assets/issue";
     private static final String LOG = "ISSUE_DETAIL";
@@ -59,12 +62,17 @@ public class IssueDetailActivity extends AppCompatActivity {
     private List<IssueAsset> assets = new ArrayList<>( );
     private User user;
 
+    //Id of the loader
+    private static final int DETAIL_LOADER = 1;
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_issue_detail);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //INIT buttons
         Button button = new Button( this );
         button.setText( "Grafieken" );
         button.setOnClickListener( new View.OnClickListener()
@@ -72,7 +80,7 @@ public class IssueDetailActivity extends AppCompatActivity {
             @Override
             public void onClick( View v )
             {
-                openGraph();
+                goToGraphActivity();
             }
         } );
         toolbar.addView( button );
@@ -80,7 +88,7 @@ public class IssueDetailActivity extends AppCompatActivity {
         ImageButton buttonSend = (ImageButton) findViewById( R.id.button_send );
         buttonSend.setOnClickListener( new View.OnClickListener() {
             public void onClick( View v ) {
-                sendIssueAsset();
+                postIssueAsset();
             }
         } );
 
@@ -91,49 +99,52 @@ public class IssueDetailActivity extends AppCompatActivity {
             }
         } );
 
+        //INIT adapter
         mListAdapter = new IssueAssetListAdapter( getApplicationContext() );
         ListView listView = (ListView) findViewById( R.id.issue_asset_link );
         listView.setAdapter( mListAdapter );
 
+        //INIT loading dialog
         loadingDialog = new ProgressDialog( this );
         loadingDialog.setTitle( "Laden.." );
         loadingDialog.setMessage( "De boodschappen worden geladen" );
         loadingDialog.setCancelable( false );
         loadingDialog.show();
 
-        user = new User();
-        user.setName( "Jan Met De Pet" );
+        //INIT sending dialog
+        sendingDialog = new ProgressDialog(this);
+        sendingDialog.setTitle("Versturen");
+        sendingDialog.setMessage("De boodschap wordt verstuurd.");
+        sendingDialog.setCancelable(false); // disable dismiss by tapping outside of the dialog
 
-        final IssueAsset asset = new IssueAsset();
-        asset.setId( 0 );
-        asset.setDescr( "De wagon vertoont een afwijking aan zijn roll waarden. Controleer het onderstel vooraan." );
-        asset.setTime( new Date( ) );
-        asset.setUser( user );
-        asset.setLocation( "azerazer" );
+        //staticDataLoading();
+    }
 
-        IssueAsset asset1 = new IssueAsset();
-        asset1.setId( 1 );
-        asset1.setDescr( "Voluptas molestiae quo voluptas ut ut totam quia. Quibusdam amet labore eos perspiciatis delectus doloribus. Ipsa maiores doloremque culpa iste.\n" +
-                "Velit rerum inventore quia sunt. Libero dolores rerum eos nulla explicabo voluptas ratione. Rem sit dolorem voluptate culpa perspiciatis omnis et enim. Sequi ab qui qui voluptatem in dolorem. Illum expedita odit libero enim expedita et doloribus.\n" +
-                "Vel deleniti et est consequuntur corporis repellendus molestiae consequatur. Sed nostrum est unde aut occaecati illo ut omnis. Perspiciatis optio est at. Doloremque perspiciatis dignissimos maiores assumenda vitae.\n" +
-                "Consectetur nesciunt vel excepturi asperiores earum est veritatis. Ducimus et sequi et voluptas aliquid vitae aut. Non dolor quasi non sunt inventore. Occaecati harum fuga est. Nemo et et illo modi est." );
-        asset1.setTime( new Date( ) );
-        asset1.setUser( user );
-        asset1.setLocation( "" );
+    private void goToGraphActivity( int data_id ) {
+        Intent intent = new Intent( this, GraphActivity.class  );
+        intent.putExtra( "psdid", "1" ); //TODO give data id!
+        startActivity( intent );
+    }
 
-        IssueAsset asset2 = new IssueAsset();
-        asset2.setId( 2 );
-        asset2.setDescr( "Test of de remmen nog goed werken." );
-        asset2.setTime( new Date( ) );
-        asset2.setUser( user );
-        asset2.setLocation( "azerazerazr" );
+    public void onResume()
+    {
+        super.onResume();
 
-        assets.add( asset );
-        assets.add( asset1 );
-        assets.add( asset2 );
+        /*
+        if( mCurrentPhotoPath != null ) {
+            Log.i( LOG, "path:" + mCurrentPhotoPath );
+            File imgFile = new  File( mCurrentPhotoPath );
+            Log.i( LOG, "path2:" + imgFile.exists() + ":" + imgFile.getAbsolutePath() );
+            if(imgFile.exists()){
+                Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+                ImageView myImage = (ImageView) findViewById(R.id.image_preview);
+                myImage.setImageBitmap(myBitmap);
+            }
+        }
+        */
+    }
 
-        //mListAdapter.updateView( assets );
-
+    public void fetchIssueAssetImage(){
         ImageRequest request = new ImageRequest( url + "/7", new Response.Listener< Bitmap >()
         {
             @Override
@@ -161,39 +172,9 @@ public class IssueDetailActivity extends AppCompatActivity {
             }
         } );
         RESTSingleton.getInstance(getApplicationContext()).addToRequestQueue(request);
-
-        sendingDialog = new ProgressDialog(this);
-        sendingDialog.setTitle("Versturen");
-        sendingDialog.setMessage("De boodschap wordt verstuurd.");
-        sendingDialog.setCancelable(false); // disable dismiss by tapping outside of the dialog
-
     }
 
-    private void openGraph() {
-        Intent intent = new Intent( this, GraphActivity.class  );
-        intent.putExtra( "psdid", "1" );
-        startActivity( intent );
-    }
-
-    public void onResume()
-    {
-        super.onResume();
-
-        /*
-        if( mCurrentPhotoPath != null ) {
-            Log.i( LOG, "path:" + mCurrentPhotoPath );
-            File imgFile = new  File( mCurrentPhotoPath );
-            Log.i( LOG, "path2:" + imgFile.exists() + ":" + imgFile.getAbsolutePath() );
-            if(imgFile.exists()){
-                Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-                ImageView myImage = (ImageView) findViewById(R.id.image_preview);
-                myImage.setImageBitmap(myBitmap);
-            }
-        }
-        */
-    }
-
-    public void sendIssueAsset() {
+    public void postIssueAsset() {
 
         sendingDialog.show();
 
@@ -371,4 +352,53 @@ public class IssueDetailActivity extends AppCompatActivity {
         return image;
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+    }
+
+    //TODO delete
+    public void staticDataLoading(){
+        user = new User();
+        user.setName( "Jan Met De Pet" );
+
+        final IssueAsset asset = new IssueAsset();
+        asset.setId( 0 );
+        asset.setDescr( "De wagon vertoont een afwijking aan zijn roll waarden. Controleer het onderstel vooraan." );
+        asset.setTime( new Date( ) );
+        asset.setUser( user );
+        asset.setLocation( "azerazer" );
+
+        IssueAsset asset1 = new IssueAsset();
+        asset1.setId( 1 );
+        asset1.setDescr( "Voluptas molestiae quo voluptas ut ut totam quia. Quibusdam amet labore eos perspiciatis delectus doloribus. Ipsa maiores doloremque culpa iste.\n" +
+                "Velit rerum inventore quia sunt. Libero dolores rerum eos nulla explicabo voluptas ratione. Rem sit dolorem voluptate culpa perspiciatis omnis et enim. Sequi ab qui qui voluptatem in dolorem. Illum expedita odit libero enim expedita et doloribus.\n" +
+                "Vel deleniti et est consequuntur corporis repellendus molestiae consequatur. Sed nostrum est unde aut occaecati illo ut omnis. Perspiciatis optio est at. Doloremque perspiciatis dignissimos maiores assumenda vitae.\n" +
+                "Consectetur nesciunt vel excepturi asperiores earum est veritatis. Ducimus et sequi et voluptas aliquid vitae aut. Non dolor quasi non sunt inventore. Occaecati harum fuga est. Nemo et et illo modi est." );
+        asset1.setTime( new Date( ) );
+        asset1.setUser( user );
+        asset1.setLocation( "" );
+
+        IssueAsset asset2 = new IssueAsset();
+        asset2.setId( 2 );
+        asset2.setDescr( "Test of de remmen nog goed werken." );
+        asset2.setTime( new Date( ) );
+        asset2.setUser( user );
+        asset2.setLocation( "azerazerazr" );
+
+        assets.add( asset );
+        assets.add( asset1 );
+        assets.add( asset2 );
+    }
 }
