@@ -17,6 +17,7 @@ public class Utility {
 
     //Adapt the DEBUG_MODE here
     public static final boolean DEBUG_MODE = false;
+    public static final boolean DEBUG_SKIP_LOGIN = false; //TODO DELETE THIS
 
     public static final String SHARED_PREF = "main_shared_pref";
     public static final int PRIVATE_MODE = 0;
@@ -110,6 +111,7 @@ public class Utility {
      * @return true if id is valid
      */
     public static boolean isUserIdValid(int id){
+        Log.v(LOG_TAG,"Validating user_id="+id);
         return id >= 0;
     }
 

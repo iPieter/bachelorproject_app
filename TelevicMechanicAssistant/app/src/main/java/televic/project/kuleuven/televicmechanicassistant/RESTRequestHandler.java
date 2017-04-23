@@ -436,4 +436,5 @@ public class RESTRequestHandler {
             "    ]\n" +
             "  }\n" +
             "]";
+    static String empty = "[]";
 }

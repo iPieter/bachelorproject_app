@@ -60,7 +60,7 @@ public class LoginActivity extends AppCompatActivity {
         //Redirect directly if a local TOKEN is present
         //TODO OVERAL BIJ ERROR 401 moet TOKEN verwijderd worden! anders oneindige redirect lus.
         String token = Utility.getLocalToken(getApplicationContext());
-        if (token != null) {
+        if (token != null || Utility.DEBUG_SKIP_LOGIN) {
             goToOverviewPage();
         }
 

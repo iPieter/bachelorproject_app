@@ -20,7 +20,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 
 import android.widget.TextView;
 
@@ -105,6 +104,10 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
         mListView = (ListView) rootView.findViewById(android.R.id.list);
         mProgressView = rootView.findViewById(R.id.overviewlist_progress);
 
+        if (Utility.DEBUG_MODE) {
+            mCurrentUserId = 1;
+        }
+
         //Setting up adapter
         mOverviewListAdapter = new OverviewListAdapter(getActivity(), null, 0);
         mListView.setAdapter(mOverviewListAdapter);
@@ -188,9 +191,6 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
      * to parse the REST response and write the parsed data to the database.
      */
     public void handleOverviewData() {
-        //Show progressbar until backend is handled
-        showProgress(true);
-
         //INIT
         JSONParserTask jsonParserTask = new JSONParserTask(getActivity());
         CountDownLatch mCountDownLatch = new CountDownLatch(RESTRequestHandler.REQUEST_COUNT);
@@ -202,7 +202,7 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
         if (Utility.isUserIdValid(mCurrentUserId)) {
             if (Utility.DEBUG_MODE) {
                 mRestRequestHandler.setIssueStringResponse(RESTRequestHandler.testStringIssue);
-                mRestRequestHandler.setWorkplaceStringResponse(RESTRequestHandler.testStringWorkplace);
+                mRestRequestHandler.setWorkplaceStringResponse(RESTRequestHandler.empty);
             } else {
                 mRestRequestHandler.sendParallelRequest(mCurrentUserId);
             }
@@ -214,6 +214,9 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         Log.v(LOG_TAG, "Creating CursorLoader");
+        //Show progressbar until backend is handled
+        showProgress(true);
+
         // Sort order =  Ascending, by Assigned Time
         String sortOrder = IssueContract.IssueEntry.COLUMN_ASSIGNED_TIME + " ASC";
         Uri allIssues = IssueContract.IssueEntry.CONTENT_URI;
@@ -231,6 +234,8 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         Log.v(LOG_TAG, "Loader onLoadFinished");
         mOverviewListAdapter.swapCursor(cursor);
+
+        //Hide progressbar
         showProgress(false);
         Log.v(LOG_TAG, "Loader cursor swapped, cursorCount = " + cursor.getCount());
     }
