@@ -4,6 +4,8 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.support.v7.app.AppCompatActivity;
 
 import android.os.Build;
@@ -34,6 +36,8 @@ import java.util.Map;
  * A login screen that offers login via email/password.
  */
 public class LoginActivity extends AppCompatActivity {
+
+    public static final String TOKEN_TAG = "token_login";
 
     /**
      * A dummy authentication store containing known user names and passwords.
@@ -344,45 +348,103 @@ public class LoginActivity extends AppCompatActivity {
         public void tryServerLogin() {
             Log.v(LOG_TAG, "Entered fetchIssueData");
 
-            try {
-                //The user can obtain a token by making a POST-request to the following url:
-                //$(base_url)/rest/login
-                String url = RESTSingleton.BASE_URL + "/" + RESTSingleton.LOGIN_PATH;
-
-                //Creating JsonStringRequest for REST call
-                JsonObjectRequest jsObjRequest = new JsonObjectRequest
-                        (Request.Method.POST, url, null, new Response.Listener<JSONObject>() {
-
-                            public void onResponse(JSONObject response) {
-                                VolleyLog.v(LOG_TAG, "JSONObject response received from REST:" + response);
-                                //TODO Redirect to OverviewActivity and store TOKEN
-                            }
-                        }, new Response.ErrorListener() {
-
-                            public void onErrorResponse(VolleyError error) {
-                                error.fillInStackTrace();
-                                VolleyLog.e("Error in RESTSingleton request:" + error.networkResponse);
-                            }
-                        }) {
-                            @Override
-                            protected Map<String, String> getParams() throws AuthFailureError {
-                                Map<String, String> params = new HashMap<String, String>();
-                                params.put("email", mEmail);
-                                params.put("password", mPassword);
-                                return params;
-                            }
-                };
-
-                //Singleton handles call to REST
-                Log.v(LOG_TAG,"Calling RESTSingleton with context:"+mContext);
-                RESTSingleton.getInstance(mContext).addToRequestQueue(jsObjRequest);
-
-                } catch(Exception e){
-                    e.printStackTrace();
-                    Log.e(LOG_TAG, "Failed REST user login");
+            String token = getLocalToken();
+            if (token != null && isTokenValid()) {
+                goToOverviewPage();
+            } else {
+                //Login when no token is present locally
+                if (newLoginAttempt()) {
+                    goToOverviewPage();
+                }else {
+                    //Display Error msg: Login Failed, Try Again.
                 }
-                Log.v(LOG_TAG, "Leaving UserLoginHandler");
             }
+            Log.v(LOG_TAG, "Leaving UserLoginHandler");
         }
+
+        /**
+         * Fetching locally stored TOKEN in sharedPreferences.
+         *
+         * @return null if no TOKEN present
+         */
+        public String getLocalToken() {
+            String token = null;
+
+            SharedPreferences pref = mContext.getApplicationContext().getSharedPreferences("MyPref", 0);
+            Editor editor = pref.edit();
+
+            //Returning null if TOKEN_TAG not present
+            pref.getString(TOKEN_TAG, null);
+
+            return token;
+        }
+        /**
+         * Checking on server-side of TOKEN is valid.
+         * We send a HEAD request. If response code is "200 OK", than TOKEN is valid.
+         *
+         * @return
+         */
+        public boolean isTokenValid() {
+            try {
+
+            //Creating JsonStringRequest for REST call
+            JsonObjectRequest jsObjRequest = new JsonObjectRequest
+                    (Request.Method.POST, url, null, new Response.Listener<JSONObject>() {
+
+                        public void onResponse(JSONObject response) {
+                            VolleyLog.v(LOG_TAG, "JSONObject response received from REST:" + response);
+                            //TODO Redirect to OverviewActivity and store TOKEN
+                            saveToken();
+                        }
+                    }, new Response.ErrorListener() {
+
+                        public void onErrorResponse(VolleyError error) {
+                            error.fillInStackTrace();
+                            VolleyLog.e("Error in RESTSingleton request:" + error.networkResponse);
+                            if (error.networkResponse)
+                        }
+                    }) {
+                @Override
+                protected Map<String, String> getParams() throws AuthFailureError {
+                    Map<String, String> params = new HashMap<String, String>();
+                    params.put("email", mEmail);
+                    params.put("password", mPassword);
+                    return params;
+                }
+            };
+
+            //Singleton handles call to REST
+            Log.v(LOG_TAG, "Calling RESTSingleton with context:" + mContext);
+            RESTSingleton.getInstance(mContext).addToRequestQueue(jsObjRequest);
+
+        } catch(
+        Exception e)
+
+        {
+            e.printStackTrace();
+            Log.e(LOG_TAG, "Failed REST user login");
+        }
+    }
+
+    /**
+     * If no TOKEN is present locally. We try a new login attempt to request a new TOKEN.
+     *
+     * @return (1) true if attempt successful (2) false if attempt unsuccessful
+     */
+    public boolean newLoginAttempt() {
+        //The user can obtain a token by making a POST-request to the following url:
+        //$(base_url)/rest/login
+        String url = RESTSingleton.BASE_URL + "/" + RESTSingleton.LOGIN_PATH;
+    }
+
+    /**
+     * If new login or login with TOKEN succesful: we redirect to the IssueOverviewActivity
+     */
+    public void goToOverviewPage() {
+
+    }
+
+
+}
     }
 
