@@ -58,7 +58,9 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     private String mCurrentPhotoPath;
     private IssueAssetListAdapter mListAdapter;
     private HashMap<Integer, Bitmap> mImageMap;
-    private int mCurrentUserId; //TODO init
+    private int mCurrentUserId;
+    private int mIssueId;
+    private int mDataId;
 
     //GUI components
     private ProgressDialog sendingDialog;
@@ -92,9 +94,13 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //INIT get values from intent
+        mIssueId = getIntent().getIntExtra(IssueOverviewFragment.INTENT_ISSUE_ID, -1);
+        mDataId = getIntent().getIntExtra(IssueOverviewFragment.INTENT_DATA_ID, -1);
+
         //INIT current user
         mCurrentUserId = Utility.getLocalUserId(this);
-        
+
         //INIT buttons
         Button button = new Button(this);
         button.setText("Grafieken");
@@ -145,9 +151,9 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         sendingDialog.setCancelable(false); // disable dismiss by tapping outside of the dialog
     }
 
-    private void goToGraphActivity(int data_id) {
+    private void goToGraphActivity() {
         Intent intent = new Intent(this, GraphActivity.class);
-        intent.putExtra("psdid", "1"); //TODO give data id!
+        intent.putExtra(IssueOverviewFragment.INTENT_DATA_ID, mDataId);
         startActivity(intent);
     }
 
@@ -188,8 +194,6 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
 
                 Toast toast = Toast.makeText(context, text, duration);
                 toast.show();
-
-                mListAdapter.updateView(assets);
             }
         });
         RESTSingleton.getInstance(getApplicationContext()).addToRequestQueue(request);
@@ -205,6 +209,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                 String resultResponse = new String(response.data);
                 try {
 
+                    //TODO INSERT NEW TUPLE IN DB
                     IssueAsset asset = new IssueAsset();
                     if (mCurrentPhotoPath == null)
                         asset.setLocation("");
@@ -282,10 +287,10 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
-                params.put("api_token", "gh659gjhvdyudo973823tt9gvjf7i6ric75r76");
+                params.put("api_token", Utility.getLocalToken(getApplicationContext()));
                 params.put("desc", ((EditText) findViewById(R.id.textfield_issueasset)).getText().toString());
-                params.put("userID", "1");
-                params.put("issueID", "1");
+                params.put("userID", String.valueOf(Utility.getLocalUserId(getApplicationContext())));
+                params.put("issueID", mIssueId);
                 return params;
             }
 

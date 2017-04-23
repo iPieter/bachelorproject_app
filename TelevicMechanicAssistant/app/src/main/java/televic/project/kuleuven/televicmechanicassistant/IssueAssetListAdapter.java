@@ -65,50 +65,14 @@ public class IssueAssetListAdapter extends CursorAdapter
         dateField.setText( prettyTime.format( date ) );
 
 
+        /* TODO
         String imagePath = cursor.getString(IssueDetailActivity.COL_ASSET_IMAGE);
         if( imagePath.length() > 0 )
             imageView.setVisibility( View.GONE );
         else {
             imageView.setImageBitmap( asset.getBitmap() );
             imageView.setVisibility( View.VISIBLE );
-        }
+        }*/
         Log.v(LOG_TAG, "List item set!");
-    }
-
-    @Override
-    public View getView( int position, View convertView, ViewGroup parent )
-    {
-        //Check for avoiding Null pointer exception
-        LinearLayout itemView;
-        if (convertView == null) {
-            itemView = (LinearLayout) mLayoutInflater.inflate(R.layout.item_issue_asset, parent, false);
-            Log.i( LOG_TAG, "INFLATING WITH ITEM_ISSUE_OVERVIEW" );
-        } else {
-            itemView = (LinearLayout) convertView;
-        }
-
-        ImageView issueAssetView = (ImageView) itemView.findViewById( R.id.issue_asset_image );
-        TextView descriptionField = (TextView) itemView.findViewById( R.id.issue_asset_description );
-        TextView authorField = (TextView) itemView.findViewById( R.id.issue_asset_author );
-        TextView dateField = (TextView) itemView.findViewById( R.id.issue_asset_date );
-
-        IssueAsset asset = mDataList.get( position );
-
-        if( descriptionField == null || authorField == null || dateField == null )
-            Log.i( LOG_TAG, "FIELDS ARE NULL" );
-
-        descriptionField.setText( asset.getDescr() );
-        authorField.setText( asset.getUser().getName() );
-
-        PrettyTime prettyTime = new PrettyTime( new Locale( "nl" ) );
-        dateField.setText( prettyTime.format( asset.getTime() ) );
-
-        if( asset.getBitmap() == null )
-            issueAssetView.setVisibility( View.GONE );
-        else {
-            issueAssetView.setImageBitmap( asset.getBitmap() );
-            issueAssetView.setVisibility( View.VISIBLE );
-        }
-        return itemView;
     }
 }

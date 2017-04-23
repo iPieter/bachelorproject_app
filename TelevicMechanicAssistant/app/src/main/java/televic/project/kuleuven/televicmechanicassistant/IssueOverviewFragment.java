@@ -39,6 +39,7 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
 
     //Tag for Extra to pass with intent to other activity
     public static String INTENT_ISSUE_ID = "issue_id_value987564321";
+    public static String INTENT_DATA_ID = "data_id_value987564321";
 
     //The adapter used to populate the listview
     private OverviewListAdapter mOverviewListAdapter;
@@ -56,6 +57,7 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
             IssueContract.IssueEntry.COLUMN_TRAINCOACH_NAME,
             IssueContract.IssueEntry.COLUMN_OPERATOR,
             IssueContract.TraincoachEntry.COLUMN_WORKPLACE_NAME,
+            IssueContract.IssueEntry.COLUMN_DATA_ID
     };
 
     //Depends on OVERVIEW_COLUMNS, if OVERVIEW_COLUMNS changes, so must these indexes!
@@ -67,6 +69,7 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
     static final int COL_ISSUE_TRAINCOACH = 5;
     static final int COL_ISSUE_OPERATOR = 6;
     static final int COL_ISSUE_WORKPLACE = 7;
+    static final int COL_ISSUE_DATA_ID = 8;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -125,7 +128,8 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
                 if (cursor != null) {
                     Log.v(LOG_TAG, "Creating intent");
                     Intent intent = new Intent(getActivity(), IssueDetailActivity.class)
-                            .putExtra(INTENT_ISSUE_ID, cursor.getInt(COL_ISSUE_ID));
+                            .putExtra(INTENT_ISSUE_ID, cursor.getInt(COL_ISSUE_ID))
+                            .putExtra(INTENT_DATA_ID, cursor.getInt(COL_ISSUE_DATA_ID));
                     startActivity(intent);
                 }
             }
