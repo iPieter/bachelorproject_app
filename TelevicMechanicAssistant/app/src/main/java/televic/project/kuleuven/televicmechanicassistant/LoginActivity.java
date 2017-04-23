@@ -38,6 +38,8 @@ import java.util.Map;
 public class LoginActivity extends AppCompatActivity {
 
     public static final String TOKEN_TAG = "token_login";
+    public static final String SHARED_PREF = "main_shared_pref";
+    public static final int PRIVATE_MODE = 0;
 
     /**
      * A dummy authentication store containing known user names and passwords.
@@ -334,6 +336,7 @@ public class LoginActivity extends AppCompatActivity {
 
     public class UserLoginHandler {
         private final String LOG_TAG = UserLoginHandler.class.getSimpleName();
+
         private String mEmail;
         private String mPassword;
         private Context mContext;
@@ -355,7 +358,7 @@ public class LoginActivity extends AppCompatActivity {
                 //Login when no token is present locally
                 if (newLoginAttempt()) {
                     goToOverviewPage();
-                }else {
+                } else {
                     //Display Error msg: Login Failed, Try Again.
                 }
             }
@@ -368,16 +371,27 @@ public class LoginActivity extends AppCompatActivity {
          * @return null if no TOKEN present
          */
         public String getLocalToken() {
-            String token = null;
-
-            SharedPreferences pref = mContext.getApplicationContext().getSharedPreferences("MyPref", 0);
-            Editor editor = pref.edit();
+            SharedPreferences pref = mContext.getApplicationContext()
+                    .getSharedPreferences(SHARED_PREF, PRIVATE_MODE);
 
             //Returning null if TOKEN_TAG not present
-            pref.getString(TOKEN_TAG, null);
+            String token = pref.getString(TOKEN_TAG, null);
 
             return token;
         }
+
+        /**
+         * Putting TOKEN in sharedPreferences.
+         * Overwrites if TOKEN_TAG already present.
+         */
+        public void putLocalToken(String token) {
+            SharedPreferences pref = mContext.getApplicationContext().getSharedPreferences("MyPref", 0);
+
+            Editor editor = pref.edit();
+            editor.putString(TOKEN_TAG, token);
+            editor.apply();
+        }
+
         /**
          * Checking on server-side of TOKEN is valid.
          * We send a HEAD request. If response code is "200 OK", than TOKEN is valid.
@@ -387,64 +401,64 @@ public class LoginActivity extends AppCompatActivity {
         public boolean isTokenValid() {
             try {
 
-            //Creating JsonStringRequest for REST call
-            JsonObjectRequest jsObjRequest = new JsonObjectRequest
-                    (Request.Method.POST, url, null, new Response.Listener<JSONObject>() {
+                //Creating JsonStringRequest for REST call
+                JsonObjectRequest jsObjRequest = new JsonObjectRequest
+                        (Request.Method.POST, url, null, new Response.Listener<JSONObject>() {
 
-                        public void onResponse(JSONObject response) {
-                            VolleyLog.v(LOG_TAG, "JSONObject response received from REST:" + response);
-                            //TODO Redirect to OverviewActivity and store TOKEN
-                            saveToken();
-                        }
-                    }, new Response.ErrorListener() {
+                            public void onResponse(JSONObject response) {
+                                VolleyLog.v(LOG_TAG, "JSONObject response received from REST:" + response);
+                                //TODO Redirect to OverviewActivity and store TOKEN
+                                saveToken();
+                            }
+                        }, new Response.ErrorListener() {
 
-                        public void onErrorResponse(VolleyError error) {
-                            error.fillInStackTrace();
-                            VolleyLog.e("Error in RESTSingleton request:" + error.networkResponse);
-                            if (error.networkResponse)
-                        }
-                    }) {
-                @Override
-                protected Map<String, String> getParams() throws AuthFailureError {
-                    Map<String, String> params = new HashMap<String, String>();
-                    params.put("email", mEmail);
-                    params.put("password", mPassword);
-                    return params;
-                }
-            };
+                            public void onErrorResponse(VolleyError error) {
+                                error.fillInStackTrace();
+                                VolleyLog.e("Error in RESTSingleton request:" + error.networkResponse);
+                                if (error.networkResponse)
+                            }
+                        }) {
+                    @Override
+                    protected Map<String, String> getParams() throws AuthFailureError {
+                        Map<String, String> params = new HashMap<String, String>();
+                        params.put("email", mEmail);
+                        params.put("password", mPassword);
+                        return params;
+                    }
+                };
 
-            //Singleton handles call to REST
-            Log.v(LOG_TAG, "Calling RESTSingleton with context:" + mContext);
-            RESTSingleton.getInstance(mContext).addToRequestQueue(jsObjRequest);
+                //Singleton handles call to REST
+                Log.v(LOG_TAG, "Calling RESTSingleton with context:" + mContext);
+                RESTSingleton.getInstance(mContext).addToRequestQueue(jsObjRequest);
 
-        } catch(
-        Exception e)
+            } catch (
+                    Exception e)
 
-        {
-            e.printStackTrace();
-            Log.e(LOG_TAG, "Failed REST user login");
+            {
+                e.printStackTrace();
+                Log.e(LOG_TAG, "Failed REST user login");
+            }
         }
+
+        /**
+         * If no TOKEN is present locally. We try a new login attempt to request a new TOKEN.
+         *
+         * @return (1) true if attempt successful (2) false if attempt unsuccessful
+         */
+        public boolean newLoginAttempt() {
+            //The user can obtain a token by making a POST-request to the following url:
+            //$(base_url)/rest/login
+            String url = RESTSingleton.BASE_URL + "/" + RESTSingleton.LOGIN_PATH;
+        }
+
+        /**
+         * If new login or login with TOKEN succesful: we redirect to the IssueOverviewActivity
+         */
+        public void goToOverviewPage() {
+
+        }
+
+
     }
-
-    /**
-     * If no TOKEN is present locally. We try a new login attempt to request a new TOKEN.
-     *
-     * @return (1) true if attempt successful (2) false if attempt unsuccessful
-     */
-    public boolean newLoginAttempt() {
-        //The user can obtain a token by making a POST-request to the following url:
-        //$(base_url)/rest/login
-        String url = RESTSingleton.BASE_URL + "/" + RESTSingleton.LOGIN_PATH;
-    }
-
-    /**
-     * If new login or login with TOKEN succesful: we redirect to the IssueOverviewActivity
-     */
-    public void goToOverviewPage() {
-
-    }
-
-
 }
-    }
 
