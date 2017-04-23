@@ -1,7 +1,6 @@
 package televic.project.kuleuven.televicmechanicassistant;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
 
@@ -11,6 +10,9 @@ import android.util.Log;
 
 public class Utility {
     private static final String LOG_TAG = Utility.class.getSimpleName();
+
+    //Adapt the DEBUG_MODE here
+    public static final boolean DEBUG_MODE = false;
 
     public static final String SHARED_PREF = "main_shared_pref";
     public static final int PRIVATE_MODE = 0;
