@@ -1,15 +1,24 @@
 package televic.project.kuleuven.televicmechanicassistant;
 
 import android.content.Context;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
+import android.net.Uri;
 import android.util.Log;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.StringRequest;
+
+import org.json.JSONArray;
 
 /**
  * Created by Matthias on 19/04/2017.
@@ -25,17 +34,25 @@ public class RESTRequestHandler {
     private CountDownLatch mCountDownLatch;
     private String issueStringResponse;
     private String workplaceStringResponse;
+    private JSONParserTask parserTask;
+    private int received = 0;
 
-    public RESTRequestHandler(Context mContext, CountDownLatch countDownLatch) {
+    public RESTRequestHandler(Context mContext, CountDownLatch countDownLatch, JSONParserTask task ) {
         this.mContext = mContext;
         this.issueStringResponse = null;
         this.workplaceStringResponse = null;
         this.mCountDownLatch = countDownLatch;
+        this.parserTask = task;
+        received = 0;
     }
 
     public void sendParallelRequest(int currentUserId) {
         fetchIssueData(currentUserId);
         fetchWorkplaceData(currentUserId);
+    }
+
+    public void setParserTask( JSONParserTask task ) {
+        parserTask = task;
     }
 
     /**
@@ -58,9 +75,16 @@ public class RESTRequestHandler {
                     (Request.Method.GET, url, new Response.Listener<String>() {
 
                         public void onResponse(String response) {
+                            Log.i( LOG_TAG, "RECEIVED ISSUES" );
                             VolleyLog.v(LOG_TAG, "JSONObject response received from REST:" + response);
                             issueStringResponse = response;
                             mCountDownLatch.countDown();
+                            received++;
+                            if( received >= REQUEST_COUNT ) {
+                                parserTask.execute(
+                                        getIssueStringResponse(),
+                                        getWorkplaceStringResponse());
+                            }
                         }
                     }, new Response.ErrorListener() {
 
@@ -92,30 +116,47 @@ public class RESTRequestHandler {
 
         try {
             //Rest Request URL
-            String url = RESTSingleton.BASE_URL + "/" +
-                    RESTSingleton.WORKPLACE_PATH + "/" + mCurrentUserId;
+            String url = RESTSingleton.BASE_URL + "/"+
+                    RESTSingleton.WORKPLACE_PATH; //TODO:: Ask Pieter to implement proper REST + "/" + mCurrentUserId;
 
             //Creating JsonStringRequest for REST call
             //We do not know if getting a JSONArray or JSONObject, So we use the StringRequest
             StringRequest jsonStringRequest = new StringRequest
-                    (Request.Method.GET, url, new Response.Listener<String>() {
+            (Request.Method.GET, url, new Response.Listener<String>() {
 
-                        public void onResponse(String response) {
-                            VolleyLog.v(LOG_TAG, "JSONObject response received from REST:" + response);
-                            workplaceStringResponse = response;
-                            mCountDownLatch.countDown();
-                        }
-                    }, new Response.ErrorListener() {
+                public void onResponse(String response) {
+                    Log.i( LOG_TAG, "RECEIVED WORKPLACES" );
+                    VolleyLog.v(LOG_TAG, "JSONObject response received from REST:" + response);
+                    workplaceStringResponse = response;
+                    mCountDownLatch.countDown();
+                    received++;
+                    if( received >= REQUEST_COUNT ) {
+                        parserTask.execute(
+                                getIssueStringResponse(),
+                                getWorkplaceStringResponse());
+                    }
+                }
+            }, new Response.ErrorListener() {
 
-                        public void onErrorResponse(VolleyError error) {
-                            error.fillInStackTrace();
-                            VolleyLog.e("Error in RESTSingleton request:" + error.networkResponse);
-                        }
-                    });
+                public void onErrorResponse(VolleyError error) {
+                    error.fillInStackTrace();
+                    VolleyLog.e("Error in RESTSingleton request:" + error.networkResponse);
+                }
+            }){
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    Map<String,String> params = new HashMap<>();
+                    params.put("Authorization","Bearer " + TOKEN);
+
+                    return params;
+                }
+            };
 
             //Singleton handles call to REST
             Log.v(LOG_TAG, "Calling RESTSingleton with context:" + mContext);
+
             RESTSingleton.getInstance(mContext).addToRequestQueue(jsonStringRequest);
+
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -140,6 +181,8 @@ public class RESTRequestHandler {
     public void setWorkplaceStringResponse(String workplaceStringResponse) {
         this.workplaceStringResponse = workplaceStringResponse;
     }
+
+    String TOKEN = "gNHCG8Ps1Y538RWGJRlgzN5VNCdC9mifmz0zDzQreSoR1dLaGXhK6BGZNQmtNy4Ya5XkP+zxApkT5Fndxg2zgkMmNb2sVeSuGLkfw8wEc8A7FqE48aFFptI91u/i9jSxMn+wRasoFHMF3PRJglUn4uDRQzIACIpoFDaU3ILlc44+SoxJM+ajbFV4zAsz+Mf/p3GLjgqHwjc2h0W15sgJC0qQIQzUGc/VP+N22XwMqjTxJGSh8BaomGVq5mYfsRRV";
 
     static String testStringIssue="[\n" +
             "    {\n" +

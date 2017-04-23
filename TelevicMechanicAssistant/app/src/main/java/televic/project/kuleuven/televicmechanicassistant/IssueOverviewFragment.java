@@ -30,7 +30,7 @@ import televic.project.kuleuven.televicmechanicassistant.data.IssueContract;
 //MAIN LAUNCH Activity
 public class IssueOverviewFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private final String LOG_TAG = IssueOverviewFragment.class.getSimpleName();
-    private boolean DEBUG_MODE = true;
+    private boolean DEBUG_MODE = false;
 
     //TODO init currentUserId @login!!!
     private int mCurrentUserId;
@@ -180,7 +180,7 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
         CountDownLatch mCountDownLatch = new CountDownLatch(RESTRequestHandler.REQUEST_COUNT);
         RESTRequestHandler mRestRequestHandler = new RESTRequestHandler(
                 this.getActivity().getApplicationContext(),
-                mCountDownLatch);
+                mCountDownLatch, jsonParserTask);
 
         //Calling backend
         if (mCurrentUserId >= 0) {
@@ -188,17 +188,18 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
                 mRestRequestHandler.setIssueStringResponse(RESTRequestHandler.testStringIssue);
                 mRestRequestHandler.setWorkplaceStringResponse(RESTRequestHandler.testStringWorkplace);
             } else {
+
                 mRestRequestHandler.sendParallelRequest(mCurrentUserId);
-                try {
-                    mCountDownLatch.await(); //await until all parallel requests have a response
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                //try {
+                //    mCountDownLatch.await(); //await until all parallel requests have a response
+                //} catch (InterruptedException e) {
+                //    e.printStackTrace();
+                //}
             }
             //The order of these parameters is obligatory
-            jsonParserTask.execute(
-                    mRestRequestHandler.getIssueStringResponse(),
-                    mRestRequestHandler.getWorkplaceStringResponse());
+            //jsonParserTask.execute(
+            //        mRestRequestHandler.getIssueStringResponse(),
+            //        mRestRequestHandler.getWorkplaceStringResponse());
         } else {
             Log.e(LOG_TAG, "Current user id < 0");
         }

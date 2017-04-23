@@ -1,5 +1,7 @@
 package model.issue;
 
+import android.graphics.Bitmap;
+
 import java.util.Date;
 
 import model.user.User;
@@ -11,6 +13,7 @@ public class IssueAsset
 	private Date time;
 	private String location;
 	private User user;
+	private Bitmap bitmap;
 	
 	public IssueAsset()
 	{
@@ -102,6 +105,16 @@ public class IssueAsset
 	 * */
 	public String toString()
 	{
-		return descr + ":" + location;
+		return descr + ":" + user.getName() + ":" + time.toString() ;
 	}
+
+    public Bitmap getBitmap()
+    {
+        return bitmap;
+    }
+
+    public void setBitmap( Bitmap bitmap )
+    {
+        this.bitmap = bitmap;
+    }
 }
