@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
 import android.support.v4.content.FileProvider;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
@@ -40,30 +41,48 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import model.issue.IssueAsset;
-import model.user.User;
+import televic.project.kuleuven.televicmechanicassistant.data.IssueContract;
 
 public class IssueDetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
+    private final String LOG_TAG = IssueDetailActivity.class.getSimpleName();
 
     private static final String url = RESTSingleton.BASE_URL + "/assets/issue";
-    private static final String LOG = "ISSUE_DETAIL";
     private static final int REQUEST_TAKE_PHOTO = 1;
 
+    //Members
     private String mCurrentPhotoPath;
     private IssueAssetListAdapter mListAdapter;
+    private int mCurrentUserId;
+
+    //GUI components
     private ProgressDialog sendingDialog;
     private ProgressDialog loadingDialog;
-    private List<IssueAsset> assets = new ArrayList<>( );
-    private User user;
 
     //Id of the loader
     private static final int DETAIL_LOADER = 1;
+
+    //Values in Database needed in this activity
+    private static final String[] DETAIL_COLUMNS = {
+            IssueContract.IssueAssetEntry.TABLE_NAME + "." + IssueContract.IssueAssetEntry._ID,
+            IssueContract.IssueAssetEntry.COLUMN_DESCRIPTION,
+            IssueContract.IssueAssetEntry.COLUMN_POST_TIME,
+            IssueContract.IssueAssetEntry.COLUMN_IMAGE_LOCATION,
+            IssueContract.IssueAssetEntry.COLUMN_USER_NAME,
+            IssueContract.IssueAssetEntry.COLUMN_USER_EMAIL
+    };
+
+    //Depends on DETAIL_COLUMNS, if DETAIL_COLUMNS changes, so must these indexes!
+    static final int COL_ASSET_ID = 0;
+    static final int COL_ASSET_DESCRIPTION = 1;
+    static final int COL_ASSET_POST_TIME = 2;
+    static final int COL_ASSET_IMAGE = 3;
+    static final int COL_ASSET_USER_NAME = 4;
+    static final int COL_ASSET_USER_EMAIL = 5;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -132,9 +151,9 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
 
         /*
         if( mCurrentPhotoPath != null ) {
-            Log.i( LOG, "path:" + mCurrentPhotoPath );
+            Log.i( LOG_TAG, "path:" + mCurrentPhotoPath );
             File imgFile = new  File( mCurrentPhotoPath );
-            Log.i( LOG, "path2:" + imgFile.exists() + ":" + imgFile.getAbsolutePath() );
+            Log.i( LOG_TAG, "path2:" + imgFile.exists() + ":" + imgFile.getAbsolutePath() );
             if(imgFile.exists()){
                 Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
                 ImageView myImage = (ImageView) findViewById(R.id.image_preview);
@@ -200,8 +219,8 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                     String status = result.getString("status");
                     String message = result.getString("message");
 
-                    Log.i( LOG, status );
-                    Log.i( LOG, message );
+                    Log.i(LOG_TAG, status );
+                    Log.i(LOG_TAG, message );
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -286,15 +305,15 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                             e.printStackTrace();
                         }
                         params.put("file", new DataPart("file_cover.jpg", bytes, "image/jpeg"));
-                        Log.i( LOG, "SENDING TEXT + PICTURE" );
+                        Log.i(LOG_TAG, "SENDING TEXT + PICTURE" );
                     } else {
-                        Log.i( LOG, "SENDING ONLY TEXT" );
+                        Log.i(LOG_TAG, "SENDING ONLY TEXT" );
                         params.put("file", new DataPart("file_cover.jpg", new byte[0], "image/jpeg"));
                     }
                 }else
                 {
                     params.put("file", new DataPart("file_cover.jpg", new byte[0], "image/jpeg"));
-                    Log.i( LOG, "PICTURE PATH: " + mCurrentPhotoPath );
+                    Log.i(LOG_TAG, "PICTURE PATH: " + mCurrentPhotoPath );
                 }
                 return params;
             }
@@ -354,8 +373,20 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Log.v(LOG_TAG, "Creating CursorLoader");
 
-        return null;
+        // Sort order =  Ascending, by Posted Time
+        String sortOrder = IssueContract.IssueAssetEntry.COLUMN_POST_TIME + " ASC";
+        Uri issueAssetsOnIssueId = IssueContract.IssueAssetEntry
+                .buildIssueAssetUri(mCurrentUserId);
+        Log.v(LOG_TAG, "CURSORLOADER URI: " + issueAssetsOnIssueId);
+
+        return new CursorLoader(this,
+                issueAssetsOnIssueId,
+                DETAIL_COLUMNS,
+                null,
+                null,
+                sortOrder);
     }
 
     @Override
@@ -368,6 +399,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
 
     }
 
+    /*
     //TODO delete
     public void staticDataLoading(){
         user = new User();
@@ -401,4 +433,5 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         assets.add( asset1 );
         assets.add( asset2 );
     }
+    */
 }
