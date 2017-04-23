@@ -25,17 +25,15 @@ public class RESTRequestHandler {
     public static final int REQUEST_COUNT = 2; //How many requests
 
     private Context mContext;
-    private CountDownLatch mCountDownLatch;
     private String issueStringResponse;
     private String workplaceStringResponse;
     private JSONParserTask parserTask;
     private int received = 0;
 
-    public RESTRequestHandler(Context mContext, CountDownLatch countDownLatch, JSONParserTask task) {
+    public RESTRequestHandler(Context mContext, JSONParserTask task) {
         this.mContext = mContext;
         this.issueStringResponse = null;
         this.workplaceStringResponse = null;
-        this.mCountDownLatch = countDownLatch;
         this.parserTask = task;
         received = 0;
     }
@@ -72,7 +70,6 @@ public class RESTRequestHandler {
                             Log.i(LOG_TAG, "RECEIVED ISSUES");
                             VolleyLog.v(LOG_TAG, "JSONObject response received from REST:" + response);
                             issueStringResponse = response;
-                            mCountDownLatch.countDown();
                             received++;
                             if (received >= REQUEST_COUNT) {
                                 parserTask.execute(
@@ -124,7 +121,6 @@ public class RESTRequestHandler {
                             Log.i(LOG_TAG, "RECEIVED WORKPLACES");
                             VolleyLog.v(LOG_TAG, "JSONObject response received from REST:" + response);
                             workplaceStringResponse = response;
-                            mCountDownLatch.countDown();
                             received++;
                             if (received >= REQUEST_COUNT) {
                                 parserTask.execute(

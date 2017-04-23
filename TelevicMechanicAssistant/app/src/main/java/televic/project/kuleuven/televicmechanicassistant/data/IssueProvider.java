@@ -143,7 +143,7 @@ public class IssueProvider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
-        //DEBUG: countRowsInAllTables();
+        countRowsInAllTables();
         Log.v(LOG_TAG, "QUERY cursor #rows = " + retCursor.getCount());
         retCursor.setNotificationUri(getContext().getContentResolver(), uri);
         return retCursor;

@@ -197,16 +197,14 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
     public void handleOverviewData() {
         //INIT
         JSONParserTask jsonParserTask = new JSONParserTask(getActivity());
-        CountDownLatch mCountDownLatch = new CountDownLatch(RESTRequestHandler.REQUEST_COUNT);
         RESTRequestHandler mRestRequestHandler = new RESTRequestHandler(
-                this.getActivity().getApplicationContext(),
-                mCountDownLatch, jsonParserTask);
+                this.getActivity().getApplicationContext(), jsonParserTask);
 
         //Calling backend
         if (Utility.isUserIdValid(mCurrentUserId)) {
             if (Utility.DEBUG_MODE) {
                 mRestRequestHandler.setIssueStringResponse(RESTRequestHandler.testStringIssue);
-                mRestRequestHandler.setWorkplaceStringResponse(RESTRequestHandler.empty);
+                mRestRequestHandler.setWorkplaceStringResponse(RESTRequestHandler.testStringWorkplace);
             } else {
                 mRestRequestHandler.sendParallelRequest(mCurrentUserId);
             }
