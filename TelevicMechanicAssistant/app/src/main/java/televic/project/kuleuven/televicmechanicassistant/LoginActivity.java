@@ -185,71 +185,12 @@ public class LoginActivity extends AppCompatActivity {
             mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
-
-    /*
-
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    /*
-    public class UserLoginHandler extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mEmail;
-        private final String mPassword;
-
-        UserLoginHandler(String email, String password) {
-            mEmail = email;
-            mPassword = password;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
-
-            // TODO: register the new account here.
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success) {
-                finish();
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
-    }*/
+    
     /**
      * If new login or login with TOKEN succesful: we redirect to the IssueOverviewActivity
      */
     public void goToOverviewPage() {
-        Log.v(LOG_TAG,"Creating intent");
+        Log.v(LOG_TAG,"Creating intent: goToOverviewPage");
         Intent intent = new Intent(getApplicationContext(), IssueOverviewActivity.class);
         startActivity(intent);
     }
@@ -293,29 +234,46 @@ public class LoginActivity extends AppCompatActivity {
                             public void onResponse(JSONObject response) {
                                 VolleyLog.v(LOG_TAG, "JSONObject response received from REST:" + response);
 
+                                //Parsing and saving data from response
                                 int user_id;
                                 String user_name;
                                 String token;
                                 try{
+                                    //PARSING
                                     token = response.getString(JSON_TOKEN);
 
                                     JSONObject user = response.getJSONObject(JSON_USER);
                                     user_id=user.getInt(JSON_ID);
                                     user_name=user.getString(JSON_NAME);
 
+                                    //STORING DATA
                                     Utility.putLocalToken(mContext,token);
                                     Utility.putLocalUserInfo(mContext,user_id,user_name);
                                 }catch(JSONException e){
                                     e.printStackTrace();
+                                    Log.e(LOG_TAG,"Login attempt failed: fail in parse & save.");
+                                }finally{
+                                    //CLEANUP
+                                    mAuthTask = null;
+                                    showProgress(false);
+
+                                    //REDIRECT
+                                    goToOverviewPage();
+                                    finish();
                                 }
-                                goToOverviewPage();
                             }
                         }, new Response.ErrorListener() {
 
                             public void onErrorResponse(VolleyError error) {
-                                error.fillInStackTrace();
-                                VolleyLog.e("Error in RESTSingleton request:" + error.networkResponse);
-                                if (error.networkResponse == Volley.)
+                                VolleyLog.e("Error in Login request:" + error.networkResponse);
+
+                                //CLEANUP
+                                mAuthTask = null;
+                                showProgress(false);
+
+                                //Error Message
+                                mPasswordView.setError(getString(R.string.error_incorrect_password));
+                                mPasswordView.requestFocus();
                             }
                         }) {
                     @Override

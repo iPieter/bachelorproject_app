@@ -2,12 +2,15 @@ package televic.project.kuleuven.televicmechanicassistant;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 /**
  * Created by Matthias on 23/04/2017.
  */
 
 public class Utility {
+    private static final String LOG_TAG = Utility.class.getSimpleName();
+
     public static final String SHARED_PREF = "main_shared_pref";
     public static final int PRIVATE_MODE = 0;
 
@@ -73,6 +76,7 @@ public class Utility {
         SharedPreferences.Editor editor = pref.edit();
         editor.putString(TOKEN_TAG, token);
         editor.apply();
+        Log.v(LOG_TAG,"SHARED_PREF: local token saved: "+token);
     }
 
     public static void putLocalUserInfo(Context context, int user_id, String user_name) {
@@ -83,5 +87,7 @@ public class Utility {
         editor.putInt(USER_ID_TAG, user_id);
         editor.putString(USER_NAME_TAG, user_name);
         editor.apply();
+        Log.v(LOG_TAG,"SHARED_PREF: user info saved: id="+user_id+", name="+user_name);
+
     }
 }
