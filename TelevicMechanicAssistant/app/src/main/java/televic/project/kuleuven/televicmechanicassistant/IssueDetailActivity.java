@@ -86,6 +86,17 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     static final int COL_ASSET_USER_NAME = 4;
     static final int COL_ASSET_USER_EMAIL = 5;
 
+    /* Values Used for the rest request! */
+    //Values in Database needed in this activity
+    private static final String[] REST_COLUMNS = {
+            IssueContract.IssueAssetEntry.TABLE_NAME + "." + IssueContract.IssueAssetEntry._ID,
+            IssueContract.IssueAssetEntry.COLUMN_IMAGE_LOCATION
+    };
+
+    //Depends on REST_COLUMNS, if REST_COLUMNS changes, so must these indexes!
+    static final int COL_REST_ID = 0;
+    static final int COL_REST_IMAGE = 1;
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_issue_detail);
@@ -100,7 +111,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         //INIT current user
         mCurrentUserId = Utility.getLocalUserId(this);
 
-        //INIT buttons
+        //INIT Send-Button
         ImageButton buttonSend = (ImageButton) findViewById(R.id.button_send);
         buttonSend.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -108,6 +119,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
             }
         });
 
+        //INIT Photo-Button
         ImageButton buttonCamera = (ImageButton) findViewById(R.id.button_camera);
         buttonCamera.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -138,12 +150,18 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         sendingDialog.setTitle("Versturen");
         sendingDialog.setMessage("De boodschap wordt verstuurd.");
         sendingDialog.setCancelable(false); // disable dismiss by tapping outside of the dialog
+
+        //Calling Backend
+        //TODO fetch all Images of those issueAssets that have an Image
+        Cursor issueAssetsCursor; //QUERY
+        fetchIssueAssetImages(issueAssetsCursor);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main_overview, menu);
+        getMenuInflater().inflate(R.menu.extra_detail, menu);
         return true;
     }
 
@@ -158,7 +176,6 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         }
         if(id == R.id.action_graphs){
             goToGraphActivity();
-
         }
 
         return super.onOptionsItemSelected(item);
@@ -187,31 +204,37 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         */
     }
 
-    public void fetchIssueAssetImage() {
-        /* TODO
-        ImageRequest request = new ImageRequest(url + "/7", new Response.Listener<Bitmap>() {
-            @Override
-            public void onResponse(Bitmap response) {
-                removeLoadingProgress();
-                //TODO link image to tupple: in hashmap bijhouden OF imagenaam, die wordt opgeslaan
-                asset.setBitmap(response);
-                mListAdapter.updateView(assets);
-            }
-        }, 350, 350, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                removeLoadingProgress();
 
-                Context context = getApplicationContext();
-                CharSequence text = "De afbeeldingen konden niet geladen worden, probeer later opnieuw.";
-                int duration = Toast.LENGTH_LONG;
+    /*TODO: with
+    *
+    * */
+    public void fetchIssueAssetImages(Cursor cursor) {
+        cursor.moveToFirst();
+        while(cursor.isAfterLast()){
+            ImageRequest request = new ImageRequest(url + "/7", new Response.Listener<Bitmap>() {
+                @Override
+                public void onResponse(Bitmap response) {
+                    removeLoadingProgress();
+                    //TODO link image to tupple: in hashmap bijhouden OF imagenaam, die wordt opgeslaan
+                    //asset.setBitmap(response);
+                }
+            }, 350, 350, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    removeLoadingProgress();
 
-                Toast toast = Toast.makeText(context, text, duration);
-                toast.show();
-            }
-        });
-        RESTSingleton.getInstance(getApplicationContext()).addToRequestQueue(request);
-    */
+                    Context context = getApplicationContext();
+                    CharSequence text = "De afbeeldingen konden niet geladen worden, probeer later opnieuw.";
+                    int duration = Toast.LENGTH_LONG;
+
+                    Toast toast = Toast.makeText(context, text, duration);
+                    toast.show();
+                }
+            });
+            RESTSingleton.getInstance(getApplicationContext()).addToRequestQueue(request);
+
+            cursor.moveToNext();
+        }
     }
 
     /**
