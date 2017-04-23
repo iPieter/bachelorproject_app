@@ -21,7 +21,7 @@ public class IssueContract {
     public static final String CONTENT_AUTHORITY = "televic.project.kuleuven.televicmechanicassistant";
     public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
     public static final String PATH_ISSUE = "issue";
-    public static final String PATH_ISSUE_ASSET = "item_issue_asset";
+    public static final String PATH_ISSUE_ASSET = "issue_asset";
     public static final String PATH_TRAINCOACH = "traincoach";
 
 
@@ -79,7 +79,7 @@ public class IssueContract {
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_ISSUE_ASSET;
 
         // Table name
-        public static final String TABLE_NAME = "item_issue_asset";
+        public static final String TABLE_NAME = "issue_asset";
 
         //Columns
         //Overwriting _ID BaseColumn, because of _ID column collision with Issue-table at JOIN

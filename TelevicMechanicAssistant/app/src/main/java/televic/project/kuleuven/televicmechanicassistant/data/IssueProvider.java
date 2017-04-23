@@ -40,7 +40,7 @@ public class IssueProvider extends ContentProvider {
         sWorkplaceByIssueQueryBuilder = new SQLiteQueryBuilder();
 
         //This is an inner join which looks like
-        //issue INNER JOIN item_issue_asset ON item_issue_asset.issue_id = issue._id
+        //issue INNER JOIN issue_asset ON issue_asset.issue_id = issue._id
         //      INNER JOIN traincoach ON issue.traincoach_id = traincoach._id
         sIssueAssetWorkplaceByIssueQueryBuilder.setTables(
                 IssueContract.IssueEntry.TABLE_NAME
@@ -133,7 +133,7 @@ public class IssueProvider extends ContentProvider {
                 retCursor = getIssueById(uri, projection, sortOrder);
                 break;
             }
-            // "item_issue_asset/*"
+            // "issue_asset/*"
             case ISSUE_ASSET_WITH_ISSUE_ID: {
                 Log.v(LOG_TAG, "QUERY ISSUE_ASSET_WITH_ISSUE_ID");
                 retCursor = getIssueAssetByIssueId(uri, projection, sortOrder);
@@ -410,7 +410,7 @@ public class IssueProvider extends ContentProvider {
         );
         Log.v(LOG_TAG,"QUERY TESTCURSOR: TraincoachTable #ROWS="+test3.getCount());
 
-        //SELECT _id FROM issue INNER JOIN item_issue_asset ON item_issue_asset.issue_id = issue._id INNER JOIN traincoach ON issue.traincoach_id = traincoach._id
+        //SELECT _id FROM issue INNER JOIN issue_asset ON issue_asset.issue_id = issue._id INNER JOIN traincoach ON issue.traincoach_id = traincoach._id
         String[] testprojection4={IssueContract.IssueEntry._ID};
         Cursor test4 = sIssueAssetWorkplaceByIssueQueryBuilder.query(mOpenHelper.getReadableDatabase(),
                 testprojection4,
