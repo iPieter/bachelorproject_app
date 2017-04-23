@@ -25,6 +25,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -228,11 +229,28 @@ public class LoginActivity extends AppCompatActivity {
 
             try {
                 //Creating JsonStringRequest for REST call
-                JsonObjectRequest jsObjRequest = new JsonObjectRequest
-                        (Request.Method.POST, url, null, new Response.Listener<JSONObject>() {
 
-                            public void onResponse(JSONObject response) {
-                                VolleyLog.v(LOG_TAG, "JSONObject response received from REST:" + response);
+                JSONObject params = new JSONObject( );
+                params.put( "email", mEmail );
+                params.put( "password", mPassword );
+
+                Log.i( LOG_TAG, mEmail );
+                Log.i( LOG_TAG, mPassword );
+
+                StringRequest jsObjRequest = new StringRequest
+                        (Request.Method.POST, url, new Response.Listener<String>() {
+
+                            public void onResponse(String responseString) {
+                                Log.v(LOG_TAG, "JSONObject response received from REST:" + responseString);
+
+                                JSONObject response = null;
+                                try
+                                {
+                                    response = new JSONObject( responseString );
+                                } catch ( JSONException e )
+                                {
+                                    e.printStackTrace();
+                                }
 
                                 //Parsing and saving data from response
                                 int user_id;
@@ -275,15 +293,25 @@ public class LoginActivity extends AppCompatActivity {
                                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                                 mPasswordView.requestFocus();
                             }
-                        }) {
-                    @Override
-                    protected Map<String, String> getParams() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("email", mEmail);
-                        params.put("password", mPassword);
-                        return params;
-                    }
-                };
+                        }){
+                            @Override
+                            public String getBodyContentType() {
+                                Log.i( LOG_TAG, "CALLING GET-CONTENT-TYPE" );
+                                return "application/x-www-form-urlencoded; charset=UTF-8";
+                            }
+
+                            @Override
+                            protected Map<String, String> getParams() throws AuthFailureError {
+                                Map<String, String> params = new HashMap<String, String>();
+
+                                Log.i( LOG_TAG, "CALLING GET-PARAMS" );
+
+                                params.put("email", mEmail);
+                                params.put("password", mPassword);
+                                return params;
+                            }
+
+                        };
 
                 //Singleton handles call to REST
                 Log.v(LOG_TAG, "Calling RESTSingleton with context:" + mContext);

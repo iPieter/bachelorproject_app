@@ -48,7 +48,7 @@ import model.user.User;
 
 public class IssueDetailActivity extends AppCompatActivity {
 
-    private static final String url = "http://192.168.1.4:8080/DWPProject-0.0.1-SNAPSHOT/rest/assets/issue";
+    private static final String url = RESTSingleton.BASE_URL + "/assets/issue";
     private static final String LOG = "ISSUE_DETAIL";
     private static final int REQUEST_TAKE_PHOTO = 1;
 
