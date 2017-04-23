@@ -45,12 +45,12 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+
 import televic.project.kuleuven.televicmechanicassistant.data.IssueContract;
 
 public class IssueDetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     private final String LOG_TAG = IssueDetailActivity.class.getSimpleName();
 
-    private static final String url = RESTSingleton.BASE_URL + "/assets/issue";
     private static final int REQUEST_TAKE_PHOTO = 1;
 
     //Members
@@ -152,12 +152,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         sendingDialog.setCancelable(false); // disable dismiss by tapping outside of the dialog
 
         //Calling Backend
-        //Fetching all Images of those issueAssets that have an Image
-        Uri assetsWithImgUri = IssueContract.IssueAssetEntry
-                .buildIssueAssetWithImgUri(mIssueId);
-        Cursor assetsWithImgCursor = getContentResolver().query(
-                assetsWithImgUri,REST_COLUMNS,null,null,null);
-        fetchIssueAssetImages(assetsWithImgCursor);
+        fetchIssueAssetImages();
     }
 
     @Override
@@ -177,7 +172,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
             //startActivity(new Intent(this,SettingsActivity.class));
             return true;
         }
-        if(id == R.id.action_graphs){
+        if (id == R.id.action_graphs) {
             goToGraphActivity();
         }
 
@@ -208,32 +203,54 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     }
 
 
-    /*TODO: with
-    *
-    * */
-    public void fetchIssueAssetImages(Cursor cursor) {
+    /**
+     * First, all issueAssets with current issueId and contain an img are queried.
+     * If IMAGE_LOCATION equals "IMG", then a REST request for this IssueAssetId is created
+     * and added to the RequestQueue. Volley handles all requests.
+     * If we get a response from volley, we store the location of the img in the HashMap.
+     * We store the IMG as a blob in the database. The cursorLoader will notify the change
+     * and call the cursorAdapter to update the ListView.
+     */
+    public void fetchIssueAssetImages() {
+        //Fetching all Images of those issueAssets that have an Image
+        Uri assetsWithImgUri = IssueContract.IssueAssetEntry
+                .buildIssueAssetWithImgUri(mIssueId);
+        Cursor cursor = getContentResolver().query(
+                assetsWithImgUri, REST_COLUMNS, null, null, null);
+
+        String baseUrl = RESTSingleton.BASE_URL + "/assets/issue";
+        String url;
+        //Iterate over Cursor's rows
         cursor.moveToFirst();
-        while(cursor.isAfterLast()){
-            ImageRequest request = new ImageRequest(url + "/7", new Response.Listener<Bitmap>() {
-                @Override
-                public void onResponse(Bitmap response) {
-                    removeLoadingProgress();
-                    //TODO link image to tupple: in hashmap bijhouden OF imagenaam, die wordt opgeslaan
-                    //asset.setBitmap(response);
-                }
-            }, 350, 350, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    removeLoadingProgress();
+        while (cursor.isAfterLast()) {
+            //The URL to fetch the image for a certain issueAssetId
+            url = baseUrl + "/" + cursor.getInt(COL_ASSET_ID);
 
-                    Context context = getApplicationContext();
-                    CharSequence text = "De afbeeldingen konden niet geladen worden, probeer later opnieuw.";
-                    int duration = Toast.LENGTH_LONG;
+            //Create the REST ImageRequest
+            ImageRequest request = new ImageRequest(url,
+                    new Response.Listener<Bitmap>() {
+                        @Override
+                        public void onResponse(Bitmap response) {
+                            removeLoadingProgress();
+                            //TODO insert blob to IMAGE_BLOB with db UPDATE method
+                            //asset.setBitmap(response);
+                        }
+                    }, 350, 350, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565,
+                    new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            removeLoadingProgress();
 
-                    Toast toast = Toast.makeText(context, text, duration);
-                    toast.show();
-                }
-            });
+                            Context context = getApplicationContext();
+                            CharSequence text = "De afbeeldingen konden niet geladen worden, probeer later opnieuw.";
+                            int duration = Toast.LENGTH_LONG;
+
+                            Toast toast = Toast.makeText(context, text, duration);
+                            toast.show();
+                        }
+                    });
+
+            //Adding the request to the requestQueue, Volley handles the rest
             RESTSingleton.getInstance(getApplicationContext()).addToRequestQueue(request);
 
             cursor.moveToNext();
@@ -371,7 +388,8 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         };
 
         RESTSingleton.getInstance(getApplicationContext()).addToRequestQueue(multipartRequest);
-    */}
+    */
+    }
 
 
     private void removeProgress() {
