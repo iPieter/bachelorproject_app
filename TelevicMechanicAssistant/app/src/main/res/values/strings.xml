@@ -2,8 +2,7 @@
     <string name="app_name">Televic Mechanic Assistant</string>
     <string name="title_activity_issue_detail">IssueDetailActivity</string>
     <string name="action_settings">Instellingen</string>
-    <string name="item_issue_overview_dataloading">Data wordt geladen...</string>
-    <string name="item_issue_overview_dataempty">Geen taken</string>
+    <string name="item_issue_overview_empty">Geen taken toegewezen...</string>
     <string name="action_refresh">Refresh</string>
     <string name="title_activity_login">Log in</string>
 
