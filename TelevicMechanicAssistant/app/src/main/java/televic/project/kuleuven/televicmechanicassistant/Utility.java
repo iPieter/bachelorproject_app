@@ -89,6 +89,10 @@ public class Utility {
         Log.v(LOG_TAG, "SHARED_PREF: local token saved: " + token);
     }
 
+    /**
+     * Putting user info in sharedPreferences.
+     * Overwrites if already present.
+     */
     public static void putLocalUserInfo(Context context, int user_id, String user_name) {
         SharedPreferences pref = context.getApplicationContext()
                 .getSharedPreferences(SHARED_PREF, PRIVATE_MODE);
@@ -98,6 +102,15 @@ public class Utility {
         editor.putString(USER_NAME_TAG, user_name);
         editor.apply();
         Log.v(LOG_TAG, "SHARED_PREF: user info saved: id=" + user_id + ", name=" + user_name);
+    }
+
+    /**
+     * Check if the userId is valid.
+     * @param id the userid
+     * @return true if id is valid
+     */
+    public static boolean isUserIdValid(int id){
+        return id >= 0;
     }
 
     /**

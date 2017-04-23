@@ -30,12 +30,9 @@ import televic.project.kuleuven.televicmechanicassistant.data.IssueContract;
 //MAIN LAUNCH Activity
 public class IssueOverviewFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private final String LOG_TAG = IssueOverviewFragment.class.getSimpleName();
-    private boolean DEBUG_MODE = false;
-
-    //TODO init currentUserId @login!!!
     private int mCurrentUserId;
 
-    //Passing to other activity
+    //Tag for Extra to pass with intent to other activity
     public static String INTENT_ISSUE_ID = "issue_id_value987564321";
 
     //The adapter used to populate the listview
@@ -98,7 +95,7 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
         View rootView = inflater.inflate(R.layout.fragment_issue_overview, container, false);
 
         //INIT
-        mCurrentUserId = 1; //TODO
+        mCurrentUserId = Utility.getLocalUserId(getActivity());
 
         //Setting up adapter
         ListView listView = (ListView) rootView.findViewById(android.R.id.list);
@@ -119,7 +116,6 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
                     Log.v(LOG_TAG, "Creating intent");
                     Intent intent = new Intent(getActivity(), IssueDetailActivity.class)
                             .putExtra(INTENT_ISSUE_ID, cursor.getInt(COL_ISSUE_ID));
-                    //TODO in response in DetailActivity: int intValue = mIntent.getIntExtra(INTENT_ISSUE_ID, 0);
                     startActivity(intent);
                 }
             }
@@ -182,15 +178,15 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
                 mCountDownLatch, jsonParserTask);
 
         //Calling backend
-        if (mCurrentUserId >= 0) {
-            if (DEBUG_MODE) {
+        if (Utility.isUserIdValid(mCurrentUserId)) {
+            if (Utility.DEBUG_MODE) {
                 mRestRequestHandler.setIssueStringResponse(RESTRequestHandler.testStringIssue);
                 mRestRequestHandler.setWorkplaceStringResponse(RESTRequestHandler.testStringWorkplace);
             } else {
                 mRestRequestHandler.sendParallelRequest(mCurrentUserId);
             }
         } else {
-            Log.e(LOG_TAG, "Current user id < 0");
+            Log.e(LOG_TAG, "Current user id is not valid!");
         }
     }
 
