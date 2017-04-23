@@ -5,12 +5,9 @@ import android.content.Context;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-
-import android.content.Intent;
 import android.util.Log;
 
 import com.android.volley.AuthFailureError;
-import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -34,7 +31,7 @@ public class RESTRequestHandler {
     private JSONParserTask parserTask;
     private int received = 0;
 
-    public RESTRequestHandler(Context mContext, CountDownLatch countDownLatch, JSONParserTask task ) {
+    public RESTRequestHandler(Context mContext, CountDownLatch countDownLatch, JSONParserTask task) {
         this.mContext = mContext;
         this.issueStringResponse = null;
         this.workplaceStringResponse = null;
@@ -48,14 +45,8 @@ public class RESTRequestHandler {
         fetchWorkplaceData(currentUserId);
     }
 
-    public void setParserTask( JSONParserTask task ) {
+    public void setParserTask(JSONParserTask task) {
         parserTask = task;
-    }
-
-    public void redirectToLogin(){
-        Log.v(LOG_TAG,"Redirecting to Login");
-        Intent intent=new Intent(mContext ,LoginActivity.class);
-        mContext.startActivity(intent);
     }
 
     /**
@@ -78,12 +69,12 @@ public class RESTRequestHandler {
                     (Request.Method.GET, url, new Response.Listener<String>() {
 
                         public void onResponse(String response) {
-                            Log.i( LOG_TAG, "RECEIVED ISSUES" );
+                            Log.i(LOG_TAG, "RECEIVED ISSUES");
                             VolleyLog.v(LOG_TAG, "JSONObject response received from REST:" + response);
                             issueStringResponse = response;
                             mCountDownLatch.countDown();
                             received++;
-                            if( received >= REQUEST_COUNT ) {
+                            if (received >= REQUEST_COUNT) {
                                 parserTask.execute(
                                         getIssueStringResponse(),
                                         getWorkplaceStringResponse());
@@ -95,12 +86,7 @@ public class RESTRequestHandler {
                             error.fillInStackTrace();
                             VolleyLog.e("Error in RESTSingleton request:" + error.networkResponse);
 
-                            NetworkResponse networkResponse = error.networkResponse;
-                            if (networkResponse != null) {
-                                if(networkResponse.statusCode == Utility.UNAUTHORIZED){
-                                    redirectToLogin();
-                                }
-                            }
+                            Utility.redirectIfUnauthorized(mContext, error);
                         }
                     });
 
@@ -126,44 +112,39 @@ public class RESTRequestHandler {
 
         try {
             //Rest Request URL
-            String url = RESTSingleton.BASE_URL + "/"+
+            String url = RESTSingleton.BASE_URL + "/" +
                     RESTSingleton.WORKPLACE_PATH; //TODO:: Ask Pieter to implement proper REST + "/" + mCurrentUserId;
 
             //Creating JsonStringRequest for REST call
             //We do not know if getting a JSONArray or JSONObject, So we use the StringRequest
             StringRequest jsonStringRequest = new StringRequest
-            (Request.Method.GET, url, new Response.Listener<String>() {
+                    (Request.Method.GET, url, new Response.Listener<String>() {
 
-                public void onResponse(String response) {
-                    Log.i( LOG_TAG, "RECEIVED WORKPLACES" );
-                    VolleyLog.v(LOG_TAG, "JSONObject response received from REST:" + response);
-                    workplaceStringResponse = response;
-                    mCountDownLatch.countDown();
-                    received++;
-                    if( received >= REQUEST_COUNT ) {
-                        parserTask.execute(
-                                getIssueStringResponse(),
-                                getWorkplaceStringResponse());
-                    }
-                }
-            }, new Response.ErrorListener() {
-
-                public void onErrorResponse(VolleyError error) {
-                    error.fillInStackTrace();
-                    VolleyLog.e("Error in RESTSingleton request:" + error.networkResponse);
-
-                    NetworkResponse networkResponse = error.networkResponse;
-                    if (networkResponse != null) {
-                        if(networkResponse.statusCode == Utility.UNAUTHORIZED){
-                            redirectToLogin();
+                        public void onResponse(String response) {
+                            Log.i(LOG_TAG, "RECEIVED WORKPLACES");
+                            VolleyLog.v(LOG_TAG, "JSONObject response received from REST:" + response);
+                            workplaceStringResponse = response;
+                            mCountDownLatch.countDown();
+                            received++;
+                            if (received >= REQUEST_COUNT) {
+                                parserTask.execute(
+                                        getIssueStringResponse(),
+                                        getWorkplaceStringResponse());
+                            }
                         }
-                    }
-                }
-            }){
+                    }, new Response.ErrorListener() {
+
+                        public void onErrorResponse(VolleyError error) {
+                            error.fillInStackTrace();
+                            VolleyLog.e("Error in RESTSingleton request:" + error.networkResponse);
+
+                            Utility.redirectIfUnauthorized(mContext, error);
+                        }
+                    }) {
                 @Override
                 public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String,String> params = new HashMap<>();
-                    params.put("Authorization","Bearer " + TOKEN);
+                    Map<String, String> params = new HashMap<>();
+                    params.put("Authorization", "Bearer " + TOKEN);
 
                     return params;
                 }
@@ -201,7 +182,7 @@ public class RESTRequestHandler {
 
     String TOKEN = "gNHCG8Ps1Y538RWGJRlgzN5VNCdC9mifmz0zDzQreSoR1dLaGXhK6BGZNQmtNy4Ya5XkP+zxApkT5Fndxg2zgkMmNb2sVeSuGLkfw8wEc8A7FqE48aFFptI91u/i9jSxMn+wRasoFHMF3PRJglUn4uDRQzIACIpoFDaU3ILlc44+SoxJM+ajbFV4zAsz+Mf/p3GLjgqHwjc2h0W15sgJC0qQIQzUGc/VP+N22XwMqjTxJGSh8BaomGVq5mYfsRRV";
 
-    static String testStringIssue="[\n" +
+    static String testStringIssue = "[\n" +
             "    {\n" +
             "        \"id\": 1,\n" +
             "        \"descr\": \"Dit is een testprobleem\",\n" +
@@ -357,7 +338,7 @@ public class RESTRequestHandler {
             "    }\n" +
             "]";
 
-    static String testStringWorkplace ="[\n" +
+    static String testStringWorkplace = "[\n" +
             "  {\n" +
             "    \"mechanics\": [\n" +
             "      {\n" +

@@ -104,19 +104,19 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
         ListView listView = (ListView) rootView.findViewById(android.R.id.list);
         mOverviewListAdapter = new OverviewListAdapter(getActivity(), null, 0);
         listView.setAdapter(mOverviewListAdapter);
-        Log.v(LOG_TAG,"Adapter is set to listview in onCreateView");
+        Log.v(LOG_TAG, "Adapter is set to listview in onCreateView");
 
         // When item is clicked, a IssueDetailActivity will be started
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Log.v(LOG_TAG,"Item Clicked!");
+                Log.v(LOG_TAG, "Item Clicked!");
                 // CursorAdapter returns a cursor at the correct position for getItem(), or null
                 // if it cannot seek to that position.
                 Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
                 if (cursor != null) {
-                    Log.v(LOG_TAG,"Creating intent");
+                    Log.v(LOG_TAG, "Creating intent");
                     Intent intent = new Intent(getActivity(), IssueDetailActivity.class)
                             .putExtra(INTENT_ISSUE_ID, cursor.getInt(COL_ISSUE_ID));
                     //TODO in response in DetailActivity: int intValue = mIntent.getIntExtra(INTENT_ISSUE_ID, 0);
@@ -149,7 +149,7 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
     public void onActivityCreated(Bundle savedInstanceState) {
         getLoaderManager().initLoader(OVERVIEW_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
-        Log.v(LOG_TAG,"Activity created and initLoader");
+        Log.v(LOG_TAG, "Activity created and initLoader");
     }
 
     public void setEmptyText(String text) {
@@ -187,18 +187,8 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
                 mRestRequestHandler.setIssueStringResponse(RESTRequestHandler.testStringIssue);
                 mRestRequestHandler.setWorkplaceStringResponse(RESTRequestHandler.testStringWorkplace);
             } else {
-
                 mRestRequestHandler.sendParallelRequest(mCurrentUserId);
-                //try {
-                //    mCountDownLatch.await(); //await until all parallel requests have a response
-                //} catch (InterruptedException e) {
-                //    e.printStackTrace();
-                //}
             }
-            //The order of these parameters is obligatory
-            //jsonParserTask.execute(
-            //        mRestRequestHandler.getIssueStringResponse(),
-            //        mRestRequestHandler.getWorkplaceStringResponse());
         } else {
             Log.e(LOG_TAG, "Current user id < 0");
         }
@@ -224,7 +214,7 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         Log.v(LOG_TAG, "Loader onLoadFinished");
         mOverviewListAdapter.swapCursor(cursor);
-        Log.v(LOG_TAG, "Loader cursor swapped, cursorCount = "+cursor.getCount());
+        Log.v(LOG_TAG, "Loader cursor swapped, cursorCount = " + cursor.getCount());
     }
 
     @Override

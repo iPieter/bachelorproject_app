@@ -1,8 +1,12 @@
 package televic.project.kuleuven.televicmechanicassistant;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
+
+import com.android.volley.NetworkResponse;
+import com.android.volley.VolleyError;
 
 /**
  * Created by Matthias on 23/04/2017.
@@ -24,7 +28,6 @@ public class Utility {
 
     //ErrorCodes Http
     public static final int UNAUTHORIZED = 401;
-
 
 
     /**
@@ -83,7 +86,7 @@ public class Utility {
         SharedPreferences.Editor editor = pref.edit();
         editor.putString(TOKEN_TAG, token);
         editor.apply();
-        Log.v(LOG_TAG,"SHARED_PREF: local token saved: "+token);
+        Log.v(LOG_TAG, "SHARED_PREF: local token saved: " + token);
     }
 
     public static void putLocalUserInfo(Context context, int user_id, String user_name) {
@@ -94,6 +97,25 @@ public class Utility {
         editor.putInt(USER_ID_TAG, user_id);
         editor.putString(USER_NAME_TAG, user_name);
         editor.apply();
-        Log.v(LOG_TAG,"SHARED_PREF: user info saved: id="+user_id+", name="+user_name);
+        Log.v(LOG_TAG, "SHARED_PREF: user info saved: id=" + user_id + ", name=" + user_name);
+    }
+
+    /**
+     * Must be called in every REST call, because the app uses tokens to check if authorized.
+     * If current user is unauthorized, the user gets redirected to the login.
+     * In the login a user can receive a new token by correctly logging in.
+     *
+     * @param error the VolleyError to be handled.
+     */
+    public static void redirectIfUnauthorized(Context context, VolleyError error) {
+        NetworkResponse networkResponse = error.networkResponse;
+        if (networkResponse != null) {
+            if (networkResponse.statusCode == Utility.UNAUTHORIZED) {
+                //Redirect to login
+                Log.v(LOG_TAG, "Redirecting to Login");
+                Intent intent = new Intent(context, LoginActivity.class);
+                context.startActivity(intent);
+            }
+        }
     }
 }
