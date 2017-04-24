@@ -14,7 +14,7 @@ import android.util.Log;
 public class IssueDbHelper extends SQLiteOpenHelper {
     private static final String LOG_TAG = IssueDbHelper.class.getSimpleName();
 
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 6;
     static final String DATABASE_NAME = "bachelorproject.db";
 
     public IssueDbHelper(Context context) {
