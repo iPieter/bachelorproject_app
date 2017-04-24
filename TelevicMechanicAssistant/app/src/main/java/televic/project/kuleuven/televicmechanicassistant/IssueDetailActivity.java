@@ -231,6 +231,9 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                                 removeLoadingProgress();
                                 //TODO we need an issueAsset id in the response!!!
                                 int assetId = ID;
+
+                                Log.i( LOG_TAG, "Asset ID: " + ID );
+
                                 insertImageInDatabase(response, assetId);
                             }
                         }, 350, 350, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565,

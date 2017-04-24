@@ -19,7 +19,7 @@ public class RESTSingleton{
 
     public final static String BASE_URL = "http://192.168.1.4:8080/DWPProject-0.0.1-SNAPSHOT/rest";
     public final static String ISSUES_PATH = "issues/all_for_user";
-    public final static String WORKPLACE_PATH = "workplace/all_for_user";
+    public final static String WORKPLACE_PATH = "workplace/get_by_user_id";
     public final static String LOGIN_PATH = "login";
     public final static String ISSUE_ASSET_PATH = "assets/issue";
 
