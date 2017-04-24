@@ -116,6 +116,7 @@ public class Utility {
         Editor editor = pref.edit();
         editor.remove(TOKEN_TAG);
         editor.apply();
+        Log.v(LOG_TAG,"Token removed!");
     }
 
     /**
