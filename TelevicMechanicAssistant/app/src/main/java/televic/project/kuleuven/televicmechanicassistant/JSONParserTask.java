@@ -243,7 +243,7 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
             issueAssetContentValues.put(IssueContract.IssueAssetEntry._ID, asset_id);
             issueAssetContentValues.put(IssueContract.IssueAssetEntry.COLUMN_DESCRIPTION, asset_description);
             issueAssetContentValues.put(IssueContract.IssueAssetEntry.COLUMN_POST_TIME, post_time);
-            issueAssetContentValues.put(IssueContract.IssueAssetEntry.COLUMN_IMAGE_LOCATION, imgLocation);
+            issueAssetContentValues.put(IssueContract.IssueAssetEntry.COLUMN_IMAGE_PRESENT, imgLocation);
             issueAssetContentValues.put(IssueContract.IssueAssetEntry.COLUMN_USER_NAME, asset_user_name);
             issueAssetContentValues.put(IssueContract.IssueAssetEntry.COLUMN_USER_EMAIL, asset_user_email);
             issueAssetContentValues.put(IssueContract.IssueAssetEntry.COLUMN_ISSUE_ID, asset_issue_id);

@@ -85,7 +85,7 @@ public class IssueContract {
         //Overwriting _ID BaseColumn, because of _ID column collision with Issue-table at JOIN
         public static final String _ID = "issue_asset_id";
         public static final String COLUMN_DESCRIPTION = "asset_description";
-        public static final String COLUMN_IMAGE_LOCATION = "image_location";
+        public static final String COLUMN_IMAGE_PRESENT = "image_location";
         public static final String COLUMN_IMAGE_BLOB = "image_blob";
         public static final String COLUMN_POST_TIME = "post_time";
         public static final String COLUMN_USER_NAME = "user_name";

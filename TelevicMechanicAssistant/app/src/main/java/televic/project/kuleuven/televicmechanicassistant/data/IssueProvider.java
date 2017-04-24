@@ -99,10 +99,10 @@ public class IssueProvider extends ContentProvider {
             IssueContract.IssueAssetEntry.TABLE_NAME +
                     "." + IssueContract.IssueAssetEntry.COLUMN_ISSUE_ID + " = ? ";
 
-    //IssueAsset.COLUMN_IMAGE_LOCATION = ?
+    //IssueAsset.COLUMN_IMAGE_PRESENT = ?
     private static final String sIssueAssetByIssueAndImgSelection =
             IssueContract.IssueAssetEntry.TABLE_NAME +
-                    "." + IssueContract.IssueAssetEntry.COLUMN_IMAGE_LOCATION + " = ? AND " +
+                    "." + IssueContract.IssueAssetEntry.COLUMN_IMAGE_PRESENT + " = ? AND " +
                     IssueContract.IssueAssetEntry.TABLE_NAME +
                     "." + IssueContract.IssueAssetEntry.COLUMN_ISSUE_ID + " = ? ";
 

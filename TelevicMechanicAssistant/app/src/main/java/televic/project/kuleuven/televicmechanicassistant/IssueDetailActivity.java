@@ -19,28 +19,16 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.android.volley.NetworkResponse;
-import com.android.volley.NoConnectionError;
-import com.android.volley.Request;
 import com.android.volley.Response;
-import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -73,7 +61,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
             IssueContract.IssueAssetEntry.TABLE_NAME + "." + IssueContract.IssueAssetEntry._ID,
             IssueContract.IssueAssetEntry.COLUMN_DESCRIPTION,
             IssueContract.IssueAssetEntry.COLUMN_POST_TIME,
-            IssueContract.IssueAssetEntry.COLUMN_IMAGE_LOCATION,
+            IssueContract.IssueAssetEntry.COLUMN_IMAGE_PRESENT,
             IssueContract.IssueAssetEntry.COLUMN_USER_NAME,
             IssueContract.IssueAssetEntry.COLUMN_USER_EMAIL
     };
@@ -90,7 +78,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     //Values in Database needed in this activity
     private static final String[] REST_COLUMNS = {
             IssueContract.IssueAssetEntry.TABLE_NAME + "." + IssueContract.IssueAssetEntry._ID,
-            IssueContract.IssueAssetEntry.COLUMN_IMAGE_LOCATION,
+            IssueContract.IssueAssetEntry.COLUMN_IMAGE_PRESENT,
             IssueContract.IssueAssetEntry.COLUMN_IMAGE_BLOB
     };
 
