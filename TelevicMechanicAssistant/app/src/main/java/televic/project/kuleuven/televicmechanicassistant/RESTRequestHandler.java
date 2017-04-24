@@ -14,6 +14,8 @@ import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.StringRequest;
 
 /**
+ * This class handles the REST request of the IssueOverviewActivity.
+ * The queried data is meant for the database, that serves as cache for the app.
  * Created by Matthias on 19/04/2017.
  */
 
@@ -93,7 +95,6 @@ public class RESTRequestHandler {
                     return params;
                 }
             };
-
 
             //Singleton handles call to REST
             Log.v(LOG_TAG, "Calling RESTSingleton with context:" + mContext);
