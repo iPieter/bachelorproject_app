@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.net.Uri;
 import android.provider.BaseColumns;
+import android.util.Log;
 
 /**
  * Created by Matthias on 18/04/2017.
@@ -99,6 +100,7 @@ public class IssueContract {
         public static Uri buildIssueAssetWithImgUri(long id){
             Uri uri = IssueContract.IssueAssetEntry.CONTENT_URI
                     .buildUpon().appendPath(IssueContract.PATH_WITH_IMG).build();
+
             return ContentUris.withAppendedId(uri, id);
         }
 

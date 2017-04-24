@@ -80,7 +80,7 @@ public class IssueProvider extends ContentProvider {
         matcher.addURI(authority, IssueContract.PATH_ISSUE, ISSUE);
         matcher.addURI(authority, IssueContract.PATH_ISSUE + "/*", ISSUE_WITH_ID);
         matcher.addURI(authority, IssueContract.PATH_ISSUE_ASSET, ISSUE_ASSET);
-        matcher.addURI(authority, IssueContract.PATH_ISSUE_ASSET + "/*", ISSUE_ASSET_WITH_ISSUE_ID);
+        matcher.addURI(authority, IssueContract.PATH_ISSUE_ASSET + "/#", ISSUE_ASSET_WITH_ISSUE_ID);
         matcher.addURI(authority, IssueContract.PATH_ISSUE_ASSET + "/"
                 + IssueContract.PATH_WITH_IMG + "/*" , ISSUE_ASSET_WITH_ISSUE_ID_AND_IMG);
         matcher.addURI(authority, IssueContract.PATH_TRAINCOACH, TRAINCOACH);

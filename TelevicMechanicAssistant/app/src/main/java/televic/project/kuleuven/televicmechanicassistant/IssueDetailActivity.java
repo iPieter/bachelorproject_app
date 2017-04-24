@@ -208,6 +208,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         //Fetching all Images of those issueAssets that have an Image
         Uri assetsWithImgUri = IssueContract.IssueAssetEntry
                 .buildIssueAssetWithImgUri(mIssueId);
+        Log.i( LOG_TAG, assetsWithImgUri.getPath() );
         Cursor cursor = getContentResolver().query(
                 assetsWithImgUri, REST_COLUMNS, null, null, null);
 
@@ -215,7 +216,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         String url;
         //Iterate over Cursor's rows
         cursor.moveToFirst();
-        while (cursor.isAfterLast()) {
+        while (!cursor.isAfterLast()) {
             //Only fetch Image if Blob of image is not present in cache.
             if (cursor.getBlob(COL_REST_IMAGE_BLOB).length == 0) {
                 //The URL to fetch the image for a certain issueAssetId
