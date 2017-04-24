@@ -61,7 +61,7 @@ public class LoginActivity extends AppCompatActivity {
         //Redirect directly if a local TOKEN is present
         //TODO OVERAL BIJ ERROR 401 moet TOKEN verwijderd worden! anders oneindige redirect lus.
         String token = Utility.getLocalToken(getApplicationContext());
-        if (token != null) {
+        if (token != null || Utility.DEBUG_SKIP_LOGIN) {
             goToOverviewPage();
         }
 
@@ -113,7 +113,7 @@ public class LoginActivity extends AppCompatActivity {
         View focusView = null;
 
         // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+        if (TextUtils.isEmpty(password) || !isPasswordValid(password)) {
             mPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = mPasswordView;
             cancel = true;

@@ -42,6 +42,7 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
     private final String TYPE = "type";
     private final String TIME = "time";
     private final String EMAIL = "email";
+    private final String LOCATION = "location";
 
     public JSONParserTask(Context context) {
         this.mContext = context;
@@ -52,7 +53,7 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
 
     @Override
     protected Void doInBackground(String... strings) {
-        Log.v(LOG_TAG,"START JSONPARSING background task");
+        Log.v(LOG_TAG, "START JSONPARSING background task");
         String issueStringResponse = strings[0];
         String workplaceStringResponse = strings[1];
 
@@ -63,7 +64,7 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
         parseWorkplaceJSON(workplaceStringResponse);
         writeWorkplacesToDatabase();
 
-        Log.v(LOG_TAG,"COMPLETED JSONPARSING background task");
+        Log.v(LOG_TAG, "COMPLETED JSONPARSING background task");
         return null;
     }
 
@@ -214,6 +215,7 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
         int asset_id;
         String asset_description;
         String post_time;
+        String imgLocation;
         String asset_user_name;
         String asset_user_email;
         int asset_issue_id;
@@ -223,6 +225,13 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
             asset_id = asset.getInt(ID);
             asset_description = asset.getString(DESCRIPTION);
             post_time = asset.getString(TIME);
+            imgLocation = asset.getString(LOCATION);
+
+            if (imgLocation.equals("")) {
+                imgLocation = "NO_IMG";
+            } else {
+                imgLocation = "IMG";
+            }
 
             JSONObject user = asset.getJSONObject(USER);
             asset_user_name = user.getString(NAME);
@@ -234,6 +243,7 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
             issueAssetContentValues.put(IssueContract.IssueAssetEntry._ID, asset_id);
             issueAssetContentValues.put(IssueContract.IssueAssetEntry.COLUMN_DESCRIPTION, asset_description);
             issueAssetContentValues.put(IssueContract.IssueAssetEntry.COLUMN_POST_TIME, post_time);
+            issueAssetContentValues.put(IssueContract.IssueAssetEntry.COLUMN_IMAGE_PRESENT, imgLocation);
             issueAssetContentValues.put(IssueContract.IssueAssetEntry.COLUMN_USER_NAME, asset_user_name);
             issueAssetContentValues.put(IssueContract.IssueAssetEntry.COLUMN_USER_EMAIL, asset_user_email);
             issueAssetContentValues.put(IssueContract.IssueAssetEntry.COLUMN_ISSUE_ID, asset_issue_id);
@@ -248,6 +258,7 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
 
     /**
      * Parsing of a single workplace of all workplaces
+     *
      * @param jsonResponse raw REST response in String format
      */
     public void parseWorkplaceJSON(String jsonResponse) {
@@ -280,6 +291,7 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
     /**
      * Parsing of a single workplace of all workplaces
      * Also adding contentvalues to mWorkplaceVector Vector, used for bulkInsert into Database
+     *
      * @param workplace the workplace JSONObject
      * @return ContentValues of a single workplace
      */
@@ -290,41 +302,42 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
         try {
             JSONArray traincoaches = workplace.getJSONArray(TRAINCOACHES);
 
-            workplace_id=workplace.getInt(ID);
-            workplace_name=workplace.getString(NAME);
+            workplace_id = workplace.getInt(ID);
+            workplace_name = workplace.getString(NAME);
 
             for (int traincoachIndex = 0; traincoachIndex < traincoaches.length(); traincoachIndex++) {
                 JSONObject traincoach = traincoaches.getJSONObject(traincoachIndex);
 
-                ContentValues contentValues = parseSingleTraincoach(traincoach,workplace_id,workplace_name);
+                ContentValues contentValues = parseSingleTraincoach(traincoach, workplace_id, workplace_name);
                 mWorkplaceVector.add(contentValues);
             }
         } catch (JSONException e1) {
             try {
                 JSONObject traincoach = workplace.getJSONObject(TRAINCOACHES);
 
-                workplace_id=workplace.getInt(ID);
-                workplace_name=workplace.getString(NAME);
+                workplace_id = workplace.getInt(ID);
+                workplace_name = workplace.getString(NAME);
 
-                ContentValues contentValues = parseSingleTraincoach(traincoach,workplace_id,workplace_name);
+                ContentValues contentValues = parseSingleTraincoach(traincoach, workplace_id, workplace_name);
                 mWorkplaceVector.add(contentValues);
             } catch (JSONException e2) {
                 e2.printStackTrace();
-                Log.e(LOG_TAG,"Traincoach object could not be parsed to JSONObject or JSONArray in parseSingleWorkplace()");
+                Log.e(LOG_TAG, "Traincoach object could not be parsed to JSONObject or JSONArray in parseSingleWorkplace()");
             }
         }
     }
 
     /**
      * Parsing of a single traincoach of all traincoaches of a single workplace
+     *
      * @param traincoach
      * @param workplace_id
      * @param workplace_name
      * @return
      */
-    private ContentValues parseSingleTraincoach(JSONObject traincoach, int workplace_id, String workplace_name){
+    private ContentValues parseSingleTraincoach(JSONObject traincoach, int workplace_id, String workplace_name) {
         int traincoach_id;
-        ContentValues contentValues=new ContentValues();
+        ContentValues contentValues = new ContentValues();
         try {
             traincoach_id = traincoach.getInt(ID);
 
@@ -333,48 +346,48 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
             contentValues.put(IssueContract.TraincoachEntry.COLUMN_WORKPLACE_NAME, workplace_name);
             Log.d(LOG_TAG, "Leaving parseSingleTraincoach: Fetched ContentValues for traincoachID = " + traincoach_id);
 
-        }catch(JSONException e){
+        } catch (JSONException e) {
             e.printStackTrace();
-            Log.e(LOG_TAG,"Cannot parse single traincoach in parseSingleTraincoach()!");
+            Log.e(LOG_TAG, "Cannot parse single traincoach in parseSingleTraincoach()!");
         }
 
         return contentValues;
     }
 
     /*--- WRTING TO DATABASE ---*/
-    public void writeIssuesToDatabase(){
-        Log.v(LOG_TAG,"DATABASE TRANSACTION to Issue-Table STARTED");
+    public void writeIssuesToDatabase() {
+        Log.v(LOG_TAG, "DATABASE TRANSACTION to Issue-Table STARTED");
         int rowsInserted = 0;
-        if ( mIssueVector.size() > 0 ) {
+        if (mIssueVector.size() > 0) {
             ContentValues[] cvArray = new ContentValues[mIssueVector.size()];
             mIssueVector.toArray(cvArray);
             rowsInserted = mContext.getContentResolver().bulkInsert(IssueContract.IssueEntry.CONTENT_URI, cvArray);
         }
 
-        Log.v(LOG_TAG,"DATABASE TRANSACTION to Issue-Table COMPLETE: "+rowsInserted+" rows inserted!");
+        Log.v(LOG_TAG, "DATABASE TRANSACTION to Issue-Table COMPLETE: " + rowsInserted + " rows inserted!");
     }
 
-    public void writeIssueAssetsToDatabase(){
-        Log.v(LOG_TAG,"DATABASE TRANSACTION to IssueAsset-Table STARTED");
+    public void writeIssueAssetsToDatabase() {
+        Log.v(LOG_TAG, "DATABASE TRANSACTION to IssueAsset-Table STARTED");
         int rowsInserted = 0;
-        if ( mIssueAssetVector.size() > 0 ) {
+        if (mIssueAssetVector.size() > 0) {
             ContentValues[] cvArray = new ContentValues[mIssueAssetVector.size()];
             mIssueAssetVector.toArray(cvArray);
             rowsInserted = mContext.getContentResolver().bulkInsert(IssueContract.IssueAssetEntry.CONTENT_URI, cvArray);
         }
 
-        Log.v(LOG_TAG,"DATABASE TRANSACTION to IssueAsset-Table COMPLETE: "+rowsInserted+" rows inserted!");
+        Log.v(LOG_TAG, "DATABASE TRANSACTION to IssueAsset-Table COMPLETE: " + rowsInserted + " rows inserted!");
     }
 
-    public void writeWorkplacesToDatabase(){
-        Log.v(LOG_TAG,"DATABASE TRANSACTION to Traincoach-Table STARTED");
+    public void writeWorkplacesToDatabase() {
+        Log.v(LOG_TAG, "DATABASE TRANSACTION to Traincoach-Table STARTED");
         int rowsInserted = 0;
-        if ( mWorkplaceVector.size() > 0 ) {
+        if (mWorkplaceVector.size() > 0) {
             ContentValues[] cvArray = new ContentValues[mWorkplaceVector.size()];
             mWorkplaceVector.toArray(cvArray);
             rowsInserted = mContext.getContentResolver().bulkInsert(IssueContract.TraincoachEntry.CONTENT_URI, cvArray);
         }
 
-        Log.v(LOG_TAG,"DATABASE TRANSACTION to Traincoach-Table COMPLETE: "+rowsInserted+" rows inserted!");
+        Log.v(LOG_TAG, "DATABASE TRANSACTION to Traincoach-Table COMPLETE: " + rowsInserted + " rows inserted!");
     }
 }

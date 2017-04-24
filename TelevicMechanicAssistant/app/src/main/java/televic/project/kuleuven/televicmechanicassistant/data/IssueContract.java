@@ -23,7 +23,7 @@ public class IssueContract {
     public static final String PATH_ISSUE = "issue";
     public static final String PATH_ISSUE_ASSET = "issue_asset";
     public static final String PATH_TRAINCOACH = "traincoach";
-
+    public static final String PATH_WITH_IMG = "with_img";
 
     /* TABLE 1: Inner class that defines the table contents of the Issue table */
     public static final class IssueEntry implements BaseColumns {
@@ -85,7 +85,8 @@ public class IssueContract {
         //Overwriting _ID BaseColumn, because of _ID column collision with Issue-table at JOIN
         public static final String _ID = "issue_asset_id";
         public static final String COLUMN_DESCRIPTION = "asset_description";
-        public static final String COLUMN_IMAGE_LOCATION = "image_location";
+        public static final String COLUMN_IMAGE_PRESENT = "image_location";
+        public static final String COLUMN_IMAGE_BLOB = "image_blob";
         public static final String COLUMN_POST_TIME = "post_time";
         public static final String COLUMN_USER_NAME = "user_name";
         public static final String COLUMN_USER_EMAIL = "user_email";
@@ -93,6 +94,12 @@ public class IssueContract {
 
         public static Uri buildIssueAssetUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
+        }
+
+        public static Uri buildIssueAssetWithImgUri(long id){
+            Uri uri = IssueContract.IssueAssetEntry.CONTENT_URI
+                    .buildUpon().appendPath(IssueContract.PATH_WITH_IMG).build();
+            return ContentUris.withAppendedId(uri, id);
         }
 
         public static int getIssueIdFromUri(Uri uri){

@@ -14,7 +14,7 @@ import android.util.Log;
 public class IssueDbHelper extends SQLiteOpenHelper {
     private static final String LOG_TAG = IssueDbHelper.class.getSimpleName();
 
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 5;
     static final String DATABASE_NAME = "bachelorproject.db";
 
     public IssueDbHelper(Context context) {
@@ -46,7 +46,8 @@ public class IssueDbHelper extends SQLiteOpenHelper {
                 IssueContract.IssueAssetEntry.TABLE_NAME + " (" +
                 IssueContract.IssueAssetEntry._ID + " INTEGER PRIMARY KEY," +
                 IssueContract.IssueAssetEntry.COLUMN_DESCRIPTION + " TEXT NOT NULL, " +
-                IssueContract.IssueAssetEntry.COLUMN_IMAGE_LOCATION + " TEXT, " +
+                IssueContract.IssueAssetEntry.COLUMN_IMAGE_PRESENT + " TEXT, " +
+                IssueContract.IssueAssetEntry.COLUMN_IMAGE_BLOB + " BLOB, " +
                 IssueContract.IssueAssetEntry.COLUMN_POST_TIME + " DATETIME NOT NULL, " +
                 IssueContract.IssueAssetEntry.COLUMN_USER_NAME + " TEXT NOT NULL, " +
                 IssueContract.IssueAssetEntry.COLUMN_USER_EMAIL + " TEXT NOT NULL, " +

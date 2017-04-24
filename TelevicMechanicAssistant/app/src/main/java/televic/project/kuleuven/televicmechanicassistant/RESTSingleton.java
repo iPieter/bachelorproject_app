@@ -21,6 +21,7 @@ public class RESTSingleton{
     public final static String ISSUES_PATH = "issues/all_for_user";
     public final static String WORKPLACE_PATH = "workplace/all_for_user";
     public final static String LOGIN_PATH = "login";
+    public final static String ISSUE_ASSET_PATH = "assets/issue";
 
     private static RESTSingleton mInstance = null;
     private RequestQueue mRequestQueue;

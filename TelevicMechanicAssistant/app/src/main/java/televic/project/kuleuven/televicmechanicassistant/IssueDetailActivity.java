@@ -1,189 +1,193 @@
 package televic.project.kuleuven.televicmechanicassistant;
 
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
 import android.support.v4.content.FileProvider;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Selection;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.android.volley.NetworkResponse;
-import com.android.volley.NoConnectionError;
-import com.android.volley.Request;
+import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
-import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import model.issue.IssueAsset;
-import model.user.User;
+import televic.project.kuleuven.televicmechanicassistant.data.IssueContract;
 
-public class IssueDetailActivity extends AppCompatActivity {
+public class IssueDetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+    private final String LOG_TAG = IssueDetailActivity.class.getSimpleName();
 
-    private static final String url = RESTSingleton.BASE_URL + "/assets/issue";
-    private static final String LOG = "ISSUE_DETAIL";
     private static final int REQUEST_TAKE_PHOTO = 1;
 
+    //Members
     private String mCurrentPhotoPath;
     private IssueAssetListAdapter mListAdapter;
+    private HashMap<Integer, Bitmap> mImageMap;
+    private int mCurrentUserId;
+    private int mIssueId;
+    private int mDataId;
+
+    //GUI components
     private ProgressDialog sendingDialog;
     private ProgressDialog loadingDialog;
-    private List<IssueAsset> assets = new ArrayList<>( );
-    private User user;
+
+    //Id of the loader
+    private static final int DETAIL_LOADER = 1;
+
+    //Values in Database needed in this activity
+    private static final String[] DETAIL_COLUMNS = {
+            IssueContract.IssueAssetEntry.TABLE_NAME + "." + IssueContract.IssueAssetEntry._ID,
+            IssueContract.IssueAssetEntry.COLUMN_DESCRIPTION,
+            IssueContract.IssueAssetEntry.COLUMN_POST_TIME,
+            IssueContract.IssueAssetEntry.COLUMN_IMAGE_PRESENT,
+            IssueContract.IssueAssetEntry.COLUMN_USER_NAME,
+            IssueContract.IssueAssetEntry.COLUMN_USER_EMAIL
+    };
+
+    //Depends on DETAIL_COLUMNS, if DETAIL_COLUMNS changes, so must these indexes!
+    static final int COL_ASSET_ID = 0;
+    static final int COL_ASSET_DESCRIPTION = 1;
+    static final int COL_ASSET_POST_TIME = 2;
+    static final int COL_ASSET_IMAGE = 3;
+    static final int COL_ASSET_USER_NAME = 4;
+    static final int COL_ASSET_USER_EMAIL = 5;
+
+    /* Values Used for the rest request! */
+    //Values in Database needed in this activity
+    private static final String[] REST_COLUMNS = {
+            IssueContract.IssueAssetEntry.TABLE_NAME + "." + IssueContract.IssueAssetEntry._ID,
+            IssueContract.IssueAssetEntry.COLUMN_IMAGE_PRESENT,
+            IssueContract.IssueAssetEntry.COLUMN_IMAGE_BLOB
+    };
+
+    //Depends on REST_COLUMNS, if REST_COLUMNS changes, so must these indexes!
+    static final int COL_REST_ID = 0;
+    static final int COL_REST_IMAGE_PRESENT = 1;
+    static final int COL_REST_IMAGE_BLOB = 2;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_issue_detail);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        Button button = new Button( this );
-        button.setText( "Grafieken" );
-        button.setOnClickListener( new View.OnClickListener()
-        {
-            @Override
-            public void onClick( View v )
-            {
-                openGraph();
-            }
-        } );
-        toolbar.addView( button );
+        //INIT get values from intent
+        mIssueId = getIntent().getIntExtra(IssueOverviewFragment.INTENT_ISSUE_ID, -1);
+        mDataId = getIntent().getIntExtra(IssueOverviewFragment.INTENT_DATA_ID, -1);
 
-        ImageButton buttonSend = (ImageButton) findViewById( R.id.button_send );
-        buttonSend.setOnClickListener( new View.OnClickListener() {
-            public void onClick( View v ) {
-                sendIssueAsset();
-            }
-        } );
+        //INIT current user
+        mCurrentUserId = Utility.getLocalUserId(this);
 
-        ImageButton buttonCamera = (ImageButton) findViewById( R.id.button_camera );
-        buttonCamera.setOnClickListener( new View.OnClickListener() {
-            public void onClick( View v ) {
+        //INIT Send-Button
+        ImageButton buttonSend = (ImageButton) findViewById(R.id.button_send);
+        buttonSend.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                postIssueAsset();
+            }
+        });
+
+        //INIT Photo-Button
+        ImageButton buttonCamera = (ImageButton) findViewById(R.id.button_camera);
+        buttonCamera.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
                 takePicture();
             }
-        } );
+        });
 
-        mListAdapter = new IssueAssetListAdapter( getApplicationContext() );
-        ListView listView = (ListView) findViewById( R.id.issue_asset_link );
-        listView.setAdapter( mListAdapter );
+        //INIT mImageMap
+        mImageMap = new HashMap<>();
 
-        loadingDialog = new ProgressDialog( this );
-        loadingDialog.setTitle( "Laden.." );
-        loadingDialog.setMessage( "De boodschappen worden geladen" );
-        loadingDialog.setCancelable( false );
+        //INIT adapter
+        mListAdapter = new IssueAssetListAdapter(getApplicationContext(), null, 0);
+        ListView listView = (ListView) findViewById(R.id.issue_asset_link);
+        listView.setAdapter(mListAdapter);
+
+        //INIT loader
+        getSupportLoaderManager().initLoader(DETAIL_LOADER, null, this);
+
+        //INIT loading dialog
+        loadingDialog = new ProgressDialog(this);
+        loadingDialog.setTitle("Laden..");
+        loadingDialog.setMessage("De boodschappen worden geladen");
+        loadingDialog.setCancelable(false);
         loadingDialog.show();
 
-        user = new User();
-        user.setName( "Jan Met De Pet" );
-
-        final IssueAsset asset = new IssueAsset();
-        asset.setId( 0 );
-        asset.setDescr( "De wagon vertoont een afwijking aan zijn roll waarden. Controleer het onderstel vooraan." );
-        asset.setTime( new Date( ) );
-        asset.setUser( user );
-        asset.setLocation( "azerazer" );
-
-        IssueAsset asset1 = new IssueAsset();
-        asset1.setId( 1 );
-        asset1.setDescr( "Voluptas molestiae quo voluptas ut ut totam quia. Quibusdam amet labore eos perspiciatis delectus doloribus. Ipsa maiores doloremque culpa iste.\n" +
-                "Velit rerum inventore quia sunt. Libero dolores rerum eos nulla explicabo voluptas ratione. Rem sit dolorem voluptate culpa perspiciatis omnis et enim. Sequi ab qui qui voluptatem in dolorem. Illum expedita odit libero enim expedita et doloribus.\n" +
-                "Vel deleniti et est consequuntur corporis repellendus molestiae consequatur. Sed nostrum est unde aut occaecati illo ut omnis. Perspiciatis optio est at. Doloremque perspiciatis dignissimos maiores assumenda vitae.\n" +
-                "Consectetur nesciunt vel excepturi asperiores earum est veritatis. Ducimus et sequi et voluptas aliquid vitae aut. Non dolor quasi non sunt inventore. Occaecati harum fuga est. Nemo et et illo modi est." );
-        asset1.setTime( new Date( ) );
-        asset1.setUser( user );
-        asset1.setLocation( "" );
-
-        IssueAsset asset2 = new IssueAsset();
-        asset2.setId( 2 );
-        asset2.setDescr( "Test of de remmen nog goed werken." );
-        asset2.setTime( new Date( ) );
-        asset2.setUser( user );
-        asset2.setLocation( "azerazerazr" );
-
-        assets.add( asset );
-        assets.add( asset1 );
-        assets.add( asset2 );
-
-        //mListAdapter.updateView( assets );
-
-        ImageRequest request = new ImageRequest( url + "/7", new Response.Listener< Bitmap >()
-        {
-            @Override
-            public void onResponse( Bitmap response )
-            {
-                removeLoadingProgress();
-                asset.setBitmap( response );
-                mListAdapter.updateView( assets );
-            }
-        }, 350, 350, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565, new Response.ErrorListener()
-        {
-            @Override
-            public void onErrorResponse( VolleyError error )
-            {
-                removeLoadingProgress();
-
-                Context context = getApplicationContext();
-                CharSequence text = "De afbeeldingen konden niet geladen worden, probeer later opnieuw.";
-                int duration = Toast.LENGTH_LONG;
-
-                Toast toast = Toast.makeText(context, text, duration);
-                toast.show();
-
-                mListAdapter.updateView( assets );
-            }
-        } );
-        RESTSingleton.getInstance(getApplicationContext()).addToRequestQueue(request);
-
+        //INIT sending dialog
         sendingDialog = new ProgressDialog(this);
         sendingDialog.setTitle("Versturen");
         sendingDialog.setMessage("De boodschap wordt verstuurd.");
         sendingDialog.setCancelable(false); // disable dismiss by tapping outside of the dialog
 
+        //Calling Backend
+        fetchIssueAssetImages();
     }
 
-    private void openGraph() {
-        Intent intent = new Intent( this, GraphActivity.class  );
-        intent.putExtra( "psdid", "1" );
-        startActivity( intent );
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main_overview, menu);
+        getMenuInflater().inflate(R.menu.extra_detail, menu);
+        return true;
     }
 
-    public void onResume()
-    {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_settings) {
+            //TODO create settings
+            //startActivity(new Intent(this,SettingsActivity.class));
+            return true;
+        }
+        if (id == R.id.action_graphs) {
+            goToGraphActivity();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void goToGraphActivity() {
+        Intent intent = new Intent(this, GraphActivity.class);
+        intent.putExtra(IssueOverviewFragment.INTENT_DATA_ID, mDataId);
+        startActivity(intent);
+    }
+
+    public void onResume() {
         super.onResume();
 
         /*
         if( mCurrentPhotoPath != null ) {
-            Log.i( LOG, "path:" + mCurrentPhotoPath );
+            Log.i( LOG_TAG, "path:" + mCurrentPhotoPath );
             File imgFile = new  File( mCurrentPhotoPath );
-            Log.i( LOG, "path2:" + imgFile.exists() + ":" + imgFile.getAbsolutePath() );
+            Log.i( LOG_TAG, "path2:" + imgFile.exists() + ":" + imgFile.getAbsolutePath() );
             if(imgFile.exists()){
                 Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
                 ImageView myImage = (ImageView) findViewById(R.id.image_preview);
@@ -193,47 +197,149 @@ public class IssueDetailActivity extends AppCompatActivity {
         */
     }
 
-    public void sendIssueAsset() {
 
+    /**
+     * First, all issueAssets with current issueId and contain an img are queried.
+     * If IMAGE_LOCATION equals "IMG", then a REST request for this IssueAssetId is created
+     * and added to the RequestQueue. Volley handles all requests.
+     * If we get a response from volley, we store the location of the img in the HashMap.
+     * We store the IMG as a blob in the database. The cursorLoader will notify the change
+     * and call the cursorAdapter to update the ListView.
+     */
+    public void fetchIssueAssetImages() {
+        //Fetching all Images of those issueAssets that have an Image
+        Uri assetsWithImgUri = IssueContract.IssueAssetEntry
+                .buildIssueAssetWithImgUri(mIssueId);
+        Cursor cursor = getContentResolver().query(
+                assetsWithImgUri, REST_COLUMNS, null, null, null);
+
+        String baseUrl = RESTSingleton.BASE_URL + "/" + RESTSingleton.ISSUE_ASSET_PATH;
+        String url;
+        //Iterate over Cursor's rows
+        cursor.moveToFirst();
+        while (cursor.isAfterLast()) {
+            //Only fetch Image if Blob of image is not present in cache.
+            if (cursor.getBlob(COL_REST_IMAGE_BLOB).length == 0) {
+                //The URL to fetch the image for a certain issueAssetId
+                url = baseUrl + "/" + cursor.getInt(COL_ASSET_ID);
+
+                //Create the REST ImageRequest
+                ImageRequest request = new ImageRequest(url,
+                        new Response.Listener<Bitmap>() {
+                            @Override
+                            public void onResponse(Bitmap response) {
+                                removeLoadingProgress();
+                                //TODO we need an issueAsset id in the response!!!
+                                int assetId = 0;
+                                insertImageInDatabase(response, assetId);
+                            }
+                        }, 350, 350, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565,
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                error.printStackTrace();
+                                Log.e(LOG_TAG, "Image fetch FAILED");
+
+                                Utility.redirectIfUnauthorized(getApplicationContext(), error);
+
+                                removeLoadingProgress();
+                                Context context = getApplicationContext();
+                                CharSequence text = "De afbeeldingen konden niet geladen worden, probeer later opnieuw.";
+                                int duration = Toast.LENGTH_LONG;
+
+                                Toast toast = Toast.makeText(context, text, duration);
+                                toast.show();
+                            }
+                        }) {
+                    @Override
+                    public Map<String, String> getHeaders() throws AuthFailureError {
+                        Map<String, String> params = new HashMap<>();
+                        params.put("Authorization", "Bearer " +
+                                Utility.getLocalToken(getApplicationContext()));
+                        return params;
+                    }
+                };
+
+                //Adding the request to the requestQueue, Volley handles the rest
+                RESTSingleton.getInstance(getApplicationContext()).addToRequestQueue(request);
+            }
+
+            cursor.moveToNext();
+        }
+    }
+
+    /**
+     * For a specified assetId, the tupple of the IssueAsset gets updated with the
+     * queried image as Blob.
+     * @param bitmap the picture
+     * @param assetId the IssueAsset to update
+     */
+    public void insertImageInDatabase(Bitmap bitmap, int assetId) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(IssueContract.IssueAssetEntry.COLUMN_IMAGE_BLOB,
+                Utility.toByteArray(bitmap));
+
+        //WHERE asset.assetId = id
+        String selection = IssueContract.IssueAssetEntry.TABLE_NAME
+                + "." + IssueContract.IssueAssetEntry._ID + " = ?";
+        String[] selectionArgs = {String.valueOf(assetId)};
+
+        //Calling our contentProvider through the contentResolver
+        getContentResolver().update(
+                IssueContract.IssueAssetEntry.buildIssueAssetUri(assetId), //TODO retrieve id from response dynamicly
+                contentValues,
+                selection,
+                selectionArgs);
+    }
+
+    /**
+     * The user can upload a new IssueAsset with picture and description to the server.
+     * Also locally on the app, the list must be updated.
+     */
+    public void postIssueAsset() {
+        /*
         sendingDialog.show();
 
-        VolleyMultipartRequest multipartRequest = new VolleyMultipartRequest( Request.Method.POST, url, new Response.Listener<NetworkResponse >() {
+        VolleyMultipartRequest multipartRequest = new VolleyMultipartRequest(Request.Method.POST, url, new Response.Listener<NetworkResponse>() {
             @Override
             public void onResponse(NetworkResponse response) {
                 String resultResponse = new String(response.data);
                 try {
 
+                    //TODO INSERT NEW TUPLE IN DB
                     IssueAsset asset = new IssueAsset();
-                    if( mCurrentPhotoPath == null )
-                        asset.setLocation( "" );
+                    if (mCurrentPhotoPath == null)
+                        asset.setLocation("");
                     else
-                        asset.setLocation( "azeaze" );
-                    asset.setUser( user );
-                    asset.setDescr( (( EditText)findViewById( R.id.textfield_issueasset )).getText().toString() );
-                    asset.setTime( new Date( ) );
+                        asset.setLocation("azeaze");
+                    asset.setUser(user);
+                    asset.setDescr(((EditText) findViewById(R.id.textfield_issueasset)).getText().toString());
+                    asset.setTime(new Date());
 
-                    assets.add( asset );
-                    mListAdapter.updateView( assets );
+                    assets.add(asset);
+                    mListAdapter.updateView(assets);
 
                     JSONObject result = new JSONObject(resultResponse);
                     String status = result.getString("status");
                     String message = result.getString("message");
 
-                    Log.i( LOG, status );
-                    Log.i( LOG, message );
+                    Log.i(LOG_TAG, status);
+                    Log.i(LOG_TAG, message);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
                 mCurrentPhotoPath = null;
                 removeProgress();
-                (( EditText)findViewById( R.id.textfield_issueasset )).setText( "" );
+                ((EditText) findViewById(R.id.textfield_issueasset)).setText("");
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 mCurrentPhotoPath = null;
                 removeProgress();
+
+                Utility.redirectIfUnauthorized(getApplicationContext(),error);
 
                 Context context = getApplicationContext();
                 CharSequence text = "De boodschap kon niet verzonden worden, controleer of u internetverbinding werkt.";
@@ -263,11 +369,11 @@ public class IssueDetailActivity extends AppCompatActivity {
                         if (networkResponse.statusCode == 404) {
                             errorMessage = "Resource not found";
                         } else if (networkResponse.statusCode == 401) {
-                            errorMessage = message+" Please login again";
+                            errorMessage = message + " Please login again";
                         } else if (networkResponse.statusCode == 400) {
-                            errorMessage = message+ " Check your inputs";
+                            errorMessage = message + " Check your inputs";
                         } else if (networkResponse.statusCode == 500) {
-                            errorMessage = message+" Something is getting wrong";
+                            errorMessage = message + " Something is getting wrong";
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -280,19 +386,20 @@ public class IssueDetailActivity extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
-                params.put( "api_token", "gh659gjhvdyudo973823tt9gvjf7i6ric75r76" );
-                params.put( "desc", (( EditText)findViewById( R.id.textfield_issueasset )).getText().toString() );
-                params.put( "userID", "1" );
-                params.put( "issueID", "1" );
+                params.put("Authorization", "Bearer " +
+                                Utility.getLocalToken(getApplicationContext()));
+                params.put("desc", ((EditText) findViewById(R.id.textfield_issueasset)).getText().toString());
+                params.put("userID", String.valueOf(Utility.getLocalUserId(getApplicationContext())));
+                params.put("issueID", String.valueOf(mIssueId));
                 return params;
             }
 
             @Override
             protected Map<String, DataPart> getByteData() {
                 Map<String, DataPart> params = new HashMap<>();
-                if( mCurrentPhotoPath != null ) {
-                    File file = new File( mCurrentPhotoPath );
-                    if( file.isFile() ) {
+                if (mCurrentPhotoPath != null) {
+                    File file = new File(mCurrentPhotoPath);
+                    if (file.isFile()) {
                         int size = (int) file.length();
                         byte[] bytes = new byte[size];
                         try {
@@ -305,25 +412,25 @@ public class IssueDetailActivity extends AppCompatActivity {
                             e.printStackTrace();
                         }
                         params.put("file", new DataPart("file_cover.jpg", bytes, "image/jpeg"));
-                        Log.i( LOG, "SENDING TEXT + PICTURE" );
+                        Log.i(LOG_TAG, "SENDING TEXT + PICTURE");
                     } else {
-                        Log.i( LOG, "SENDING ONLY TEXT" );
+                        Log.i(LOG_TAG, "SENDING ONLY TEXT");
                         params.put("file", new DataPart("file_cover.jpg", new byte[0], "image/jpeg"));
                     }
-                }else
-                {
+                } else {
                     params.put("file", new DataPart("file_cover.jpg", new byte[0], "image/jpeg"));
-                    Log.i( LOG, "PICTURE PATH: " + mCurrentPhotoPath );
+                    Log.i(LOG_TAG, "PICTURE PATH: " + mCurrentPhotoPath);
                 }
                 return params;
             }
         };
 
         RESTSingleton.getInstance(getApplicationContext()).addToRequestQueue(multipartRequest);
+    */
     }
 
-    private void removeProgress()
-    {
+
+    private void removeProgress() {
         sendingDialog.dismiss();
     }
 
@@ -341,7 +448,7 @@ public class IssueDetailActivity extends AppCompatActivity {
                 photoFile = createImageFile();
             } catch (IOException ex) {
                 // Error occurred while creating the File
-                Log.e( "ISSUE_DETAIL", ex.getMessage() );
+                Log.e("ISSUE_DETAIL", ex.getMessage());
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
@@ -354,12 +461,12 @@ public class IssueDetailActivity extends AppCompatActivity {
         }
     }
 
-    private File createImageFile() throws IOException
-    {
+    //TODO insert into database instead of local file
+    private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getExternalFilesDir( Environment.DIRECTORY_PICTURES);
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
@@ -371,4 +478,33 @@ public class IssueDetailActivity extends AppCompatActivity {
         return image;
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Log.v(LOG_TAG, "Creating CursorLoader");
+
+        // Sort order =  Ascending, by Posted Time
+        String sortOrder = IssueContract.IssueAssetEntry.COLUMN_POST_TIME + " ASC";
+        Uri issueAssetsOnIssueId = IssueContract.IssueAssetEntry
+                .buildIssueAssetUri(mCurrentUserId);
+        Log.v(LOG_TAG, "CURSORLOADER URI: " + issueAssetsOnIssueId);
+
+        return new CursorLoader(this,
+                issueAssetsOnIssueId,
+                DETAIL_COLUMNS,
+                null,
+                null,
+                sortOrder);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        mListAdapter.swapCursor(cursor);
+        Log.v(LOG_TAG, "onLoadFinished: Loader cursor swapped, cursorCount = " + cursor.getCount());
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        Log.v(LOG_TAG, "Loader onLoaderReset");
+        mListAdapter.swapCursor(null);
+    }
 }

@@ -53,7 +53,7 @@ public class GraphActivity extends AppCompatActivity
         loadingDialog.show();
 
         Intent intent = getIntent();
-        String id = intent.getStringExtra( "psdid" );
+        String id = intent.getStringExtra( IssueOverviewFragment.INTENT_DATA_ID );
 
         JsonObjectRequest request = new JsonObjectRequest( Request.Method.GET, url + "/" + id, null, new Response.Listener< JSONObject >()
         {

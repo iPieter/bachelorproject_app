@@ -1,8 +1,12 @@
 package televic.project.kuleuven.televicmechanicassistant;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -10,16 +14,13 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 
-import android.widget.FrameLayout.LayoutParams;
 import android.widget.TextView;
 
 import java.util.concurrent.CountDownLatch;
@@ -30,13 +31,15 @@ import televic.project.kuleuven.televicmechanicassistant.data.IssueContract;
 //MAIN LAUNCH Activity
 public class IssueOverviewFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private final String LOG_TAG = IssueOverviewFragment.class.getSimpleName();
-    private boolean DEBUG_MODE = false;
-
-    //TODO init currentUserId @login!!!
     private int mCurrentUserId;
 
-    //Passing to other activity
+    //UI Components
+    private View mProgressView;
+    private ListView mListView;
+
+    //Tag for Extra to pass with intent to other activity
     public static String INTENT_ISSUE_ID = "issue_id_value987564321";
+    public static String INTENT_DATA_ID = "data_id_value987564321";
 
     //The adapter used to populate the listview
     private OverviewListAdapter mOverviewListAdapter;
@@ -54,6 +57,7 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
             IssueContract.IssueEntry.COLUMN_TRAINCOACH_NAME,
             IssueContract.IssueEntry.COLUMN_OPERATOR,
             IssueContract.TraincoachEntry.COLUMN_WORKPLACE_NAME,
+            IssueContract.IssueEntry.COLUMN_DATA_ID
     };
 
     //Depends on OVERVIEW_COLUMNS, if OVERVIEW_COLUMNS changes, so must these indexes!
@@ -65,6 +69,7 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
     static final int COL_ISSUE_TRAINCOACH = 5;
     static final int COL_ISSUE_OPERATOR = 6;
     static final int COL_ISSUE_WORKPLACE = 7;
+    static final int COL_ISSUE_DATA_ID = 8;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -98,45 +103,37 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
         View rootView = inflater.inflate(R.layout.fragment_issue_overview, container, false);
 
         //INIT
-        mCurrentUserId = 1; //TODO
+        mCurrentUserId = Utility.getLocalUserId(getActivity());
+        mListView = (ListView) rootView.findViewById(android.R.id.list);
+        mProgressView = rootView.findViewById(R.id.overviewlist_progress);
+
+        if (Utility.DEBUG_MODE) {
+            mCurrentUserId = 1;
+        }
 
         //Setting up adapter
-        ListView listView = (ListView) rootView.findViewById(android.R.id.list);
         mOverviewListAdapter = new OverviewListAdapter(getActivity(), null, 0);
-        listView.setAdapter(mOverviewListAdapter);
-        Log.v(LOG_TAG,"Adapter is set to listview in onCreateView");
+        mListView.setAdapter(mOverviewListAdapter);
+        Log.v(LOG_TAG, "Adapter is set to listview in onCreateView");
 
         // When item is clicked, a IssueDetailActivity will be started
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                Log.v(LOG_TAG,"Item Clicked!");
+                Log.v(LOG_TAG, "Item Clicked!");
                 // CursorAdapter returns a cursor at the correct position for getItem(), or null
                 // if it cannot seek to that position.
                 Cursor cursor = (Cursor) adapterView.getItemAtPosition(position);
                 if (cursor != null) {
-                    Log.v(LOG_TAG,"Creating intent");
+                    Log.v(LOG_TAG, "Creating intent");
                     Intent intent = new Intent(getActivity(), IssueDetailActivity.class)
-                            .putExtra(INTENT_ISSUE_ID, cursor.getInt(COL_ISSUE_ID));
-                    //TODO in response in DetailActivity: int intValue = mIntent.getIntExtra(INTENT_ISSUE_ID, 0);
+                            .putExtra(INTENT_ISSUE_ID, cursor.getInt(COL_ISSUE_ID))
+                            .putExtra(INTENT_DATA_ID, cursor.getInt(COL_ISSUE_DATA_ID));
                     startActivity(intent);
                 }
             }
         });
-
-        // Create a progress bar to display while the list loads
-        ProgressBar progressBar = new ProgressBar(this.getContext());
-        progressBar.setId(R.id.progressbar_loading);
-        progressBar.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
-                LayoutParams.WRAP_CONTENT, Gravity.CENTER));
-        progressBar.setIndeterminate(true);
-        listView.setEmptyView(progressBar);
-
-        // Must add the progress bar to the root of the layout
-        ViewGroup rootGroup = (ViewGroup) rootView.findViewById(android.R.id.content);
-        rootGroup.addView(progressBar);
-        Log.v(LOG_TAG, "Progressbar is set!");
 
         //Activating Back-End
         handleOverviewData();
@@ -149,7 +146,7 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
     public void onActivityCreated(Bundle savedInstanceState) {
         getLoaderManager().initLoader(OVERVIEW_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
-        Log.v(LOG_TAG,"Activity created and initLoader");
+        Log.v(LOG_TAG, "Activity created and initLoader");
     }
 
     public void setEmptyText(String text) {
@@ -157,16 +154,40 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
         textView.setText(text);
     }
 
-    public void removeProgressBar() {
-        /*
-        Log.v(LOG_TAG, "Trying to remove the progressbar");
-        try {
-            ListView listView = (ListView) getActivityfindViewById(android.R.id.list);
-            ProgressBar progressBar = (ProgressBar) listView.findViewById(R.id.progressbar_loading);
-            listView.removeViewInLayout(progressBar);
-        } catch (Exception e) {
-            Log.e(LOG_TAG, e.toString());
-        }*/
+    /**
+     * Shows the progress UI and hides the list
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    public void showProgress(final boolean show) {
+        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+        // for very easy animations. If available, use these APIs to fade-in
+        // the progress spinner.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+            mListView.setVisibility(show ? View.GONE : View.VISIBLE);
+            mListView.animate().setDuration(shortAnimTime).alpha(
+                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mListView.setVisibility(show ? View.GONE : View.VISIBLE);
+                }
+            });
+
+            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            mProgressView.animate().setDuration(shortAnimTime).alpha(
+                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+                }
+            });
+        } else {
+            // The ViewPropertyAnimator APIs are not available, so simply show
+            // and hide the relevant UI components.
+            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            mListView.setVisibility(show ? View.GONE : View.VISIBLE);
+        }
     }
 
     /**
@@ -176,37 +197,28 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
     public void handleOverviewData() {
         //INIT
         JSONParserTask jsonParserTask = new JSONParserTask(getActivity());
-        CountDownLatch mCountDownLatch = new CountDownLatch(RESTRequestHandler.REQUEST_COUNT);
         RESTRequestHandler mRestRequestHandler = new RESTRequestHandler(
-                this.getActivity().getApplicationContext(),
-                mCountDownLatch, jsonParserTask);
+                this.getActivity().getApplicationContext(), jsonParserTask);
 
         //Calling backend
-        if (mCurrentUserId >= 0) {
-            if (DEBUG_MODE) {
+        if (Utility.isUserIdValid(mCurrentUserId)) {
+            if (Utility.DEBUG_MODE) {
                 mRestRequestHandler.setIssueStringResponse(RESTRequestHandler.testStringIssue);
                 mRestRequestHandler.setWorkplaceStringResponse(RESTRequestHandler.testStringWorkplace);
             } else {
-
                 mRestRequestHandler.sendParallelRequest(mCurrentUserId);
-                //try {
-                //    mCountDownLatch.await(); //await until all parallel requests have a response
-                //} catch (InterruptedException e) {
-                //    e.printStackTrace();
-                //}
             }
-            //The order of these parameters is obligatory
-            //jsonParserTask.execute(
-            //        mRestRequestHandler.getIssueStringResponse(),
-            //        mRestRequestHandler.getWorkplaceStringResponse());
         } else {
-            Log.e(LOG_TAG, "Current user id < 0");
+            Log.e(LOG_TAG, "Current user id is not valid!");
         }
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         Log.v(LOG_TAG, "Creating CursorLoader");
+        //Show progressbar until backend is handled
+        showProgress(true);
+
         // Sort order =  Ascending, by Assigned Time
         String sortOrder = IssueContract.IssueEntry.COLUMN_ASSIGNED_TIME + " ASC";
         Uri allIssues = IssueContract.IssueEntry.CONTENT_URI;
@@ -224,12 +236,16 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         Log.v(LOG_TAG, "Loader onLoadFinished");
         mOverviewListAdapter.swapCursor(cursor);
-        Log.v(LOG_TAG, "Loader cursor swapped, cursorCount = "+cursor.getCount());
+
+        //Hide progressbar
+        showProgress(false);
+        Log.v(LOG_TAG, "Loader cursor swapped, cursorCount = " + cursor.getCount());
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
         Log.v(LOG_TAG, "Loader onLoaderReset");
         mOverviewListAdapter.swapCursor(null);
+        showProgress(true);
     }
 }
