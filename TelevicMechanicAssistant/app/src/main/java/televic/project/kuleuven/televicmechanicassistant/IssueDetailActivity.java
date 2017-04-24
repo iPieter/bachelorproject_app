@@ -226,11 +226,9 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                             @Override
                             public void onResponse(Bitmap response) {
                                 removeLoadingProgress();
-                                //TODO insert blob to IMAGE_BLOB with db UPDATE method
-                                ContentValues contentValues = new ContentValues();
-                                contentValues.put(IssueContract.IssueAssetEntry.COLUMN_IMAGE_BLOB,
-                                        response.byt);
-                                getContentResolver().insert(MyBaseColumn.MyTable.CONTENT_URI, values);
+                                //TODO we need an issueAsset id in the response!!!
+                                int assetId = 0;
+                                insertImageInDatabase(response,assetId);
                             }
                         }, 350, 350, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565,
                         new Response.ErrorListener() {
@@ -238,6 +236,8 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                             public void onErrorResponse(VolleyError error) {
                                 error.printStackTrace();
                                 Log.e(LOG_TAG, "Image fetch FAILED");
+
+                                Utility.redirectIfUnauthorized(getApplicationContext(),error);
 
                                 removeLoadingProgress();
                                 Context context = getApplicationContext();
@@ -255,6 +255,19 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
 
             cursor.moveToNext();
         }
+    }
+
+    public void insertImageInDatabase(Bitmap response, int assetId){
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(IssueContract.IssueAssetEntry.COLUMN_IMAGE_BLOB,
+                Utility.toByteArray(response));
+
+        //Calling our contentProvider through the contentResolver
+        getContentResolver().update(
+                IssueContract.IssueAssetEntry.buildIssueAssetUri(assetId), //TODO retrieve id from response dynamicly
+                contentValues,
+                null,
+                null);
     }
 
     /**
@@ -303,6 +316,8 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
             public void onErrorResponse(VolleyError error) {
                 mCurrentPhotoPath = null;
                 removeProgress();
+
+                Utility.redirectIfUnauthorized(getApplicationContext(),error);
 
                 Context context = getApplicationContext();
                 CharSequence text = "De boodschap kon niet verzonden worden, controleer of u internetverbinding werkt.";

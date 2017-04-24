@@ -162,9 +162,10 @@ public class Utility {
      */
     public static byte[] toByteArray(Bitmap bitmap){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        int quality = 100;
 
         //Compress the bitmap and write to the ByteArrayOutputStream
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+        bitmap.compress(Bitmap.CompressFormat.PNG, quality, baos);
 
         return baos.toByteArray();
     }
