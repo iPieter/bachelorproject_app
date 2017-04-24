@@ -268,6 +268,12 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         }
     }
 
+    /**
+     * For a specified assetId, the tupple of the IssueAsset gets updated with the
+     * queried image as Blob.
+     * @param bitmap the picture
+     * @param assetId the IssueAsset to update
+     */
     public void insertImageInDatabase(Bitmap bitmap, int assetId) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(IssueContract.IssueAssetEntry.COLUMN_IMAGE_BLOB,
@@ -455,6 +461,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         }
     }
 
+    //TODO insert into database instead of local file
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -500,40 +507,4 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         Log.v(LOG_TAG, "Loader onLoaderReset");
         mListAdapter.swapCursor(null);
     }
-
-    /*
-    //TODO delete
-    public void staticDataLoading(){
-        user = new User();
-        user.setName( "Jan Met De Pet" );
-
-        final IssueAsset asset = new IssueAsset();
-        asset.setId( 0 );
-        asset.setDescr( "De wagon vertoont een afwijking aan zijn roll waarden. Controleer het onderstel vooraan." );
-        asset.setTime( new Date( ) );
-        asset.setUser( user );
-        asset.setLocation( "azerazer" );
-
-        IssueAsset asset1 = new IssueAsset();
-        asset1.setId( 1 );
-        asset1.setDescr( "Voluptas molestiae quo voluptas ut ut totam quia. Quibusdam amet labore eos perspiciatis delectus doloribus. Ipsa maiores doloremque culpa iste.\n" +
-                "Velit rerum inventore quia sunt. Libero dolores rerum eos nulla explicabo voluptas ratione. Rem sit dolorem voluptate culpa perspiciatis omnis et enim. Sequi ab qui qui voluptatem in dolorem. Illum expedita odit libero enim expedita et doloribus.\n" +
-                "Vel deleniti et est consequuntur corporis repellendus molestiae consequatur. Sed nostrum est unde aut occaecati illo ut omnis. Perspiciatis optio est at. Doloremque perspiciatis dignissimos maiores assumenda vitae.\n" +
-                "Consectetur nesciunt vel excepturi asperiores earum est veritatis. Ducimus et sequi et voluptas aliquid vitae aut. Non dolor quasi non sunt inventore. Occaecati harum fuga est. Nemo et et illo modi est." );
-        asset1.setTime( new Date( ) );
-        asset1.setUser( user );
-        asset1.setLocation( "" );
-
-        IssueAsset asset2 = new IssueAsset();
-        asset2.setId( 2 );
-        asset2.setDescr( "Test of de remmen nog goed werken." );
-        asset2.setTime( new Date( ) );
-        asset2.setUser( user );
-        asset2.setLocation( "azerazerazr" );
-
-        assets.add( asset );
-        assets.add( asset1 );
-        assets.add( asset2 );
-    }
-    */
 }
