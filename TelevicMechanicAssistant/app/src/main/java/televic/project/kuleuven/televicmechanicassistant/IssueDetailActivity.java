@@ -1,10 +1,12 @@
 package televic.project.kuleuven.televicmechanicassistant;
 
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -225,7 +227,10 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                             public void onResponse(Bitmap response) {
                                 removeLoadingProgress();
                                 //TODO insert blob to IMAGE_BLOB with db UPDATE method
-                                //asset.setBitmap(response);
+                                ContentValues contentValues = new ContentValues();
+                                contentValues.put(IssueContract.IssueAssetEntry.COLUMN_IMAGE_BLOB,
+                                        response.byt);
+                                getContentResolver().insert(MyBaseColumn.MyTable.CONTENT_URI, values);
                             }
                         }, 350, 350, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565,
                         new Response.ErrorListener() {

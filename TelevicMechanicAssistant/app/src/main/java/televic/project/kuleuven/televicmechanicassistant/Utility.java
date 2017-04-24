@@ -4,10 +4,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.VolleyError;
+
+import java.io.ByteArrayOutputStream;
 
 /**
  * Created by Matthias on 23/04/2017.
@@ -150,5 +153,19 @@ public class Utility {
                 context.startActivity(intent);
             }
         }
+    }
+
+    /**
+     * Method to convert a Bitmap to a Byte array.
+     * @param bitmap
+     * @return the Byte array
+     */
+    public static byte[] toByteArray(Bitmap bitmap){
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        //Compress the bitmap and write to the ByteArrayOutputStream
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+
+        return baos.toByteArray();
     }
 }
