@@ -4,7 +4,6 @@ import android.content.Context;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 import android.util.Log;
 
 import com.android.volley.AuthFailureError;
@@ -85,7 +84,16 @@ public class RESTRequestHandler {
 
                             Utility.redirectIfUnauthorized(mContext, error);
                         }
-                    });
+                    }){
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    Map<String, String> params = new HashMap<>();
+                    params.put("Authorization", "Bearer " + Utility.getLocalToken(mContext));
+
+                    return params;
+                }
+            };
+
 
             //Singleton handles call to REST
             Log.v(LOG_TAG, "Calling RESTSingleton with context:" + mContext);
@@ -140,7 +148,7 @@ public class RESTRequestHandler {
                 @Override
                 public Map<String, String> getHeaders() throws AuthFailureError {
                     Map<String, String> params = new HashMap<>();
-                    params.put("Authorization", "Bearer " + TOKEN);
+                    params.put("Authorization", "Bearer " + Utility.getLocalToken(mContext));
 
                     return params;
                 }
@@ -175,8 +183,6 @@ public class RESTRequestHandler {
     public void setWorkplaceStringResponse(String workplaceStringResponse) {
         this.workplaceStringResponse = workplaceStringResponse;
     }
-
-    String TOKEN = "gNHCG8Ps1Y538RWGJRlgzN5VNCdC9mifmz0zDzQreSoR1dLaGXhK6BGZNQmtNy4Ya5XkP+zxApkT5Fndxg2zgkMmNb2sVeSuGLkfw8wEc8A7FqE48aFFptI91u/i9jSxMn+wRasoFHMF3PRJglUn4uDRQzIACIpoFDaU3ILlc44+SoxJM+ajbFV4zAsz+Mf/p3GLjgqHwjc2h0W15sgJC0qQIQzUGc/VP+N22XwMqjTxJGSh8BaomGVq5mYfsRRV";
 
     static String testStringIssue = "[\n" +
             "    {\n" +
