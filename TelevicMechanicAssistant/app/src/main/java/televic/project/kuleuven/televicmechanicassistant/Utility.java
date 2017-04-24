@@ -3,6 +3,7 @@ package televic.project.kuleuven.televicmechanicassistant;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.util.Log;
 
 import com.android.volley.NetworkResponse;
@@ -84,7 +85,7 @@ public class Utility {
         SharedPreferences pref = context.getApplicationContext()
                 .getSharedPreferences(SHARED_PREF, PRIVATE_MODE);
 
-        SharedPreferences.Editor editor = pref.edit();
+        Editor editor = pref.edit();
         editor.putString(TOKEN_TAG, token);
         editor.apply();
         Log.v(LOG_TAG, "SHARED_PREF: local token saved: " + token);
@@ -98,7 +99,7 @@ public class Utility {
         SharedPreferences pref = context.getApplicationContext()
                 .getSharedPreferences(SHARED_PREF, PRIVATE_MODE);
 
-        SharedPreferences.Editor editor = pref.edit();
+        Editor editor = pref.edit();
         editor.putInt(USER_ID_TAG, user_id);
         editor.putString(USER_NAME_TAG, user_name);
         editor.apply();
@@ -106,12 +107,25 @@ public class Utility {
     }
 
     /**
+     * Removing locally stored TOKEN in sharedPreferences, if present.
+     */
+    public static void removeLocalToken(Context context) {
+        SharedPreferences pref = context.getApplicationContext()
+                .getSharedPreferences(SHARED_PREF, PRIVATE_MODE);
+
+        Editor editor = pref.edit();
+        editor.remove(TOKEN_TAG);
+        editor.apply();
+    }
+
+    /**
      * Check if the userId is valid.
+     *
      * @param id the userid
      * @return true if id is valid
      */
-    public static boolean isUserIdValid(int id){
-        Log.v(LOG_TAG,"Validating user_id="+id);
+    public static boolean isUserIdValid(int id) {
+        Log.v(LOG_TAG, "Validating user_id=" + id);
         return id >= 0;
     }
 
@@ -126,6 +140,9 @@ public class Utility {
         NetworkResponse networkResponse = error.networkResponse;
         if (networkResponse != null) {
             if (networkResponse.statusCode == Utility.UNAUTHORIZED) {
+                //Delete token if present
+                removeLocalToken(context);
+
                 //Redirect to login
                 Log.v(LOG_TAG, "Redirecting to Login");
                 Intent intent = new Intent(context, LoginActivity.class);
