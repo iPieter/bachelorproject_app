@@ -208,7 +208,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         Cursor cursor = getContentResolver().query(
                 assetsWithImgUri, REST_COLUMNS, null, null, null);
 
-        String baseUrl = RESTSingleton.BASE_URL + "/assets/issue";
+        String baseUrl = RESTSingleton.BASE_URL + "/" + RESTSingleton.ISSUE_ASSET_PATH;
         String url;
         //Iterate over Cursor's rows
         cursor.moveToFirst();
