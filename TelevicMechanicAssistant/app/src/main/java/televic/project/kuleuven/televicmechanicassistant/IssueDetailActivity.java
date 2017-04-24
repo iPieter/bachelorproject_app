@@ -223,6 +223,8 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                 //The URL to fetch the image for a certain issueAssetId
                 url = baseUrl + "/" + cursor.getInt(COL_ASSET_ID);
 
+                final int ID = cursor.getInt( COL_ASSET_ID );
+
                 //Create the REST ImageRequest
                 ImageRequest request = new ImageRequest(url,
                         new Response.Listener<Bitmap>() {
@@ -230,7 +232,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                             public void onResponse(Bitmap response) {
                                 removeLoadingProgress();
                                 //TODO we need an issueAsset id in the response!!!
-                                int assetId = 0;
+                                int assetId = ID;
                                 insertImageInDatabase(response, assetId);
                             }
                         }, 350, 350, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565,
