@@ -17,6 +17,7 @@ import android.support.v4.content.FileProvider;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Selection;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -228,7 +229,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                                 removeLoadingProgress();
                                 //TODO we need an issueAsset id in the response!!!
                                 int assetId = 0;
-                                insertImageInDatabase(response,assetId);
+                                insertImageInDatabase(response, assetId);
                             }
                         }, 350, 350, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565,
                         new Response.ErrorListener() {
@@ -237,7 +238,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                                 error.printStackTrace();
                                 Log.e(LOG_TAG, "Image fetch FAILED");
 
-                                Utility.redirectIfUnauthorized(getApplicationContext(),error);
+                                Utility.redirectIfUnauthorized(getApplicationContext(), error);
 
                                 removeLoadingProgress();
                                 Context context = getApplicationContext();
@@ -257,17 +258,22 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         }
     }
 
-    public void insertImageInDatabase(Bitmap response, int assetId){
+    public void insertImageInDatabase(Bitmap bitmap, int assetId) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(IssueContract.IssueAssetEntry.COLUMN_IMAGE_BLOB,
-                Utility.toByteArray(response));
+                Utility.toByteArray(bitmap));
+
+        //WHERE asset.assetId = id
+        String selection = IssueContract.IssueAssetEntry.TABLE_NAME
+                + "." + IssueContract.IssueAssetEntry._ID + " = ?";
+        String[] selectionArgs = {String.valueOf(assetId)};
 
         //Calling our contentProvider through the contentResolver
         getContentResolver().update(
                 IssueContract.IssueAssetEntry.buildIssueAssetUri(assetId), //TODO retrieve id from response dynamicly
                 contentValues,
-                null,
-                null);
+                selection,
+                selectionArgs);
     }
 
     /**
