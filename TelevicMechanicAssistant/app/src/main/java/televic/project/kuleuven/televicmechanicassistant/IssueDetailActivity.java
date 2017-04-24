@@ -90,12 +90,14 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     //Values in Database needed in this activity
     private static final String[] REST_COLUMNS = {
             IssueContract.IssueAssetEntry.TABLE_NAME + "." + IssueContract.IssueAssetEntry._ID,
-            IssueContract.IssueAssetEntry.COLUMN_IMAGE_LOCATION
+            IssueContract.IssueAssetEntry.COLUMN_IMAGE_LOCATION,
+            IssueContract.IssueAssetEntry.COLUMN_IMAGE_BLOB
     };
 
     //Depends on REST_COLUMNS, if REST_COLUMNS changes, so must these indexes!
     static final int COL_REST_ID = 0;
-    static final int COL_REST_IMAGE = 1;
+    static final int COL_REST_IMAGE_PRESENT = 1;
+    static final int COL_REST_IMAGE_BLOB = 2;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -223,35 +225,40 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         //Iterate over Cursor's rows
         cursor.moveToFirst();
         while (cursor.isAfterLast()) {
-            //The URL to fetch the image for a certain issueAssetId
-            url = baseUrl + "/" + cursor.getInt(COL_ASSET_ID);
+            //Only fetch Image if Blob of image is not present in cache.
+            if (cursor.getBlob(COL_REST_IMAGE_BLOB).length == 0) {
+                //The URL to fetch the image for a certain issueAssetId
+                url = baseUrl + "/" + cursor.getInt(COL_ASSET_ID);
 
-            //Create the REST ImageRequest
-            ImageRequest request = new ImageRequest(url,
-                    new Response.Listener<Bitmap>() {
-                        @Override
-                        public void onResponse(Bitmap response) {
-                            removeLoadingProgress();
-                            //TODO insert blob to IMAGE_BLOB with db UPDATE method
-                            //asset.setBitmap(response);
-                        }
-                    }, 350, 350, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565,
-                    new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            removeLoadingProgress();
+                //Create the REST ImageRequest
+                ImageRequest request = new ImageRequest(url,
+                        new Response.Listener<Bitmap>() {
+                            @Override
+                            public void onResponse(Bitmap response) {
+                                removeLoadingProgress();
+                                //TODO insert blob to IMAGE_BLOB with db UPDATE method
+                                //asset.setBitmap(response);
+                            }
+                        }, 350, 350, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565,
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                error.printStackTrace();
+                                Log.e(LOG_TAG, "Image fetch FAILED");
 
-                            Context context = getApplicationContext();
-                            CharSequence text = "De afbeeldingen konden niet geladen worden, probeer later opnieuw.";
-                            int duration = Toast.LENGTH_LONG;
+                                removeLoadingProgress();
+                                Context context = getApplicationContext();
+                                CharSequence text = "De afbeeldingen konden niet geladen worden, probeer later opnieuw.";
+                                int duration = Toast.LENGTH_LONG;
 
-                            Toast toast = Toast.makeText(context, text, duration);
-                            toast.show();
-                        }
-                    });
+                                Toast toast = Toast.makeText(context, text, duration);
+                                toast.show();
+                            }
+                        });
 
-            //Adding the request to the requestQueue, Volley handles the rest
-            RESTSingleton.getInstance(getApplicationContext()).addToRequestQueue(request);
+                //Adding the request to the requestQueue, Volley handles the rest
+                RESTSingleton.getInstance(getApplicationContext()).addToRequestQueue(request);
+            }
 
             cursor.moveToNext();
         }
