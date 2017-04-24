@@ -27,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
@@ -36,6 +37,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 import televic.project.kuleuven.televicmechanicassistant.data.IssueContract;
 
@@ -248,7 +250,15 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                                 Toast toast = Toast.makeText(context, text, duration);
                                 toast.show();
                             }
-                        });
+                        }) {
+                    @Override
+                    public Map<String, String> getHeaders() throws AuthFailureError {
+                        Map<String, String> params = new HashMap<>();
+                        params.put("Authorization", "Bearer " +
+                                Utility.getLocalToken(getApplicationContext()));
+                        return params;
+                    }
+                };
 
                 //Adding the request to the requestQueue, Volley handles the rest
                 RESTSingleton.getInstance(getApplicationContext()).addToRequestQueue(request);
@@ -370,7 +380,8 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
             @Override
             protected Map<String, String> getParams() {
                 Map<String, String> params = new HashMap<>();
-                params.put("api_token", Utility.getLocalToken(getApplicationContext()));
+                params.put("Authorization", "Bearer " +
+                                Utility.getLocalToken(getApplicationContext()));
                 params.put("desc", ((EditText) findViewById(R.id.textfield_issueasset)).getText().toString());
                 params.put("userID", String.valueOf(Utility.getLocalUserId(getApplicationContext())));
                 params.put("issueID", String.valueOf(mIssueId));
