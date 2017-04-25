@@ -15,7 +15,6 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.FileProvider;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -157,8 +156,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main_overview, menu);
-        getMenuInflater().inflate(R.menu.extra_detail, menu);
+        getMenuInflater().inflate(R.menu.main_detail, menu);
         return true;
     }
 
@@ -166,15 +164,9 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.action_settings) {
-            //TODO create settings
-            //startActivity(new Intent(this,SettingsActivity.class));
-            return true;
-        }
         if (id == R.id.action_graphs) {
             goToGraphActivity();
         }
-
         return super.onOptionsItemSelected(item);
     }
 

@@ -37,13 +37,8 @@ public class IssueOverviewActivity extends AppCompatActivity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
 
-        if (id == R.id.action_settings) {
-            //TODO create settings
-            //startActivity(new Intent(this,SettingsActivity.class));
-            return true;
-        }
+        //int id = item.getItemId();
 
         return super.onOptionsItemSelected(item);
     }
