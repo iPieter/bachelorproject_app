@@ -61,7 +61,8 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
 
     //Values in Database needed in this activity
     private static final String[] DETAIL_COLUMNS = {
-            IssueContract.IssueAssetEntry.TABLE_NAME + "." + IssueContract.IssueAssetEntry._ID,
+            IssueContract.IssueAssetEntry.TABLE_NAME + "." +
+                    IssueContract.IssueAssetEntry._ID +" AS _id", //CursorLoader Needs _id column
             IssueContract.IssueAssetEntry.COLUMN_DESCRIPTION,
             IssueContract.IssueAssetEntry.COLUMN_POST_TIME,
             IssueContract.IssueAssetEntry.COLUMN_IMAGE_PRESENT,
