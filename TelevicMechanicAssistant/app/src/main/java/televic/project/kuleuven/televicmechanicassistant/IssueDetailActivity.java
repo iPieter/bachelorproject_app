@@ -221,7 +221,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
 
             Log.i( LOG_TAG, "TESTING ASSET: " + cursor.getInt( COL_ASSET_ID ) );
             //Only fetch Image if Blob of image is not present in cache.
-            if (cursor.getBlob(COL_REST_IMAGE_BLOB).length == 0) {
+            if (cursor.getBlob(COL_REST_IMAGE_BLOB) == null) {
 
                 Log.i( LOG_TAG, "FETCHING FOR ISSUE ASSET: " + cursor.getInt( COL_ASSET_ID ) );
                 //The URL to fetch the image for a certain issueAssetId

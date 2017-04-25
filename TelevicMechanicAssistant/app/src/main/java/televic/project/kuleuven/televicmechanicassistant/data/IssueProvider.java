@@ -82,7 +82,7 @@ public class IssueProvider extends ContentProvider {
         matcher.addURI(authority, IssueContract.PATH_ISSUE_ASSET, ISSUE_ASSET);
         matcher.addURI(authority, IssueContract.PATH_ISSUE_ASSET + "/#", ISSUE_ASSET_WITH_ISSUE_ID);
         matcher.addURI(authority, IssueContract.PATH_ISSUE_ASSET + "/"
-                + IssueContract.PATH_WITH_IMG + "/*" , ISSUE_ASSET_WITH_ISSUE_ID_AND_IMG);
+                + IssueContract.PATH_WITH_IMG + "/#" , ISSUE_ASSET_WITH_ISSUE_ID_AND_IMG);
         matcher.addURI(authority, IssueContract.PATH_TRAINCOACH, TRAINCOACH);
 
         Log.v(LOG_TAG, "UriMatcher initialized");
@@ -203,7 +203,8 @@ public class IssueProvider extends ContentProvider {
     //Setup of query to ask all IssueAssets for certain parameter IssueId
     // and check if IMAGE_LOCATION="IMG"
     private Cursor getIssueAssetByIssueIdAndImg(Uri uri, String[] projection, String sortOrder) {
-        int issueId = IssueContract.IssueAssetEntry.getIssueIdFromUri(uri);
+        int issueId = IssueContract.IssueAssetEntry.getIssueIdFromImgUri(uri);
+        Log.v(LOG_TAG,"IssueId to query getIssueAssetByIssueIdAndImg = "+issueId);
 
         String selection = sIssueAssetByIssueAndImgSelection;
         String[] selectionArgs = new String[]{"IMG",Integer.toString(issueId)};

@@ -6,6 +6,8 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.Log;
 
+import java.util.List;
+
 /**
  * Created by Matthias on 18/04/2017.
  */
@@ -100,12 +102,21 @@ public class IssueContract {
         public static Uri buildIssueAssetWithImgUri(long id){
             Uri uri = IssueContract.IssueAssetEntry.CONTENT_URI
                     .buildUpon().appendPath(IssueContract.PATH_WITH_IMG).build();
-
             return ContentUris.withAppendedId(uri, id);
         }
 
         public static int getIssueIdFromUri(Uri uri){
             String idString = uri.getQueryParameter(_ID);
+            Log.v(LOG_TAG,"idString in getIssueIdFromUri="+idString);
+            if(idString!=null && idString.length()>0){
+                return Integer.parseInt(idString);
+            }
+            return -1;
+        }
+
+        public static int getIssueIdFromImgUri(Uri uri){
+            String idString = uri.getPathSegments().get(2);
+            
             if(idString!=null && idString.length()>0){
                 return Integer.parseInt(idString);
             }
