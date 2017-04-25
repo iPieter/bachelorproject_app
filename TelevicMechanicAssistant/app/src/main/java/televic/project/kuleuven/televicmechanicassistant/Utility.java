@@ -5,11 +5,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.VolleyError;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
 /**
@@ -168,5 +170,16 @@ public class Utility {
         bitmap.compress(Bitmap.CompressFormat.PNG, quality, baos);
 
         return baos.toByteArray();
+    }
+
+    /**
+     * Method to convert a Byte array to a Bitmap
+     * @param byteArray
+     * @return the Bitmap
+     */
+    public static Bitmap toBitmap(byte[] byteArray){
+        ByteArrayInputStream imageStream = new ByteArrayInputStream(byteArray);
+
+        return BitmapFactory.decodeStream(imageStream);
     }
 }

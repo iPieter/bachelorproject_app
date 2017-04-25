@@ -2,6 +2,7 @@ package televic.project.kuleuven.televicmechanicassistant;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -64,15 +65,15 @@ public class IssueAssetListAdapter extends CursorAdapter
         Date date = new Date(Long.valueOf(cursor.getString(IssueDetailActivity.COL_ASSET_POST_TIME)));
         dateField.setText( prettyTime.format( date ) );
 
-
-        /* TODO
-        String imagePath = cursor.getString(IssueDetailActivity.COL_ASSET_IMAGE);
-        if( imagePath.length() > 0 )
-            imageView.setVisibility( View.GONE );
+        byte[] imgBlob = cursor.getBlob(IssueDetailActivity.COL_ASSET_IMAGE_BLOB);
+        if( imgBlob == null ) {
+            imageView.setVisibility(View.GONE);
+        }
         else {
-            imageView.setImageBitmap( asset.getBitmap() );
+            Bitmap imageBitmap = Utility.toBitmap(imgBlob);
+            imageView.setImageBitmap( imageBitmap );
             imageView.setVisibility( View.VISIBLE );
-        }*/
+        }
         Log.v(LOG_TAG, "List item set!");
     }
 }

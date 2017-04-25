@@ -66,6 +66,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
             IssueContract.IssueAssetEntry.COLUMN_DESCRIPTION,
             IssueContract.IssueAssetEntry.COLUMN_POST_TIME,
             IssueContract.IssueAssetEntry.COLUMN_IMAGE_PRESENT,
+            IssueContract.IssueAssetEntry.COLUMN_IMAGE_BLOB,
             IssueContract.IssueAssetEntry.COLUMN_USER_NAME,
             IssueContract.IssueAssetEntry.COLUMN_USER_EMAIL
     };
@@ -74,9 +75,10 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     static final int COL_ASSET_ID = 0;
     static final int COL_ASSET_DESCRIPTION = 1;
     static final int COL_ASSET_POST_TIME = 2;
-    static final int COL_ASSET_IMAGE = 3;
-    static final int COL_ASSET_USER_NAME = 4;
-    static final int COL_ASSET_USER_EMAIL = 5;
+    static final int COL_ASSET_IMAGE_PRESENT = 3;
+    static final int COL_ASSET_IMAGE_BLOB = 4;
+    static final int COL_ASSET_USER_NAME = 5;
+    static final int COL_ASSET_USER_EMAIL = 6;
 
     /* Values Used for the rest request! */
     //Values in Database needed in this activity
