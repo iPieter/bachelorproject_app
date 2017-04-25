@@ -236,10 +236,8 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                             public void onResponse(Bitmap response) {
                                 removeLoadingProgress();
                                 //TODO we need an issueAsset id in the response!!!
-                                Log.i( LOG_TAG, "" + ID );
+                                Log.i( LOG_TAG, "REST onResponse of image, assetID=" + ID );
                                 int assetId = ID;
-
-                                Log.i( LOG_TAG, "Asset ID: " + ID );
 
                                 insertImageInDatabase(response, assetId);
                             }
@@ -296,9 +294,11 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                 + "." + IssueContract.IssueAssetEntry._ID + " = ?";
         String[] selectionArgs = {String.valueOf(assetId)};
 
+        Uri uri=IssueContract.IssueAssetEntry.buildIssueAssetUri(assetId);
+
         //Calling our contentProvider through the contentResolver
         getContentResolver().update(
-                IssueContract.IssueAssetEntry.buildIssueAssetUri(assetId), //TODO retrieve id from response dynamicly
+                uri,
                 contentValues,
                 selection,
                 selectionArgs);

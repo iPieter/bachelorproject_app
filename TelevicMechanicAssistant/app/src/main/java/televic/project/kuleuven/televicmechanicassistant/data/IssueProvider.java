@@ -390,6 +390,10 @@ public class IssueProvider extends ContentProvider {
                 rowsUpdated = db.update(
                         IssueContract.IssueAssetEntry.TABLE_NAME, contentValues, selection, selectionArgs);
                 break;
+            case ISSUE_ASSET_WITH_ISSUE_ID:
+                rowsUpdated = db.update(
+                        IssueContract.IssueAssetEntry.TABLE_NAME, contentValues, selection, selectionArgs);
+                break;
             case TRAINCOACH:
                 rowsUpdated = db.update(
                         IssueContract.TraincoachEntry.TABLE_NAME, contentValues, selection, selectionArgs);
@@ -400,6 +404,7 @@ public class IssueProvider extends ContentProvider {
         if (rowsUpdated != 0) {
             getContext().getContentResolver().notifyChange(uri, null);
         }
+        Log.v(LOG_TAG,rowsUpdated+" rows updated!");
         return rowsUpdated;
     }
 

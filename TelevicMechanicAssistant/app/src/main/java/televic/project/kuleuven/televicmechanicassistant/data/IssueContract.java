@@ -116,7 +116,7 @@ public class IssueContract {
 
         public static int getIssueIdFromImgUri(Uri uri){
             String idString = uri.getPathSegments().get(2);
-            
+
             if(idString!=null && idString.length()>0){
                 return Integer.parseInt(idString);
             }
