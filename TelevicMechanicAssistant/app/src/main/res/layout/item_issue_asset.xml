@@ -70,11 +70,8 @@
                 android:id="@+id/issue_asset_description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_weight="1"
-                android:background="@color/cardview_light_background"
-                android:text="Description"/>
-
+                android:textColor="#000000"
+                android:text="TextView" />
         </LinearLayout>
 
     </android.support.v7.widget.CardView>

@@ -54,7 +54,10 @@ public class IssueAssetListAdapter extends CursorAdapter
 
         //Set datafields in the list item
         Log.v(LOG_TAG, "Binding datafields to list item");
-        descriptionField.setText( cursor.getString(IssueDetailActivity.COL_ASSET_DESCRIPTION) );
+        String description = cursor.getString(IssueDetailActivity.COL_ASSET_DESCRIPTION);
+        Log.v(LOG_TAG, "DESCR FIELD FOR ITEM:"+cursor.getString(IssueDetailActivity.COL_ASSET_DESCRIPTION));
+        Log.v(LOG_TAG,"Descriptionfield="+descriptionField);
+        descriptionField.setText( description ); //TODO
         authorField.setText( cursor.getString(IssueDetailActivity.COL_ASSET_USER_NAME) );
 
         PrettyTime prettyTime = new PrettyTime( new Locale( "nl" ) );
