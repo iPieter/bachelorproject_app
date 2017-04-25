@@ -41,6 +41,7 @@ import televic.project.kuleuven.televicmechanicassistant.data.IssueContract;
 public class IssueDetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     private final String LOG_TAG = IssueDetailActivity.class.getSimpleName();
 
+    public static final String INTENT_DATA_ID_GRAPH = "data_id_for_graph";
     private static final int REQUEST_TAKE_PHOTO = 1;
 
     //Members
@@ -172,7 +173,8 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
 
     private void goToGraphActivity() {
         Intent intent = new Intent(this, GraphActivity.class);
-        intent.putExtra(IssueOverviewFragment.INTENT_DATA_ID, mDataId);
+        intent.putExtra(INTENT_DATA_ID_GRAPH, mDataId);
+        Log.v(LOG_TAG,"Starting Graph with dataid="+mDataId);
         startActivity(intent);
     }
 
