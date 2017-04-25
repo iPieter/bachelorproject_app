@@ -23,8 +23,6 @@ import android.widget.ListView;
 
 import android.widget.TextView;
 
-import java.util.concurrent.CountDownLatch;
-
 import televic.project.kuleuven.televicmechanicassistant.data.IssueContract;
 
 
