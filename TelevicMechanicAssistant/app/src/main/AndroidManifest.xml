@@ -42,7 +42,13 @@
         <activity
             android:name=".IssueDetailActivity"
             android:label="@string/title_activity_issue_detail"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            android:parentActivityName=".IssueOverviewActivity">
+            <!-- Parent activity meta-data to support 4.0 and lower -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".IssueOverviewActivity" />
+        </activity>
 
         <!-- PROVIDERS -->
         <provider
