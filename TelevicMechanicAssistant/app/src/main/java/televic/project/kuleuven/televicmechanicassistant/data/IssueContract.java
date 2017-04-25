@@ -106,7 +106,7 @@ public class IssueContract {
         }
 
         public static int getIssueIdFromUri(Uri uri){
-            String idString = uri.getQueryParameter(_ID);
+            String idString = uri.getPathSegments().get(1);
             Log.v(LOG_TAG,"idString in getIssueIdFromUri="+idString);
             if(idString!=null && idString.length()>0){
                 return Integer.parseInt(idString);

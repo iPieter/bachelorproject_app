@@ -137,7 +137,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         loadingDialog.setTitle("Laden..");
         loadingDialog.setMessage("De boodschappen worden geladen");
         loadingDialog.setCancelable(false);
-        loadingDialog.show();
+        //loadingDialog.show();
 
         //INIT sending dialog
         sendingDialog = new ProgressDialog(this);
@@ -234,7 +234,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                         new Response.Listener<Bitmap>() {
                             @Override
                             public void onResponse(Bitmap response) {
-                                removeLoadingProgress();
+                                //showLoadingProgressDialog();
                                 //TODO we need an issueAsset id in the response!!!
                                 Log.i( LOG_TAG, "REST onResponse of image, assetID=" + ID );
                                 int assetId = ID;
@@ -250,7 +250,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
 
                                 Utility.redirectIfUnauthorized(getApplicationContext(), error);
 
-                                removeLoadingProgress();
+                                //showLoadingProgressDialog(true);
                                 Context context = getApplicationContext();
                                 CharSequence text = "De afbeeldingen konden niet geladen worden, probeer later opnieuw.";
                                 int duration = Toast.LENGTH_LONG;
@@ -446,8 +446,12 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         sendingDialog.dismiss();
     }
 
-    private void removeLoadingProgress() {
-        loadingDialog.dismiss();
+    private void showLoadingProgressDialog(boolean show) {
+        if(show){
+            loadingDialog.show();
+        }else {
+            loadingDialog.dismiss();
+        }
     }
 
     public void takePicture() {
@@ -493,12 +497,13 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Log.v(LOG_TAG, "Creating CursorLoader");
+        showLoadingProgressDialog(true);
 
         // Sort order =  Ascending, by Posted Time
         String sortOrder = IssueContract.IssueAssetEntry.COLUMN_POST_TIME + " ASC";
         Uri issueAssetsOnIssueId = IssueContract.IssueAssetEntry
                 .buildIssueAssetUri(mCurrentUserId);
-        Log.v(LOG_TAG, "CURSORLOADER URI: " + issueAssetsOnIssueId);
+        Log.v(LOG_TAG, "CURSORLOADER URI FOR QUERIES: " + issueAssetsOnIssueId);
 
         return new CursorLoader(this,
                 issueAssetsOnIssueId,
@@ -511,6 +516,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         mListAdapter.swapCursor(cursor);
+        showLoadingProgressDialog(false);
         Log.v(LOG_TAG, "onLoadFinished: Loader cursor swapped, cursorCount = " + cursor.getCount());
     }
 

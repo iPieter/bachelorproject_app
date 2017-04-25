@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import java.util.Vector;
 
 import televic.project.kuleuven.televicmechanicassistant.data.IssueContract;
+import televic.project.kuleuven.televicmechanicassistant.data.IssueDbHelper;
 
 
 /**
@@ -54,6 +55,8 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
     @Override
     protected Void doInBackground(String... strings) {
         Log.v(LOG_TAG, "START JSONPARSING background task");
+        clearDatabaseCache();
+
         String issueStringResponse = strings[0];
         String workplaceStringResponse = strings[1];
 
@@ -66,6 +69,16 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
 
         Log.v(LOG_TAG, "COMPLETED JSONPARSING background task");
         return null;
+    }
+
+    /**
+     * Deleting the previous cachedata in the database.
+     * Remark: Contentprovider (and thus database) only gets created when
+     * first called. So make sure you don't delete the database when still need the cached data.
+     */
+    private void clearDatabaseCache(){
+        mContext.deleteDatabase(IssueDbHelper.DATABASE_NAME);
+        Log.v(LOG_TAG,"Database deleted");
     }
 
     /**

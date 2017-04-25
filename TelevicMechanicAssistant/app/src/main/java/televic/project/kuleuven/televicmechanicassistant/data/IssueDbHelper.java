@@ -15,7 +15,7 @@ public class IssueDbHelper extends SQLiteOpenHelper {
     private static final String LOG_TAG = IssueDbHelper.class.getSimpleName();
 
     private static final int DATABASE_VERSION = 7;
-    static final String DATABASE_NAME = "bachelorproject.db";
+    public static final String DATABASE_NAME = "bachelorproject.db";
 
     public IssueDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
