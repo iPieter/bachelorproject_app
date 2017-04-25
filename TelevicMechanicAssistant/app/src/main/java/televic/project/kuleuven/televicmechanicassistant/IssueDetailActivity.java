@@ -218,8 +218,12 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         //Iterate over Cursor's rows
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
+
+            Log.i( LOG_TAG, "TESTING ASSET: " + cursor.getInt( COL_ASSET_ID ) );
             //Only fetch Image if Blob of image is not present in cache.
             if (cursor.getBlob(COL_REST_IMAGE_BLOB).length == 0) {
+
+                Log.i( LOG_TAG, "FETCHING FOR ISSUE ASSET: " + cursor.getInt( COL_ASSET_ID ) );
                 //The URL to fetch the image for a certain issueAssetId
                 url = baseUrl + "/" + cursor.getInt(COL_ASSET_ID);
 
@@ -232,6 +236,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                             public void onResponse(Bitmap response) {
                                 removeLoadingProgress();
                                 //TODO we need an issueAsset id in the response!!!
+                                Log.i( LOG_TAG, "" + ID );
                                 int assetId = ID;
 
                                 Log.i( LOG_TAG, "Asset ID: " + ID );
@@ -261,6 +266,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                         Map<String, String> params = new HashMap<>();
                         params.put("Authorization", "Bearer " +
                                 Utility.getLocalToken(getApplicationContext()));
+                        Log.i( LOG_TAG, "GETTING HEADERS" );
                         return params;
                     }
                 };
@@ -271,6 +277,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
 
             cursor.moveToNext();
         }
+        Log.i( LOG_TAG, "FINISHED FETCHING ISSUE ASSETS" );
     }
 
     /**
