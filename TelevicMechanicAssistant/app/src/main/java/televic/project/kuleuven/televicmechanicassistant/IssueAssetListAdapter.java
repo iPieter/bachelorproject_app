@@ -9,16 +9,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.ocpsoft.prettytime.PrettyTime;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-
-import model.issue.IssueAsset;
 
 /**
  * Created by Anton on 19/04/2017.

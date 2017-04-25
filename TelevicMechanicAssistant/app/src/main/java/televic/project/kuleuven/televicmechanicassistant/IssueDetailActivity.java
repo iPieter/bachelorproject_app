@@ -103,6 +103,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         //INIT get values from intent
         mIssueId = getIntent().getIntExtra(IssueOverviewFragment.INTENT_ISSUE_ID, -1);
         mDataId = getIntent().getIntExtra(IssueOverviewFragment.INTENT_DATA_ID, -1);
+        Log.v(LOG_TAG,"onCreate IssueDetailActivity, issueId="+mIssueId+",dataId="+mDataId);
 
         //INIT current user
         mCurrentUserId = Utility.getLocalUserId(this);
@@ -229,18 +230,16 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                 //The URL to fetch the image for a certain issueAssetId
                 url = baseUrl + "/" + cursor.getInt(COL_ASSET_ID);
 
-                final int ID = cursor.getInt( COL_ASSET_ID );
+                final int ASSET_ID = cursor.getInt( COL_ASSET_ID );
 
                 //Create the REST ImageRequest
                 ImageRequest request = new ImageRequest(url,
                         new Response.Listener<Bitmap>() {
                             @Override
                             public void onResponse(Bitmap response) {
-                                //showLoadingProgressDialog();
-                                //TODO we need an issueAsset id in the response!!!
-                                Log.i( LOG_TAG, "REST onResponse of image, assetID=" + ID );
-                                int assetId = ID;
+                                Log.i( LOG_TAG, "REST onResponse of image, assetID=" + ASSET_ID );
 
+                                int assetId = ASSET_ID;
                                 insertImageInDatabase(response, assetId);
                             }
                         }, 350, 350, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565,
@@ -252,7 +251,6 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
 
                                 Utility.redirectIfUnauthorized(getApplicationContext(), error);
 
-                                //showLoadingProgressDialog(true);
                                 Context context = getApplicationContext();
                                 CharSequence text = "De afbeeldingen konden niet geladen worden, probeer later opnieuw.";
                                 int duration = Toast.LENGTH_LONG;
@@ -503,7 +501,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         // Sort order =  Ascending, by Posted Time
         String sortOrder = IssueContract.IssueAssetEntry.COLUMN_POST_TIME + " ASC";
         Uri issueAssetsOnIssueId = IssueContract.IssueAssetEntry
-                .buildIssueAssetUri(mCurrentUserId);
+                .buildIssueAssetUri(mIssueId);
         Log.v(LOG_TAG, "CURSORLOADER URI FOR QUERIES: " + issueAssetsOnIssueId);
 
         return new CursorLoader(this,
