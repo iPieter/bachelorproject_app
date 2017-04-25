@@ -117,11 +117,6 @@ public class IssueProvider extends ContentProvider {
         Log.d(LOG_TAG, "entered onCreate");
         mOpenHelper = new IssueDbHelper(getContext());
 
-        //Deleting database cache before creating a new ContentProvider
-        mOpenHelper.close();
-        getContext().deleteDatabase(IssueDbHelper.DATABASE_NAME);
-        Log.d(LOG_TAG, "DATABASE DELETED!!!");
-
         return true;
     }
 
