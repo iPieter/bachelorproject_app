@@ -137,7 +137,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         loadingDialog.setTitle("Laden..");
         loadingDialog.setMessage("De boodschappen worden geladen");
         loadingDialog.setCancelable(false);
-        //loadingDialog.show();
+        showLoadingProgressDialog(true);
 
         //INIT sending dialog
         sendingDialog = new ProgressDialog(this);
@@ -497,7 +497,6 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Log.v(LOG_TAG, "Creating CursorLoader");
-        showLoadingProgressDialog(true);
 
         // Sort order =  Ascending, by Posted Time
         String sortOrder = IssueContract.IssueAssetEntry.COLUMN_POST_TIME + " ASC";

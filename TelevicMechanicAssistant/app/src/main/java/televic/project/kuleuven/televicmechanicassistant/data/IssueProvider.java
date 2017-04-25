@@ -106,11 +106,22 @@ public class IssueProvider extends ContentProvider {
                     IssueContract.IssueAssetEntry.TABLE_NAME +
                     "." + IssueContract.IssueAssetEntry.COLUMN_ISSUE_ID + " = ? ";
 
+    /**
+     * First we create a new SQLiteOpenHelper.
+     * Second, we delete the previous cachedata in the database.
+     * Remark: Contentprovider (and thus database) only gets created when
+     * first called. So make sure you don't delete the database when still need the cached data.
+     */
     @Override
     public boolean onCreate() {
         Log.d(LOG_TAG, "entered onCreate");
         mOpenHelper = new IssueDbHelper(getContext());
-        Log.d(LOG_TAG, "leaving onCreate: IssueProvider created!");
+
+        //Deleting database cache before creating a new ContentProvider
+        mOpenHelper.close();
+        getContext().deleteDatabase(IssueDbHelper.DATABASE_NAME);
+        Log.d(LOG_TAG, "DATABASE DELETED!!!");
+
         return true;
     }
 
