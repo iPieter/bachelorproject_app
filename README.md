@@ -6,7 +6,7 @@ Consist of a fragment IssueOverviewFragment. This fragment dynamicly handles the
 ### Detailview of an Issue
 The data gets loaded from the database to populate the listview. The IMAGE_PRESENT column gets queried to check which IssueAsset have an image attached. If the IssueAsset has an attached image on the server, than a REST-request is handed over to Volley to fetch the image from the server. On response of the server, the bitmap gets saved into the database as a Blob. The CursorLoader notifies the adaptation in the database and populates the images in the listview.
 
-### Graphs
+### Graphs of an Issue
 From the Detailview, the user can consult the attached data for the selected Issue. This data is fetched from the server, but is not saved in the database because of its size. Also it is seldom that the user (the mechanic) will need to consult the graphics concerning the Issue.
 
 ## REST (Volley)
