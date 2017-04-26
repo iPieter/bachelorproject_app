@@ -109,8 +109,6 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_issue_detail);
 
-        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Berichten");
 
@@ -179,6 +177,8 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         } else if (id == R.id.action_change_status) {
             String newStatus = "IN_PROGRESS";
             changeIssueStatus(newStatus);
+        } else if (id == R.id.action_logout){
+            Utility.redirectToLogin(this);
         }
         return super.onOptionsItemSelected(item);
     }

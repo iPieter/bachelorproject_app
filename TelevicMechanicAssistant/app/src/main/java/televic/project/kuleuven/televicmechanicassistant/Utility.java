@@ -150,9 +150,6 @@ public class Utility {
         NetworkResponse networkResponse = error.networkResponse;
         if (networkResponse != null) {
             if (networkResponse.statusCode == Utility.UNAUTHORIZED) {
-                //Delete token if present
-                removeLocalToken(context);
-
                 //Redirect to login
                 redirectToLogin(context);
             }
@@ -161,9 +158,13 @@ public class Utility {
 
     /**
      * The user gets redirected to the login screen.
+     * In all cases: if a token is present, it must be deleted.
      * @param context
      */
     public static void redirectToLogin(Context context){
+        //Delete token if present
+        removeLocalToken(context);
+
         Log.v(LOG_TAG, "Redirecting to Login");
         Intent intent = new Intent(context, LoginActivity.class);
         context.startActivity(intent);
