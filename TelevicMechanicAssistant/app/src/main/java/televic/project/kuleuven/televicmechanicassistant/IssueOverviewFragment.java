@@ -140,6 +140,10 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
         return rootView;
     }
 
+    /**
+     * When the activity is created, the loader must be initialized.
+     * @param savedInstanceState
+     */
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         getLoaderManager().initLoader(OVERVIEW_LOADER, null, this);

@@ -579,6 +579,11 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                 sortOrder);
     }
 
+    /**
+     * Method called when loader is finished
+     * @param loader
+     * @param cursor
+     */
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         mListAdapter.swapCursor(cursor);
@@ -591,10 +596,4 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         Log.v(LOG_TAG, "Loader onLoaderReset");
         mListAdapter.swapCursor(null);
     }
-
-    String testStringResponse = "{\"id\":21," +
-            "\"descr\":\"jobolo\"," +
-            "\"time\":1493198920546," +
-            "\"location\":\"C:\\\\Users\\\\Gebruiker/project_televic/issue_assets/2017_28_26_11_28_40_1.png\"," +
-            "\"user\":{\"id\":1,\"name\":\"John Doe\",\"email\":\"john0@test.be\",\"role\":\"MECHANIC\",\"imageHash\":\"qwertyui\"}};";
 }
