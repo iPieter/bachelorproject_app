@@ -3,8 +3,11 @@ package televic.project.kuleuven.televicmechanicassistant;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -43,9 +46,11 @@ public class GraphActivity extends AppCompatActivity
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_graph );
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         loadingDialog = new ProgressDialog( this );
         loadingDialog.setTitle( "Laden.." );
-        loadingDialog.setMessage( "De boodschappen worden geladen" );
+        loadingDialog.setMessage( "De grafieken worden geladen" );
         loadingDialog.setCancelable( false );
         loadingDialog.show();
 
@@ -83,7 +88,7 @@ public class GraphActivity extends AppCompatActivity
 
                 Context context = getApplicationContext();
                 CharSequence text = "Er was een probleem tijdens het ophalen van de grafieken." +
-                                    " Test u internetverbinding en probeer opnieuw.";
+                                    " Test uw internetverbinding en probeer opnieuw.";
                 int duration = Toast.LENGTH_LONG;
 
                 Toast toast = Toast.makeText(context, text, duration);
@@ -127,5 +132,26 @@ public class GraphActivity extends AppCompatActivity
         graphView.getViewport().setScalableY(true);
 
         graphView.addSeries(seriesRoll);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main_detail, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_logout: {
+                Utility.redirectToLogin(this);
+                break;
+            }
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

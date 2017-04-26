@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.app.NavUtils;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.FileProvider;
 import android.support.v4.content.Loader;
@@ -158,6 +159,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         sendingDialog.setCancelable(false); // disable dismiss by tapping outside of the dialog
 
         //Calling Backend
+        if(mIssueId!=-1)
         fetchIssueAssetImages();
     }
 
@@ -170,15 +172,24 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
 
-        if (id == R.id.action_graphs) {
-            goToGraphActivity();
-        } else if (id == R.id.action_change_status) {
-            String newStatus = "IN_PROGRESS";
-            changeIssueStatus(newStatus);
-        } else if (id == R.id.action_logout){
-            Utility.redirectToLogin(this);
+        switch (item.getItemId()) {
+            case R.id.action_graphs:
+                goToGraphActivity();
+                break;
+
+            case R.id.action_change_status:
+                String newStatus = "IN_PROGRESS";
+                changeIssueStatus(newStatus);
+                break;
+
+            case R.id.action_logout: {
+                Utility.redirectToLogin(this);
+                break;
+            }
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -207,7 +218,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                 (Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {
 
                     public void onResponse(JSONObject response) {
-                        Log.v(LOG_TAG,"JSONRESPONSE STATUSCHANGE: "+response.toString());
+                        Log.v(LOG_TAG, "JSONRESPONSE STATUSCHANGE: " + response.toString());
                         updateStatusInDatabase(status);
                     }
                 }, new Response.ErrorListener() {
@@ -233,9 +244,9 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         RESTSingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonStringRequest);
     }
 
-    private void updateStatusInDatabase(String status){
+    private void updateStatusInDatabase(String status) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(IssueContract.IssueEntry.COLUMN_STATUS,status);
+        contentValues.put(IssueContract.IssueEntry.COLUMN_STATUS, status);
 
         //WHERE issue.id = id
         String selection = IssueContract.IssueEntry.TABLE_NAME
@@ -581,6 +592,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
 
     /**
      * Method called when loader is finished
+     *
      * @param loader
      * @param cursor
      */
