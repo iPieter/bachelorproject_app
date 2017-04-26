@@ -185,40 +185,6 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         startActivity(intent);
     }
 
-    public void onResume() {
-        super.onResume();
-
-        /*
-        if( mCurrentPhotoPath != null ) {
-            Log.i( LOG_TAG, "path:" + mCurrentPhotoPath );
-            File imgFile = new  File( mCurrentPhotoPath );
-            Log.i( LOG_TAG, "path2:" + imgFile.exists() + ":" + imgFile.getAbsolutePath() );
-            if(imgFile.exists()){
-                Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-                ImageView myImage = (ImageView) findViewById(R.id.image_preview);
-                myImage.setImageBitmap(myBitmap);
-            }
-        }
-        */
-    }
-
-    /**
-     * When the requestcode equals REQUEST_TAKE_PHOTO, the photo in the gallery
-     * is written to the database.
-     * @param requestCode
-     * @param resultCode
-     * @param data
-     */
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_TAKE_PHOTO) {
-            if (resultCode == RESULT_OK) {
-                //Here we can do something with the pic
-            }
-        }
-    }
-
-
     /**
      * First, all issueAssets with current issueId and contain an img are queried.
      * If IMAGE_LOCATION equals "IMG", then a REST request for this IssueAssetId is created
@@ -367,6 +333,8 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                 }
                 mCurrentPhotoPath = null;
                 showSendingProgressDialog(false);
+
+                //Clearing the message inputbar
                 ((EditText) findViewById(R.id.textfield_issueasset)).setText("");
             }
         }, new Response.ErrorListener() {
