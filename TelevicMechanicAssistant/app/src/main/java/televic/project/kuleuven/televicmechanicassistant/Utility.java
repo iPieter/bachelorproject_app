@@ -11,8 +11,12 @@ import android.util.Log;
 import com.android.volley.NetworkResponse;
 import com.android.volley.VolleyError;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 /**
  * Created by Matthias on 23/04/2017.
@@ -181,5 +185,29 @@ public class Utility {
         ByteArrayInputStream imageStream = new ByteArrayInputStream(byteArray);
 
         return BitmapFactory.decodeStream(imageStream);
+    }
+
+    /**
+     *
+     * @param path
+     * @return byte array of image, if it is present. null if no image present on path.
+     */
+    public static byte[] getBytesFromPicture(String path){
+        byte[] blob=null;
+        if (path != null) {
+            File file = new File(path);
+            if (file.isFile()) {
+                int size = (int) file.length();
+                blob = new byte[size];
+                try {
+                    BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
+                    buf.read(blob, 0, blob.length);
+                    buf.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return blob;
     }
 }

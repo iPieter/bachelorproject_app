@@ -324,6 +324,23 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     }
 
     /**
+     * When the user has sent a postRequest to make a new IssueAsset, the server will respond
+     * and provide the given id for the IssueAsset
+     * @param response the JSONObject returne from the REST request
+     */
+    public void insertNewIssueAssetInDatabase(JSONObject response){
+        //transfer local file to database, if a local image is present.
+        byte[] blob= Utility.getBytesFromPicture(mCurrentPhotoPath);
+
+        ContentValues contentValues = JSONParserTask.parseSingleAsset(response,blob,mIssueId);
+
+        Uri uri=IssueContract.IssueAssetEntry.CONTENT_URI;
+
+        //Calling our contentProvider through the contentResolver
+        getContentResolver().insert(uri, contentValues);
+    }
+
+    /**
      * The user can upload a new IssueAsset with picture and description to the server.
      * Also locally on the app, the list must be updated.
      */
@@ -335,28 +352,15 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         VolleyMultipartRequest multipartRequest = new VolleyMultipartRequest(Request.Method.POST, url, new Response.Listener<NetworkResponse>() {
             @Override
             public void onResponse(NetworkResponse response) {
-                String resultResponse = new String(response.data);
+                String responseString = new String(response.data);
                 try {
+                    Log.i(LOG_TAG,"TOTAL JSON RESULT: "+responseString);
 
-                    //TODO INSERT NEW TUPLE IN DB
-                    IssueAsset asset = new IssueAsset();
-                    if (mCurrentPhotoPath == null)
-                        asset.setLocation("");
-                    else
-                        asset.setLocation("azeaze");
-                    asset.setUser(user);
-                    asset.setDescr(((EditText) findViewById(R.id.textfield_issueasset)).getText().toString());
-                    asset.setTime(new Date());
+                    //Parsing the response
+                    JSONObject responseJsObj = new JSONObject(responseString);
 
-                    assets.add(asset);
-                    mListAdapter.updateView(assets);
-
-                    JSONObject result = new JSONObject(resultResponse);
-                    String status = result.getString("status");
-                    String message = result.getString("message");
-
-                    Log.i(LOG_TAG, status);
-                    Log.i(LOG_TAG, message);
+                    //Insert into database
+                    insertNewIssueAssetInDatabase(responseJsObj);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -382,10 +386,16 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
             }
         }) {
             @Override
-            protected Map<String, String> getParams() {
+            public Map<String, String> getHeaders() {
                 Map<String, String> params = new HashMap<>();
                 params.put("Authorization", "Bearer " +
-                                Utility.getLocalToken(getApplicationContext()));
+                        Utility.getLocalToken(getApplicationContext()));
+                return params;
+            }
+
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<>();
                 params.put("desc", ((EditText) findViewById(R.id.textfield_issueasset)).getText().toString());
                 params.put("userID", String.valueOf(Utility.getLocalUserId(getApplicationContext())));
                 params.put("issueID", String.valueOf(mIssueId));
@@ -427,6 +437,12 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     }
 
 
+    /**
+     * This ProgressDialog is showed when the user sends in a new IssueAsset text and/or picture
+     * to the server.
+     * If show is true, then the ProgressDialog will be showed, otherwise it is dismissed.
+     * @param show
+     */
     private void showSendingProgressDialog(final boolean show) {
         if(show){
             sendingDialog.show();
@@ -435,6 +451,11 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         }
     }
 
+    /**
+     * This ProgressDialog is showed when the data of the list is loading.
+     * If show is true, then the ProgressDialog will be showed, otherwise it is dismissed.
+     * @param show
+     */
     private void showLoadingProgressDialog(final boolean show) {
         if(show){
             loadingDialog.show();
@@ -470,14 +491,13 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     }
 
     /**
-     * Every pictur that the user takes, is also available in the photo gallery.
-     * This is the method where the imageFile gets created.
+     * Every picture that the user takes, is also available in the photo gallery.
+     * This is the method where the imageFile gets created in the DIRECTORY_PICTURES.
      * The picture's name must be unique. Therefore the time when the picture was captured
-     * is used to create a file with a unique name.
+     * is used to create a file with a unique filename.
      * @return the file where the image is stored in
      * @throws IOException
      */
-    //TODO insert into database instead of local file
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -530,4 +550,10 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         Log.v(LOG_TAG, "Loader onLoaderReset");
         mListAdapter.swapCursor(null);
     }
+
+    String testStringResponse="{\"id\":21," +
+            "\"descr\":\"jobolo\"," +
+            "\"time\":1493198920546," +
+            "\"location\":\"C:\\\\Users\\\\Gebruiker/project_televic/issue_assets/2017_28_26_11_28_40_1.png\"," +
+            "\"user\":{\"id\":1,\"name\":\"John Doe\",\"email\":\"john0@test.be\",\"role\":\"MECHANIC\",\"imageHash\":\"qwertyui\"}};";
 }

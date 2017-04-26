@@ -27,23 +27,23 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
     private Vector<ContentValues> mWorkplaceVector = null;
 
     //for each Issue/IssueAsset in StringResponse
-    private final String ID = "id";
-    private final String DESCRIPTION = "descr";
-    private final String STATUS = "status";
-    private final String ASSETS = "assets";
-    private final String OPERATOR = "operator";
-    private final String DATA = "data";
-    private final String ASSIGNED_TIME = "assignedTime";
-    private final String IN_PROGRESS_TIME = "inProgressTime";
-    private final String CLOSED_TIME = "closedTime";
-    private final String USER = "user";
-    private final String NAME = "name";
-    private final String TRAINCOACH = "traincoach";
-    private final String TRAINCOACHES = "traincoaches";
-    private final String TYPE = "type";
-    private final String TIME = "time";
-    private final String EMAIL = "email";
-    private final String LOCATION = "location";
+    public static final String ID = "id";
+    public static final String DESCRIPTION = "descr";
+    public static final String STATUS = "status";
+    public static final String ASSETS = "assets";
+    public static final String OPERATOR = "operator";
+    public static final String DATA = "data";
+    public static final String ASSIGNED_TIME = "assignedTime";
+    public static final String IN_PROGRESS_TIME = "inProgressTime";
+    public static final String CLOSED_TIME = "closedTime";
+    public static final String USER = "user";
+    public static final String NAME = "name";
+    public static final String TRAINCOACH = "traincoach";
+    public static final String TRAINCOACHES = "traincoaches";
+    public static final String TYPE = "type";
+    public static final String TIME = "time";
+    public static final String EMAIL = "email";
+    public static final String LOCATION = "location";
 
     public JSONParserTask(Context context) {
         this.mContext = context;
@@ -251,6 +251,61 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
             issueAssetContentValues.put(IssueContract.IssueAssetEntry.COLUMN_ISSUE_ID, asset_issue_id);
 
             Log.d(LOG_TAG, "Leaving parseSingleAsset: Fetched ContentValues for AssetID = " + asset_id);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return issueAssetContentValues;
+    }
+
+    /**
+     * Fetching ContentValues for a single Asset and putting the blob with the contentValues.
+     *
+     * @param asset single asset
+     * @param blob the byte[] of the image
+     * @return ContentValues of a single Asset
+     */
+    public static ContentValues parseSingleAsset(JSONObject asset, byte[] blob, int issueId) {
+        //Values needed for IssueAsset Table
+        int asset_id;
+        String asset_description;
+        String post_time;
+        String imgLocation;
+        String asset_user_name;
+        String asset_user_email;
+        int asset_issue_id;
+        ContentValues issueAssetContentValues = new ContentValues();
+
+        try {
+            asset_id = asset.getInt(ID);
+            asset_description = asset.getString(DESCRIPTION);
+            post_time = asset.getString(TIME);
+            imgLocation = asset.getString(LOCATION);
+
+            if (imgLocation.equals("")) {
+                imgLocation = "NO_IMG";
+            } else {
+                imgLocation = "IMG";
+            }
+
+            JSONObject user = asset.getJSONObject(USER);
+            asset_user_name = user.getString(NAME);
+            asset_user_email = user.getString(EMAIL);
+
+            asset_issue_id = issueId;
+
+            //Adding all parsed values to the contentValues
+            issueAssetContentValues.put(IssueContract.IssueAssetEntry._ID, asset_id);
+            issueAssetContentValues.put(IssueContract.IssueAssetEntry.COLUMN_DESCRIPTION, asset_description);
+            issueAssetContentValues.put(IssueContract.IssueAssetEntry.COLUMN_POST_TIME, post_time);
+            issueAssetContentValues.put(IssueContract.IssueAssetEntry.COLUMN_IMAGE_PRESENT, imgLocation);
+            issueAssetContentValues.put(IssueContract.IssueAssetEntry.COLUMN_USER_NAME, asset_user_name);
+            issueAssetContentValues.put(IssueContract.IssueAssetEntry.COLUMN_USER_EMAIL, asset_user_email);
+            issueAssetContentValues.put(IssueContract.IssueAssetEntry.COLUMN_ISSUE_ID, asset_issue_id);
+
+            if(blob!=null){
+                issueAssetContentValues.put(IssueContract.IssueAssetEntry.COLUMN_IMAGE_BLOB, blob);
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
