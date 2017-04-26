@@ -2,6 +2,23 @@
 
 <!-- Root Layout -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+<android.support.v7.widget.CardView
+    android:id="@+id/card_view_issue_asset"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:layout_marginBottom="5dp"
+    android:background="@android:color/background_light"
+    app:cardCornerRadius="0dp"
+    app:cardElevation="2dp"
+    app:contentPadding="0dp">
+
+<LinearLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -11,10 +28,10 @@
         android:id="@+id/item_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#ccbdbd"
+        android:background="@color/colorPrimaryLight"
         android:orientation="vertical"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="5dp"
         android:paddingTop="4dp"
         android:paddingBottom="4dp">
 
@@ -54,6 +71,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
+        android:layout_margin="10dp"
         android:text="This is the description of an issue." />
-
+</LinearLayout>
+</android.support.v7.widget.CardView>
 </LinearLayout>
