@@ -154,11 +154,19 @@ public class Utility {
                 removeLocalToken(context);
 
                 //Redirect to login
-                Log.v(LOG_TAG, "Redirecting to Login");
-                Intent intent = new Intent(context, LoginActivity.class);
-                context.startActivity(intent);
+                redirectToLogin(context);
             }
         }
+    }
+
+    /**
+     * The user gets redirected to the login screen.
+     * @param context
+     */
+    public static void redirectToLogin(Context context){
+        Log.v(LOG_TAG, "Redirecting to Login");
+        Intent intent = new Intent(context, LoginActivity.class);
+        context.startActivity(intent);
     }
 
     /**
