@@ -377,6 +377,8 @@ public class IssueProvider extends ContentProvider {
         if (rowsDeleted != 0) {
             getContext().getContentResolver().notifyChange(uri, null);
         }
+
+        Log.v(LOG_TAG,"ROWS DELETED = "+rowsDeleted);
         return rowsDeleted;
     }
 
@@ -389,6 +391,10 @@ public class IssueProvider extends ContentProvider {
 
         switch (match) {
             case ISSUE:
+                rowsUpdated = db.update(
+                        IssueContract.IssueEntry.TABLE_NAME, contentValues, selection, selectionArgs);
+                break;
+            case ISSUE_WITH_ID:
                 rowsUpdated = db.update(
                         IssueContract.IssueEntry.TABLE_NAME, contentValues, selection, selectionArgs);
                 break;

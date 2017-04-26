@@ -59,6 +59,8 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
         String issueStringResponse = strings[0];
         String workplaceStringResponse = strings[1];
 
+        deleteCacheInDatabase();
+
         parseIssueJSON(issueStringResponse);
         writeIssuesToDatabase();
         writeIssueAssetsToDatabase();
@@ -68,6 +70,13 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
 
         Log.v(LOG_TAG, "COMPLETED JSONPARSING background task");
         return null;
+    }
+
+    private void deleteCacheInDatabase(){
+        //Deleting all entries
+        mContext.getContentResolver().delete(IssueContract.TraincoachEntry.CONTENT_URI,null,null);
+        mContext.getContentResolver().delete(IssueContract.IssueAssetEntry.CONTENT_URI,null,null);
+        mContext.getContentResolver().delete(IssueContract.IssueEntry.CONTENT_URI,null,null);
     }
 
     /**

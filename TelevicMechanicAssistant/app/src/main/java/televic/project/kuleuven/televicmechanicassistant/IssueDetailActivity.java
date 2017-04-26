@@ -30,7 +30,9 @@ import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.ImageRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -72,7 +74,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     //Values in Database needed in this activity
     private static final String[] DETAIL_COLUMNS = {
             IssueContract.IssueAssetEntry.TABLE_NAME + "." +
-                    IssueContract.IssueAssetEntry._ID +" AS _id", //CursorLoader Needs _id column
+                    IssueContract.IssueAssetEntry._ID + " AS _id", //CursorLoader Needs _id column
             IssueContract.IssueAssetEntry.COLUMN_DESCRIPTION,
             IssueContract.IssueAssetEntry.COLUMN_POST_TIME,
             IssueContract.IssueAssetEntry.COLUMN_IMAGE_PRESENT,
@@ -115,7 +117,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         //INIT get values from intent
         mIssueId = getIntent().getIntExtra(IssueOverviewFragment.INTENT_ISSUE_ID, -1);
         mDataId = getIntent().getIntExtra(IssueOverviewFragment.INTENT_DATA_ID, -1);
-        Log.v(LOG_TAG,"onCreate IssueDetailActivity, issueId="+mIssueId+",dataId="+mDataId);
+        Log.v(LOG_TAG, "onCreate IssueDetailActivity, issueId=" + mIssueId + ",dataId=" + mDataId);
 
         //INIT current user
         mCurrentUserId = Utility.getLocalUserId(this);
@@ -174,6 +176,9 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
 
         if (id == R.id.action_graphs) {
             goToGraphActivity();
+        } else if (id == R.id.action_change_status) {
+            String newStatus = "IN_PROGRESS";
+            changeIssueStatus(newStatus);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -181,8 +186,70 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     private void goToGraphActivity() {
         Intent intent = new Intent(this, GraphActivity.class);
         intent.putExtra(INTENT_DATA_ID_GRAPH, mDataId);
-        Log.v(LOG_TAG,"Starting Graph with dataid="+mDataId);
+        Log.v(LOG_TAG, "Starting Graph with dataid=" + mDataId);
         startActivity(intent);
+    }
+
+    /**
+     * Change the status from ASSIGNED to IN_PROGRESS
+     */
+    private void changeIssueStatus(final String status) {
+        //Create POST request to server to update status
+        //onResponse, update locally
+
+        //The REST url
+        String url = RESTSingleton.BASE_URL + "/" +
+                RESTSingleton.ISSUES_PATH + "/" + mIssueId + "/" + status;
+
+        //Creating JsonStringRequest for REST call
+        //We do not know if getting a JSONArray or JSONObject, So we use the StringRequest
+        JsonObjectRequest jsonStringRequest = new JsonObjectRequest
+                (Request.Method.PUT, url, null, new Response.Listener<JSONObject>() {
+
+                    public void onResponse(JSONObject response) {
+                        Log.v(LOG_TAG,"JSONRESPONSE STATUSCHANGE: "+response.toString());
+                        updateStatusInDatabase(status);
+                    }
+                }, new Response.ErrorListener() {
+
+                    public void onErrorResponse(VolleyError error) {
+                        error.fillInStackTrace();
+                        VolleyLog.e("Error in RESTSingleton request:" + error.networkResponse);
+
+                        Utility.redirectIfUnauthorized(getApplicationContext(), error);
+                    }
+                }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> params = new HashMap<>();
+                params.put("Authorization", "Bearer " + Utility.getLocalToken(getApplicationContext()));
+
+                return params;
+            }
+        };
+
+        //Singleton handles call to REST
+        Log.v(LOG_TAG, "Calling RESTSingleton with context:" + getApplicationContext());
+        RESTSingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonStringRequest);
+    }
+
+    private void updateStatusInDatabase(String status){
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(IssueContract.IssueEntry.COLUMN_STATUS,status);
+
+        //WHERE issue.id = id
+        String selection = IssueContract.IssueEntry.TABLE_NAME
+                + "." + IssueContract.IssueEntry._ID + " = ?";
+        String[] selectionArgs = {String.valueOf(mIssueId)};
+
+        Uri uri = IssueContract.IssueEntry.buildIssueUri(mIssueId);
+
+        //Calling our contentProvider through the contentResolver
+        getContentResolver().update(
+                uri,
+                contentValues,
+                selection,
+                selectionArgs);
     }
 
     /**
@@ -197,7 +264,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         //Fetching all Images of those issueAssets that have an Image
         Uri assetsWithImgUri = IssueContract.IssueAssetEntry
                 .buildIssueAssetWithImgUri(mIssueId);
-        Log.i( LOG_TAG, assetsWithImgUri.getPath() );
+        Log.i(LOG_TAG, assetsWithImgUri.getPath());
         Cursor cursor = getContentResolver().query(
                 assetsWithImgUri, REST_COLUMNS, null, null, null);
 
@@ -207,22 +274,22 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
 
-            Log.i( LOG_TAG, "TESTING ASSET: " + cursor.getInt( COL_ASSET_ID ) );
+            Log.i(LOG_TAG, "TESTING ASSET: " + cursor.getInt(COL_ASSET_ID));
             //Only fetch Image if Blob of image is not present in cache.
             if (cursor.getBlob(COL_REST_IMAGE_BLOB) == null) {
 
-                Log.i( LOG_TAG, "FETCHING FOR ISSUE ASSET: " + cursor.getInt( COL_ASSET_ID ) );
+                Log.i(LOG_TAG, "FETCHING FOR ISSUE ASSET: " + cursor.getInt(COL_ASSET_ID));
                 //The URL to fetch the image for a certain issueAssetId
                 url = baseUrl + "/" + cursor.getInt(COL_ASSET_ID);
 
-                final int ASSET_ID = cursor.getInt( COL_ASSET_ID );
+                final int ASSET_ID = cursor.getInt(COL_ASSET_ID);
 
                 //Create the REST ImageRequest
                 ImageRequest request = new ImageRequest(url,
                         new Response.Listener<Bitmap>() {
                             @Override
                             public void onResponse(Bitmap response) {
-                                Log.i( LOG_TAG, "REST onResponse of image, assetID=" + ASSET_ID );
+                                Log.i(LOG_TAG, "REST onResponse of image, assetID=" + ASSET_ID);
 
                                 int assetId = ASSET_ID;
                                 updateImageInDatabase(response, assetId);
@@ -249,7 +316,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                         Map<String, String> params = new HashMap<>();
                         params.put("Authorization", "Bearer " +
                                 Utility.getLocalToken(getApplicationContext()));
-                        Log.i( LOG_TAG, "GETTING HEADERS" );
+                        Log.i(LOG_TAG, "GETTING HEADERS");
                         return params;
                     }
                 };
@@ -260,13 +327,14 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
 
             cursor.moveToNext();
         }
-        Log.i( LOG_TAG, "FINISHED FETCHING ISSUE ASSETS" );
+        Log.i(LOG_TAG, "FINISHED FETCHING ISSUE ASSETS");
     }
 
     /**
      * For a specified assetId, the tupple of the IssueAsset gets updated with the
      * queried image as Blob.
-     * @param bitmap the picture
+     *
+     * @param bitmap  the picture
      * @param assetId the IssueAsset to update
      */
     public void updateImageInDatabase(Bitmap bitmap, int assetId) {
@@ -279,7 +347,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                 + "." + IssueContract.IssueAssetEntry._ID + " = ?";
         String[] selectionArgs = {String.valueOf(assetId)};
 
-        Uri uri=IssueContract.IssueAssetEntry.buildIssueAssetUri(assetId);
+        Uri uri = IssueContract.IssueAssetEntry.buildIssueAssetUri(assetId);
 
         //Calling our contentProvider through the contentResolver
         getContentResolver().update(
@@ -292,15 +360,16 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     /**
      * When the user has sent a postRequest to make a new IssueAsset, the server will respond
      * and provide the given id for the IssueAsset
+     *
      * @param response the JSONObject returne from the REST request
      */
-    public void insertNewIssueAssetInDatabase(JSONObject response){
+    public void insertNewIssueAssetInDatabase(JSONObject response) {
         //transfer local file to database, if a local image is present.
-        byte[] blob= Utility.getBytesFromPicture(mCurrentPhotoPath);
+        byte[] blob = Utility.getBytesFromPicture(mCurrentPhotoPath);
 
-        ContentValues contentValues = JSONParserTask.parseSingleAsset(response,blob,mIssueId);
+        ContentValues contentValues = JSONParserTask.parseSingleAsset(response, blob, mIssueId);
 
-        Uri uri=IssueContract.IssueAssetEntry.CONTENT_URI;
+        Uri uri = IssueContract.IssueAssetEntry.CONTENT_URI;
 
         //Calling our contentProvider through the contentResolver
         getContentResolver().insert(uri, contentValues);
@@ -320,7 +389,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
             public void onResponse(NetworkResponse response) {
                 String responseString = new String(response.data);
                 try {
-                    Log.i(LOG_TAG,"TOTAL JSON RESULT: "+responseString);
+                    Log.i(LOG_TAG, "TOTAL JSON RESULT: " + responseString);
 
                     //Parsing the response
                     JSONObject responseJsObj = new JSONObject(responseString);
@@ -343,7 +412,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                 mCurrentPhotoPath = null;
                 showSendingProgressDialog(false);
 
-                Utility.redirectIfUnauthorized(getApplicationContext(),error);
+                Utility.redirectIfUnauthorized(getApplicationContext(), error);
 
                 CharSequence text = "De boodschap kon niet verzonden worden, controleer of u internetverbinding werkt.";
                 int duration = Toast.LENGTH_LONG;
@@ -409,12 +478,13 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
      * This ProgressDialog is showed when the user sends in a new IssueAsset text and/or picture
      * to the server.
      * If show is true, then the ProgressDialog will be showed, otherwise it is dismissed.
+     *
      * @param show
      */
     private void showSendingProgressDialog(final boolean show) {
-        if(show){
+        if (show) {
             sendingDialog.show();
-        }else {
+        } else {
             sendingDialog.dismiss();
         }
     }
@@ -422,12 +492,13 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     /**
      * This ProgressDialog is showed when the data of the list is loading.
      * If show is true, then the ProgressDialog will be showed, otherwise it is dismissed.
+     *
      * @param show
      */
     private void showLoadingProgressDialog(final boolean show) {
-        if(show){
+        if (show) {
             loadingDialog.show();
-        }else {
+        } else {
             loadingDialog.dismiss();
         }
     }
@@ -463,6 +534,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
      * This is the method where the imageFile gets created in the DIRECTORY_PICTURES.
      * The picture's name must be unique. Therefore the time when the picture was captured
      * is used to create a file with a unique filename.
+     *
      * @return the file where the image is stored in
      * @throws IOException
      */
@@ -484,6 +556,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
 
     /**
      * Method called when the loader gets created
+     *
      * @param id
      * @param args
      * @return
@@ -519,7 +592,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         mListAdapter.swapCursor(null);
     }
 
-    String testStringResponse="{\"id\":21," +
+    String testStringResponse = "{\"id\":21," +
             "\"descr\":\"jobolo\"," +
             "\"time\":1493198920546," +
             "\"location\":\"C:\\\\Users\\\\Gebruiker/project_televic/issue_assets/2017_28_26_11_28_40_1.png\"," +

@@ -60,7 +60,7 @@ public class RESTRequestHandler {
         try {
             //Rest Request URL
             String url = RESTSingleton.BASE_URL + "/" +
-                    RESTSingleton.ISSUES_PATH + "/" + mCurrentUserId;
+                    RESTSingleton.ISSUES_ALL_FOR_USER_PATH + "/" + mCurrentUserId;
 
             //Creating JsonStringRequest for REST call
             //We do not know if getting a JSONArray or JSONObject, So we use the StringRequest

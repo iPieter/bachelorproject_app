@@ -23,8 +23,7 @@ public class IssueDbHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * First the tables of the database get dropped, because the databse only serves as cache.
-     * Second the tables get created.
+     * The tables of the database are created.
      * @param sqLiteDatabase
      */
     @Override
@@ -72,7 +71,6 @@ public class IssueDbHelper extends SQLiteOpenHelper {
                 IssueContract.TraincoachEntry.COLUMN_WORKPLACE_NAME + " TEXT NOT NULL " +
                 " );";
 
-        dropTables(sqLiteDatabase);
         sqLiteDatabase.execSQL(SQL_CREATE_ISSUE_TABLE);
         sqLiteDatabase.execSQL(SQL_CREATE_ISSUE_ASSET_TABLE);
         sqLiteDatabase.execSQL(SQL_CREATE_TRAINCOACH_TABLE);
@@ -88,6 +86,7 @@ public class IssueDbHelper extends SQLiteOpenHelper {
     }
 
     private void dropTables(SQLiteDatabase sqLiteDatabase){
+        Log.v(LOG_TAG,"TABLES DROPPED");
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + IssueContract.IssueEntry.TABLE_NAME);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + IssueContract.IssueAssetEntry.TABLE_NAME);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + IssueContract.TraincoachEntry.TABLE_NAME);
