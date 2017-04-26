@@ -2,6 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <!--This is meant to change the status of an Issue-->
+    <item android:id="@+id/action_change_status"
+        android:title="@string/action_change_status"
+        android:orderInCategory="1"
+        app:showAsAction="never"/>
+
     <!--This is meant to go to the graphs-->
     <item android:id="@+id/action_graphs"
     android:title="@string/action_graphs"
