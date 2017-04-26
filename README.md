@@ -20,3 +20,10 @@ We use a database for caching the requested data. Every app-session, the tables 
 
 ## ContentProvider
 We query the database using a contentProvider that we can access through the contentResolver in Android. This way, other apps could interact with our app and read or write data from the app's database.
+
+## Tokens
+When the user successfully logs in, the token received from the server is stored in the SharedPreferences. The SharedPreferences are independent of the app's lifecycle, what makes it perfectly suited to store the token in. For every REST request the token is passed in the header. If the token is expired (default 14 days), then a 401 Unauthorized response message is delivered from the server. A 401 results in the user getting redirected to the login activity, where he can log in to receive a new token from the server.
+
+## Work on the app
+### Anton Danneels
+### Matthias De Lange
