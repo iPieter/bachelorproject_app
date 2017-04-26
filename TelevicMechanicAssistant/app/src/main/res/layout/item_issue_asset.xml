@@ -61,10 +61,12 @@
             <ImageView
                 android:id="@+id/issue_asset_image"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
+                android:maxHeight="350px"
                 android:layout_weight="1"
+                android:adjustViewBounds="true"
                 android:background="@color/cardview_light_background"
-                android:src="@drawable/ic_launcher"/>
+                android:src="@drawable/ic_launcher" />
 
             <TextView
                 android:id="@+id/issue_asset_description"
