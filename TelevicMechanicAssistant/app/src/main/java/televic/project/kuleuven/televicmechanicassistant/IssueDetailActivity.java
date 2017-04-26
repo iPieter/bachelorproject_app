@@ -19,17 +19,25 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -41,13 +49,15 @@ import televic.project.kuleuven.televicmechanicassistant.data.IssueContract;
 public class IssueDetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     private final String LOG_TAG = IssueDetailActivity.class.getSimpleName();
 
+    //Intent Tags
     public static final String INTENT_DATA_ID_GRAPH = "data_id_for_graph";
+
+    //Request codes
     private static final int REQUEST_TAKE_PHOTO = 1;
 
     //Members
     private String mCurrentPhotoPath;
     private IssueAssetListAdapter mListAdapter;
-    private HashMap<Integer, Bitmap> mImageMap;
     private int mCurrentUserId;
     private int mIssueId;
     private int mDataId;
@@ -114,7 +124,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         ImageButton buttonSend = (ImageButton) findViewById(R.id.button_send);
         buttonSend.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                postIssueAsset();
+                sendIssueAssetPostRequest();
             }
         });
 
@@ -125,9 +135,6 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                 takePicture();
             }
         });
-
-        //INIT mImageMap
-        mImageMap = new HashMap<>();
 
         //INIT adapter
         mListAdapter = new IssueAssetListAdapter(getApplicationContext(), null, 0);
@@ -195,6 +202,22 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         */
     }
 
+    /**
+     * When the requestcode equals REQUEST_TAKE_PHOTO, the photo in the gallery
+     * is written to the database.
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_TAKE_PHOTO) {
+            if (resultCode == RESULT_OK) {
+                //Here we can do something with the pic
+            }
+        }
+    }
+
 
     /**
      * First, all issueAssets with current issueId and contain an img are queried.
@@ -236,7 +259,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                                 Log.i( LOG_TAG, "REST onResponse of image, assetID=" + ASSET_ID );
 
                                 int assetId = ASSET_ID;
-                                insertImageInDatabase(response, assetId);
+                                updateImageInDatabase(response, assetId);
                             }
                         }, 350, 350, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565,
                         new Response.ErrorListener() {
@@ -280,7 +303,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
      * @param bitmap the picture
      * @param assetId the IssueAsset to update
      */
-    public void insertImageInDatabase(Bitmap bitmap, int assetId) {
+    public void updateImageInDatabase(Bitmap bitmap, int assetId) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(IssueContract.IssueAssetEntry.COLUMN_IMAGE_BLOB,
                 Utility.toByteArray(bitmap));
@@ -304,9 +327,10 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
      * The user can upload a new IssueAsset with picture and description to the server.
      * Also locally on the app, the list must be updated.
      */
-    public void postIssueAsset() {
-        /*
-        sendingDialog.show();
+    public void sendIssueAssetPostRequest() {
+        showSendingProgressDialog(true);
+
+        String url = RESTSingleton.BASE_URL + "/" + RESTSingleton.ISSUE_ASSET_PATH;
 
         VolleyMultipartRequest multipartRequest = new VolleyMultipartRequest(Request.Method.POST, url, new Response.Listener<NetworkResponse>() {
             @Override
@@ -338,56 +362,22 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                     e.printStackTrace();
                 }
                 mCurrentPhotoPath = null;
-                removeProgress();
+                showSendingProgressDialog(false);
                 ((EditText) findViewById(R.id.textfield_issueasset)).setText("");
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 mCurrentPhotoPath = null;
-                removeProgress();
+                showSendingProgressDialog(false);
 
                 Utility.redirectIfUnauthorized(getApplicationContext(),error);
 
-                Context context = getApplicationContext();
                 CharSequence text = "De boodschap kon niet verzonden worden, controleer of u internetverbinding werkt.";
                 int duration = Toast.LENGTH_LONG;
 
-                Toast toast = Toast.makeText(context, text, duration);
+                Toast toast = Toast.makeText(getApplicationContext(), text, duration);
                 toast.show();
-
-                NetworkResponse networkResponse = error.networkResponse;
-                String errorMessage = "Unknown error";
-                if (networkResponse == null) {
-                    if (error.getClass().equals(TimeoutError.class)) {
-                        errorMessage = "Request timeout";
-                    } else if (error.getClass().equals(NoConnectionError.class)) {
-                        errorMessage = "Failed to connect server";
-                    }
-                } else {
-                    String result = new String(networkResponse.data);
-                    try {
-                        JSONObject response = new JSONObject(result);
-                        String status = response.getString("status");
-                        String message = response.getString("message");
-
-                        Log.e("Error Status", status);
-                        Log.e("Error Message", message);
-
-                        if (networkResponse.statusCode == 404) {
-                            errorMessage = "Resource not found";
-                        } else if (networkResponse.statusCode == 401) {
-                            errorMessage = message + " Please login again";
-                        } else if (networkResponse.statusCode == 400) {
-                            errorMessage = message + " Check your inputs";
-                        } else if (networkResponse.statusCode == 500) {
-                            errorMessage = message + " Something is getting wrong";
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-                Log.i("Error", errorMessage);
                 error.printStackTrace();
             }
         }) {
@@ -402,6 +392,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                 return params;
             }
 
+            //Overriding the getByteData from the VolleyMultipartRequest
             @Override
             protected Map<String, DataPart> getByteData() {
                 Map<String, DataPart> params = new HashMap<>();
@@ -414,8 +405,6 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                             BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
                             buf.read(bytes, 0, bytes.length);
                             buf.close();
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -431,18 +420,22 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                 }
                 return params;
             }
-        };
+        };//End of VolleyMultipartRequest
 
+        //Adding the request to the requestQueue
         RESTSingleton.getInstance(getApplicationContext()).addToRequestQueue(multipartRequest);
-    */
     }
 
 
-    private void removeProgress() {
-        sendingDialog.dismiss();
+    private void showSendingProgressDialog(final boolean show) {
+        if(show){
+            sendingDialog.show();
+        }else {
+            sendingDialog.dismiss();
+        }
     }
 
-    private void showLoadingProgressDialog(boolean show) {
+    private void showLoadingProgressDialog(final boolean show) {
         if(show){
             loadingDialog.show();
         }else {
@@ -450,6 +443,9 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         }
     }
 
+    /**
+     * Method to open the Picture App of the Android phone and take a picture with it.
+     */
     public void takePicture() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Ensure that there's a camera activity to handle the intent
@@ -473,6 +469,14 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         }
     }
 
+    /**
+     * Every pictur that the user takes, is also available in the photo gallery.
+     * This is the method where the imageFile gets created.
+     * The picture's name must be unique. Therefore the time when the picture was captured
+     * is used to create a file with a unique name.
+     * @return the file where the image is stored in
+     * @throws IOException
+     */
     //TODO insert into database instead of local file
     private File createImageFile() throws IOException {
         // Create an image file name
@@ -490,6 +494,12 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         return image;
     }
 
+    /**
+     * Method called when the loader gets created
+     * @param id
+     * @param args
+     * @return
+     */
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Log.v(LOG_TAG, "Creating CursorLoader");
