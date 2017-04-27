@@ -17,6 +17,9 @@ import java.util.Date;
 import java.util.Locale;
 
 /**
+ * This adapter extends the CursorAdapter. This means that it interacts with the database through
+ * a CursorLoader. When the database content changes, the loader will provide the queried data to
+ * the Adapter and the adapter binds the list items to the queried data.
  * Created by Anton on 19/04/2017.
  */
 
@@ -29,6 +32,13 @@ public class IssueAssetListAdapter extends CursorAdapter
         Log.v(LOG_TAG,"IssueAssetListAdapter Constructor called!");
     }
 
+    /**
+     * Method called when the adapter creates a new view in the listView
+     * @param context
+     * @param cursor
+     * @param parent
+     * @return the view of the item
+     */
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         Log.v(LOG_TAG,"newView");
