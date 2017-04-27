@@ -55,9 +55,21 @@ public class OverviewListAdapter extends CursorAdapter {
         //Set datafields in the list item
         Log.v(LOG_TAG, "Binding datafields to list item");
         item_header_workplace.setText(cursor.getString(IssueOverviewFragment.COL_ISSUE_WORKPLACE));
-        item_header_status.setText(cursor.getString(IssueOverviewFragment.COL_ISSUE_STATUS));
+        item_header_status.setText(convertIssueStatus(cursor.getString(IssueOverviewFragment.COL_ISSUE_STATUS)));
         item_header_traincoach.setText(cursor.getString(IssueOverviewFragment.COL_ISSUE_TRAINCOACH));
         item_content.setText(cursor.getString(IssueOverviewFragment.COL_ISSUE_DESCRIPTION));
         Log.v(LOG_TAG, "List item set!");
+    }
+
+    public String convertIssueStatus(String status)
+    {
+        switch (status)
+        {
+            case "CREATED": return "Aangemaakt";
+            case "ASSIGNED": return "Toewezen";
+            case "IN_PROGRESS": return "In behandeling";
+            case "CLOSED": return "Gesloten";
+            default: return "";
+        }
     }
 }
