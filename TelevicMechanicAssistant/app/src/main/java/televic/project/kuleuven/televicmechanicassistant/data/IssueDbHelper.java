@@ -6,10 +6,10 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 /**
+ * IssueDbHelper helps managing the Issue Database: Creation of the database
+ * and upgrade of the database (when version is incremented).
  * Created by Matthias on 18/04/2017.
- * Helps managing the Issue Database
  */
-
 
 public class IssueDbHelper extends SQLiteOpenHelper {
     private static final String LOG_TAG = IssueDbHelper.class.getSimpleName();
@@ -78,6 +78,13 @@ public class IssueDbHelper extends SQLiteOpenHelper {
         Log.v(LOG_TAG, "Leaving onCreate: SQL CREATE TABLES executed");
     }
 
+    /**
+     * When the database version is incremented, the tables will be dropped and
+     * thereafter the tables are recreated.
+     * @param sqLiteDatabase
+     * @param oldVersion
+     * @param newVersion
+     */
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         //Database only serves as cache, so onUpgrade drop table
@@ -85,6 +92,10 @@ public class IssueDbHelper extends SQLiteOpenHelper {
         onCreate(sqLiteDatabase);
     }
 
+    /**
+     * Method that drops all tables of the database if they exist.
+     * @param sqLiteDatabase
+     */
     private void dropTables(SQLiteDatabase sqLiteDatabase){
         Log.v(LOG_TAG,"TABLES DROPPED");
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + IssueContract.IssueEntry.TABLE_NAME);
