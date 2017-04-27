@@ -46,7 +46,7 @@ public class GraphActivity extends AppCompatActivity
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_graph );
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         loadingDialog = new ProgressDialog( this );
         loadingDialog.setTitle( "Laden.." );
