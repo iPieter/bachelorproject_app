@@ -288,7 +288,7 @@ public class IssueProvider extends ContentProvider {
     /**
      * Method to insert in the database
      *
-     * @param uri defines on which table to execute insert
+     * @param uri           defines on which table to execute insert
      * @param contentValues the values to insert in corresponding column
      * @return URI on which the insert is executed
      */
@@ -332,8 +332,7 @@ public class IssueProvider extends ContentProvider {
     }
 
     /**
-     *
-     * @param uri Which table to insert in
+     * @param uri    Which table to insert in
      * @param values array of contentValues with corresponding Column
      * @return amount if inserts
      */
@@ -403,8 +402,9 @@ public class IssueProvider extends ContentProvider {
 
     /**
      * Method to delete rows from tables in database.
-     * @param uri which table to delete in
-     * @param selection where clause
+     *
+     * @param uri           which table to delete in
+     * @param selection     where clause
      * @param selectionArgs arguments of where clause
      * @return amount of rows deleted
      */
@@ -442,9 +442,10 @@ public class IssueProvider extends ContentProvider {
 
     /**
      * Method to update rows in the database.
-     * @param uri which table to update in
+     *
+     * @param uri           which table to update in
      * @param contentValues contentValues with corresponding Columns to update
-     * @param selection where clause
+     * @param selection     where clause
      * @param selectionArgs arguments in where clause
      * @return amount of rows updated
      */
