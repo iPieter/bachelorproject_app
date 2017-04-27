@@ -136,7 +136,7 @@ public class GraphActivity extends AppCompatActivity
     /**
      * Inflating the menu items to the menu bar
      * @param menu
-     * @return
+     * @return true if successful
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -148,7 +148,7 @@ public class GraphActivity extends AppCompatActivity
     /**
      * Binding actions to the menu items
      * @param item
-     * @return
+     * @return true if successful
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

@@ -49,6 +49,9 @@ import java.util.Map;
 
 import televic.project.kuleuven.televicmechanicassistant.data.IssueContract;
 
+/**
+ * This activity shows a list of IssueAsset, that belong to a issue with a unique IssueId.
+ */
 public class IssueDetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     private final String LOG_TAG = IssueDetailActivity.class.getSimpleName();
 
@@ -106,6 +109,11 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     static final int COL_REST_IMAGE_PRESENT = 1;
     static final int COL_REST_IMAGE_BLOB = 2;
 
+    /**
+     * Called when Activity is created. The intent data are initialized and all
+     * attributes are initialized.
+     * @param savedInstanceState
+     */
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_issue_detail);
@@ -159,10 +167,14 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         sendingDialog.setCancelable(false); // disable dismiss by tapping outside of the dialog
 
         //Calling Backend
-        if(mIssueId!=-1)
         fetchIssueAssetImages();
     }
 
+    /**
+     * Inflating the menu items to the menu bar
+     * @param menu
+     * @return true if successful
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // adds items to the action bar if it is present.
@@ -170,6 +182,11 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         return true;
     }
 
+    /**
+     * Binding actions to the menu items
+     * @param item
+     * @return true if successful
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
@@ -194,6 +211,9 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * To navigate to the GraphActivity
+     */
     private void goToGraphActivity() {
         Intent intent = new Intent(this, GraphActivity.class);
         intent.putExtra(INTENT_DATA_ID_GRAPH, mDataId);
@@ -244,6 +264,10 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         RESTSingleton.getInstance(getApplicationContext()).addToRequestQueue(jsonStringRequest);
     }
 
+    /**
+     * Method that updates the status of a row in the IssueAsset table.
+     * @param status
+     */
     private void updateStatusInDatabase(String status) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(IssueContract.IssueEntry.COLUMN_STATUS, status);
@@ -267,9 +291,9 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
      * First, all issueAssets with current issueId and contain an img are queried.
      * If IMAGE_LOCATION equals "IMG", then a REST request for this IssueAssetId is created
      * and added to the RequestQueue. Volley handles all requests.
-     * If we get a response from volley, we store the location of the img in the HashMap.
-     * We store the IMG as a blob in the database. The cursorLoader will notify the change
-     * and call the cursorAdapter to update the ListView.
+     * If we get a response from volley, we store the image as a blob in the database.
+     * Therefore we update the row with the IssueAssetId corresponding with the image.
+     * The cursorLoader will notify the change and call the cursorAdapter to update the ListView.
      */
     public void fetchIssueAssetImages() {
         //Fetching all Images of those issueAssets that have an Image
@@ -342,7 +366,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     }
 
     /**
-     * For a specified assetId, the tupple of the IssueAsset gets updated with the
+     * For a specified assetId, the row of the IssueAsset gets updated with the
      * queried image as Blob.
      *
      * @param bitmap  the picture
@@ -603,6 +627,10 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         Log.v(LOG_TAG, "onLoadFinished: Loader cursor swapped, cursorCount = " + cursor.getCount());
     }
 
+    /**
+     * Called when loader resets
+     * @param loader
+     */
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         Log.v(LOG_TAG, "Loader onLoaderReset");
