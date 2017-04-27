@@ -75,7 +75,6 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
 
     //GUI components
     private ProgressDialog sendingDialog;
-    //private ProgressDialog loadingDialog; TODO DELETE
     private TextView mEmptyListTextView;
     private View mDataLoadingProgressView;
     private ListView mListView;
@@ -161,13 +160,6 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
 
         //INIT loader
         getSupportLoaderManager().initLoader(DETAIL_LOADER, null, this);
-
-        //INIT loading dialog
-        /*loadingDialog = new ProgressDialog(this);
-        loadingDialog.setTitle("Laden..");
-        loadingDialog.setMessage("De boodschappen worden geladen");
-        loadingDialog.setCancelable(false);
-        showLoadingProgressDialog(true);*/
 
         //INIT sending dialog
         sendingDialog = new ProgressDialog(this);
@@ -307,13 +299,14 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     }
 
     /**
-     * Text showed when there are no Issues assigned to the user.
+     * Text showed when there are no Issues assigned to the user and
+     * hides the list.
      *
      * @param show
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     public void showListEmptyText(final boolean show) {
-        Log.v(LOG_TAG,"LIST EMPTY TEXT show="+show);
+        Log.v(LOG_TAG, "LIST EMPTY TEXT show=" + show);
         int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
         mListView.setVisibility(show ? View.GONE : View.VISIBLE);

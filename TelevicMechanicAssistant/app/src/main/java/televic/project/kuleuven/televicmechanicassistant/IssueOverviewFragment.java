@@ -122,6 +122,9 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
         mProgressView = rootView.findViewById(R.id.overviewlist_progress);
         mEmptyListTextView = (TextView) rootView.findViewById(R.id.overviewlist_empty);
 
+        //Show progressbar until backend is handled
+        showProgress(true);
+
         //Setting up adapter
         mOverviewListAdapter = new OverviewListAdapter(getActivity(), null, 0);
         mListView.setAdapter(mOverviewListAdapter);
@@ -166,7 +169,8 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
     }
 
     /**
-     * Text showed when there are no Issues assigned to the user.
+     * Text showed when there are no Issues assigned to the user and
+     * hides the list.
      * @param show
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
@@ -246,8 +250,6 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         Log.v(LOG_TAG, "Creating CursorLoader");
-        //Show progressbar until backend is handled
-        showProgress(true);
 
         // Sort order =  Ascending, by Assigned Time
         String sortOrder = IssueContract.IssueEntry.COLUMN_ASSIGNED_TIME + " ASC";
