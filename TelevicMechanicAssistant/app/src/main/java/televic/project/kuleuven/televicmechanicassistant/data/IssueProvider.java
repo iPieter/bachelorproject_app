@@ -12,6 +12,9 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 /**
+ * IssueProvider extends from ContentProvider. This IssueProvider is accessed to
+ * to manage the database. It uses a IssueDbHelper to manage the database.
+ * Queries,updates,deletions and inserts are handled by the IssueProvider.
  * Created by Matthias on 18/04/2017.
  */
 
@@ -57,7 +60,7 @@ public class IssueProvider extends ContentProvider {
                         "." + IssueContract.IssueEntry.COLUMN_TRAINCOACH_ID +
                         " = " + IssueContract.TraincoachEntry.TABLE_NAME +
                         "." + IssueContract.TraincoachEntry._ID
-                        );
+        );
 
         //issue INNER JOIN traincoach ON issue.traincoach_id = traincoach._id
         sWorkplaceByIssueQueryBuilder.setTables(
@@ -72,6 +75,12 @@ public class IssueProvider extends ContentProvider {
         Log.v(LOG_TAG, "SQLiteQueryBuilders builded!");
     }
 
+    /**
+     * Creation of a UriMatcher. This UriMatcher is used to match the URI sent to the IssueProvider
+     * to the corresponding code to access the correct query,updated,delete or insert method.
+     *
+     * @return UriMatcher
+     */
     static UriMatcher buildUriMatcher() {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         final String authority = IssueContract.CONTENT_AUTHORITY;
@@ -82,7 +91,7 @@ public class IssueProvider extends ContentProvider {
         matcher.addURI(authority, IssueContract.PATH_ISSUE_ASSET, ISSUE_ASSET);
         matcher.addURI(authority, IssueContract.PATH_ISSUE_ASSET + "/#", ISSUE_ASSET_WITH_ISSUE_ID);
         matcher.addURI(authority, IssueContract.PATH_ISSUE_ASSET + "/"
-                + IssueContract.PATH_WITH_IMG + "/#" , ISSUE_ASSET_WITH_ISSUE_ID_AND_IMG);
+                + IssueContract.PATH_WITH_IMG + "/#", ISSUE_ASSET_WITH_ISSUE_ID_AND_IMG);
         matcher.addURI(authority, IssueContract.PATH_TRAINCOACH, TRAINCOACH);
 
         Log.v(LOG_TAG, "UriMatcher initialized");
@@ -107,10 +116,8 @@ public class IssueProvider extends ContentProvider {
                     "." + IssueContract.IssueAssetEntry.COLUMN_ISSUE_ID + " = ? ";
 
     /**
-     * First we create a new SQLiteOpenHelper.
-     * Second, we delete the previous cachedata in the database.
-     * Remark: Contentprovider (and thus database) only gets created when
-     * first called. So make sure you don't delete the database when still need the cached data.
+     * We create a new SQLiteOpenHelper to create the database if it didn't exist yet.
+     * Or upgrade the database if it's version was incremented.
      */
     @Override
     public boolean onCreate() {
@@ -120,6 +127,16 @@ public class IssueProvider extends ContentProvider {
         return true;
     }
 
+    /**
+     * Method to query the database
+     *
+     * @param uri           defines which query to execute
+     * @param projection    Which columns to return in the cursor
+     * @param selection     Where clause
+     * @param selectionArgs Where clause parameters
+     * @param sortOrder     The sorting Order of the returned rows
+     * @return a cursor with the resulting rows
+     */
     @Nullable
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
@@ -166,13 +183,19 @@ public class IssueProvider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
-        countRowsInAllTables();
         Log.v(LOG_TAG, "QUERY cursor #rows = " + retCursor.getCount());
         retCursor.setNotificationUri(getContext().getContentResolver(), uri);
         return retCursor;
     }
 
-    //Setup of query to fetch an Issue in Issue Table with specified parameter _ID
+    /**
+     * Setup of query to fetch an Issue in Issue Table with specified parameter _ID
+     *
+     * @param uri
+     * @param projection
+     * @param sortOrder
+     * @return cursor with result of query
+     */
     private Cursor getIssueById(Uri uri, String[] projection, String sortOrder) {
         int issueId = IssueContract.IssueEntry.getIssueIdFromUri(uri);
 
@@ -189,7 +212,14 @@ public class IssueProvider extends ContentProvider {
         );
     }
 
-    //Setup of query to ask all IssueAssets for certain parameter IssueId
+    /**
+     * Setup of query to ask all IssueAssets for certain parameter IssueId
+     *
+     * @param uri
+     * @param projection
+     * @param sortOrder
+     * @return cursor with result of query
+     */
     private Cursor getIssueAssetByIssueId(Uri uri, String[] projection, String sortOrder) {
         int issueId = IssueContract.IssueAssetEntry.getIssueIdFromUri(uri);
 
@@ -206,14 +236,16 @@ public class IssueProvider extends ContentProvider {
         );
     }
 
-    //Setup of query to ask all IssueAssets for certain parameter IssueId
-    // and check if IMAGE_LOCATION="IMG"
+    /**
+     * Setup of query to ask all IssueAssets for certain parameter IssueId
+     * and check if IMAGE_LOCATION="IMG" (when Issue contains an image on server)
+     */
     private Cursor getIssueAssetByIssueIdAndImg(Uri uri, String[] projection, String sortOrder) {
         int issueId = IssueContract.IssueAssetEntry.getIssueIdFromImgUri(uri);
-        Log.v(LOG_TAG,"IssueId to query getIssueAssetByIssueIdAndImg = "+issueId);
+        Log.v(LOG_TAG, "IssueId to query getIssueAssetByIssueIdAndImg = " + issueId);
 
         String selection = sIssueAssetByIssueAndImgSelection;
-        String[] selectionArgs = new String[]{"IMG",Integer.toString(issueId)};
+        String[] selectionArgs = new String[]{"IMG", Integer.toString(issueId)};
 
         return sIssueAssetWorkplaceByIssueQueryBuilder.query(mOpenHelper.getReadableDatabase(),
                 projection,
@@ -225,6 +257,12 @@ public class IssueProvider extends ContentProvider {
         );
     }
 
+    /**
+     * Get the Type of the URI
+     *
+     * @param uri
+     * @return String representing the type
+     */
     @Nullable
     @Override
     public String getType(@NonNull Uri uri) {
@@ -247,6 +285,13 @@ public class IssueProvider extends ContentProvider {
         }
     }
 
+    /**
+     * Method to insert in the database
+     *
+     * @param uri defines on which table to execute insert
+     * @param contentValues the values to insert in corresponding column
+     * @return URI on which the insert is executed
+     */
     @Nullable
     @Override
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues contentValues) {
@@ -286,6 +331,12 @@ public class IssueProvider extends ContentProvider {
         return returnUri;
     }
 
+    /**
+     *
+     * @param uri Which table to insert in
+     * @param values array of contentValues with corresponding Column
+     * @return amount if inserts
+     */
     @Override
     public int bulkInsert(Uri uri, ContentValues[] values) {
         Log.v(LOG_TAG, "entering bulkInsert");
@@ -350,6 +401,13 @@ public class IssueProvider extends ContentProvider {
         }
     }
 
+    /**
+     * Method to delete rows from tables in database.
+     * @param uri which table to delete in
+     * @param selection where clause
+     * @param selectionArgs arguments of where clause
+     * @return amount of rows deleted
+     */
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
@@ -378,10 +436,18 @@ public class IssueProvider extends ContentProvider {
             getContext().getContentResolver().notifyChange(uri, null);
         }
 
-        Log.v(LOG_TAG,"ROWS DELETED = "+rowsDeleted);
+        Log.v(LOG_TAG, "ROWS DELETED = " + rowsDeleted);
         return rowsDeleted;
     }
 
+    /**
+     * Method to update rows in the database.
+     * @param uri which table to update in
+     * @param contentValues contentValues with corresponding Columns to update
+     * @param selection where clause
+     * @param selectionArgs arguments in where clause
+     * @return amount of rows updated
+     */
     @Override
     public int update(@NonNull Uri uri, @Nullable ContentValues contentValues,
                       @Nullable String selection, @Nullable String[] selectionArgs) {
@@ -416,65 +482,7 @@ public class IssueProvider extends ContentProvider {
         if (rowsUpdated != 0) {
             getContext().getContentResolver().notifyChange(uri, null);
         }
-        Log.v(LOG_TAG,rowsUpdated+" rows updated!");
+        Log.v(LOG_TAG, rowsUpdated + " rows updated!");
         return rowsUpdated;
     }
-
-
-
-    /**
-     * DEBUG PURPOSES
-     * TODO DELETE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-     */
-    public void countRowsInAllTables(){
-        String[] testprojection={IssueContract.IssueEntry._ID};
-        Cursor test1 = mOpenHelper.getReadableDatabase().query(
-                IssueContract.IssueEntry.TABLE_NAME,
-                testprojection,
-                null,
-                null,
-                null,
-                null,
-                null
-        );
-        Log.v(LOG_TAG,"QUERY TESTCURSOR: IssueTable #ROWS="+test1.getCount());
-
-        String[] testprojection2={IssueContract.IssueAssetEntry._ID};
-        Cursor test2 = mOpenHelper.getReadableDatabase().query(
-                IssueContract.IssueAssetEntry.TABLE_NAME,
-                testprojection2,
-                null,
-                null,
-                null,
-                null,
-                null
-        );
-        Log.v(LOG_TAG,"QUERY TESTCURSOR: IssueAssetTable #ROWS="+test2.getCount());
-
-        String[] testprojection3={IssueContract.TraincoachEntry._ID};
-        Cursor test3 = mOpenHelper.getReadableDatabase().query(
-                IssueContract.TraincoachEntry.TABLE_NAME,
-                testprojection3,
-                null,
-                null,
-                null,
-                null,
-                null
-        );
-        Log.v(LOG_TAG,"QUERY TESTCURSOR: TraincoachTable #ROWS="+test3.getCount());
-
-        //SELECT _id FROM issue INNER JOIN issue_asset ON issue_asset.issue_id = issue._id INNER JOIN traincoach ON issue.traincoach_id = traincoach._id
-        String[] testprojection4={IssueContract.IssueEntry._ID};
-        Cursor test4 = sIssueAssetWorkplaceByIssueQueryBuilder.query(mOpenHelper.getReadableDatabase(),
-                testprojection4,
-                null,
-                null,
-                null,
-                null,
-                null
-        );
-        Log.v(LOG_TAG,"QUERY TESTCURSOR: JOINED TABLES #ROWS="+test4.getCount());
-    }
-
-
 }
