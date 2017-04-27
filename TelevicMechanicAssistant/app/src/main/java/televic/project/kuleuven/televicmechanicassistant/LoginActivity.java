@@ -24,7 +24,6 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONException;
@@ -35,9 +34,10 @@ import java.util.Map;
 
 /**
  * A login screen that offers login via email/password.
- * Als de user zelfs geen token heeft locaal: blijf op signin page, anders redirect naar MainPage
- * en dan op de MainPage als 401 ->
- * nieuwe token aanvragen + sign in
+ * If the user doesn't have a local Token, the uer stays on the signin page.
+ * Otherwise otherwise it redirects to the OverviewListActivity.
+ * If the REST request gets a "401 Unauthorized" response, the user is also redirected to
+ * the LoginActivity.
  */
 public class LoginActivity extends AppCompatActivity {
     private final String LOG_TAG = LoginActivity.class.getSimpleName();
@@ -59,9 +59,8 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         //Redirect directly if a local TOKEN is present
-        //TODO OVERAL BIJ ERROR 401 moet TOKEN verwijderd worden! anders oneindige redirect lus.
         String token = Utility.getLocalToken(getApplicationContext());
-        if (token != null || Utility.DEBUG_SKIP_LOGIN) {
+        if (token != null ) {
             goToOverviewPage();
         }
 
@@ -143,10 +142,20 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Method to check if the input email address is valid.
+     * @param email
+     * @return
+     */
     private boolean isEmailValid(String email) {
         return email.contains("@") && email.contains(".");
     }
 
+    /**
+     * Method to check if the entered password is valid.
+     * @param password
+     * @return
+     */
     private boolean isPasswordValid(String password) {
         return password.length() >= 8;
     }
@@ -188,7 +197,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /**
-     * If new login or login with TOKEN succesful: we redirect to the IssueOverviewActivity
+     * If new login or login with TOKEN successful: we redirect to the IssueOverviewActivity
      */
     public void goToOverviewPage() {
         Log.v(LOG_TAG,"Creating intent: goToOverviewPage");
@@ -197,6 +206,9 @@ public class LoginActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Inner class that handles the request of a token to the server.
+     */
     public class UserLoginHandler {
         private final String LOG_TAG = UserLoginHandler.class.getSimpleName();
 
