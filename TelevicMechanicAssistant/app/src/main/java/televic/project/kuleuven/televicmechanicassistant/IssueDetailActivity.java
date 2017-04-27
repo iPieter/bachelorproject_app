@@ -228,6 +228,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
 
     //TODO
     public void showListEmptyText(boolean show) {
+        /*
         TextView textView = new TextView(this);
         textView.setTextColor(Color.BLACK);
         textView.setId();
@@ -241,7 +242,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         }
         else{
             listView.setEmptyView(null);
-        }
+        }*/
     }
 
     /**

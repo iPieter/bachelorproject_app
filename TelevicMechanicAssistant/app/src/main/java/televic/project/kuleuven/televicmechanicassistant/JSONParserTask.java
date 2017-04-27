@@ -16,6 +16,8 @@ import televic.project.kuleuven.televicmechanicassistant.data.IssueDbHelper;
 
 
 /**
+ * This AsyncTask is executed on a background thread. It parses JSON files and puts
+ * the values in the database.
  * Created by Matthias on 19/04/2017.
  */
 
@@ -52,6 +54,14 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
         this.mWorkplaceVector = new Vector<>();
     }
 
+    /**
+     * The background task to execute. When this task is entered, it got a successful REST response.
+     * First the cache in the database is deleted, so that the new data can take its place.
+     * The REST response will be parse and thereafter loaded into the database.
+     *
+     * @param strings
+     * @return
+     */
     @Override
     protected Void doInBackground(String... strings) {
         Log.v(LOG_TAG, "START JSONPARSING background task");
@@ -72,18 +82,20 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
         return null;
     }
 
-    private void deleteCacheInDatabase(){
+    /**
+     * Method to delete all rows in the database tables.
+     */
+    private void deleteCacheInDatabase() {
         //Deleting all entries
-        mContext.getContentResolver().delete(IssueContract.TraincoachEntry.CONTENT_URI,null,null);
-        mContext.getContentResolver().delete(IssueContract.IssueAssetEntry.CONTENT_URI,null,null);
-        mContext.getContentResolver().delete(IssueContract.IssueEntry.CONTENT_URI,null,null);
+        mContext.getContentResolver().delete(IssueContract.TraincoachEntry.CONTENT_URI, null, null);
+        mContext.getContentResolver().delete(IssueContract.IssueAssetEntry.CONTENT_URI, null, null);
+        mContext.getContentResolver().delete(IssueContract.IssueEntry.CONTENT_URI, null, null);
     }
 
     /**
      * Parsing the Issue JSON obtained from REST
-     * IssueAsset Parsing is called internally in the IssueParsing
-     * => see parseSingleIssue(JSONObject issue)
-     * Adding ContentValues to Vector. This vector is used to bulkInsert into DataBase
+     * IssueAsset Parsing is called internally in the IssueParsing.
+     * Adding ContentValues to a Vector for Issues. This vector is used to bulkInsert into DataBase
      *
      * @param jsonResponse String response from Volley
      */
@@ -271,7 +283,7 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
      * Fetching ContentValues for a single Asset and putting the blob with the contentValues.
      *
      * @param asset single asset
-     * @param blob the byte[] of the image
+     * @param blob  the byte[] of the image
      * @return ContentValues of a single Asset
      */
     public static ContentValues parseSingleAsset(JSONObject asset, byte[] blob, int issueId) {
@@ -312,7 +324,7 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
             issueAssetContentValues.put(IssueContract.IssueAssetEntry.COLUMN_USER_EMAIL, asset_user_email);
             issueAssetContentValues.put(IssueContract.IssueAssetEntry.COLUMN_ISSUE_ID, asset_issue_id);
 
-            if(blob!=null){
+            if (blob != null) {
                 issueAssetContentValues.put(IssueContract.IssueAssetEntry.COLUMN_IMAGE_BLOB, blob);
             }
         } catch (JSONException e) {
@@ -421,6 +433,10 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
     }
 
     /*--- WRTING TO DATABASE ---*/
+
+    /**
+     * Method to write all parsed Issues to the database.
+     */
     public void writeIssuesToDatabase() {
         Log.v(LOG_TAG, "DATABASE TRANSACTION to Issue-Table STARTED");
         int rowsInserted = 0;
@@ -433,6 +449,9 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
         Log.v(LOG_TAG, "DATABASE TRANSACTION to Issue-Table COMPLETE: " + rowsInserted + " rows inserted!");
     }
 
+    /**
+     * Method to write all parsed IssueAssets to the database.
+     */
     public void writeIssueAssetsToDatabase() {
         Log.v(LOG_TAG, "DATABASE TRANSACTION to IssueAsset-Table STARTED");
         int rowsInserted = 0;
@@ -445,6 +464,9 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
         Log.v(LOG_TAG, "DATABASE TRANSACTION to IssueAsset-Table COMPLETE: " + rowsInserted + " rows inserted!");
     }
 
+    /**
+     * Method to write all parsed Workplaces to the database.
+     */
     public void writeWorkplacesToDatabase() {
         Log.v(LOG_TAG, "DATABASE TRANSACTION to Traincoach-Table STARTED");
         int rowsInserted = 0;
