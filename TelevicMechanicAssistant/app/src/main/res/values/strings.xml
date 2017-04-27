@@ -23,4 +23,6 @@
 
     <!--Other-->
     <string name="item_issue_overview_empty">Geen taken toegewezen...</string>
+    <string name="item_issue_detail_empty">Geen geplaatste berichten...</string>
+
 </resources>

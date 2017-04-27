@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -17,14 +18,18 @@ import android.support.v4.content.FileProvider;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.LinearLayout.LayoutParams;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
@@ -219,6 +224,24 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         intent.putExtra(INTENT_DATA_ID_GRAPH, mDataId);
         Log.v(LOG_TAG, "Starting Graph with dataid=" + mDataId);
         startActivity(intent);
+    }
+
+    //TODO
+    public void showListEmptyText(boolean show) {
+        TextView textView = new TextView(this);
+        textView.setTextColor(Color.BLACK);
+        textView.setId();
+        LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        params.gravity= Gravity.CENTER;
+
+        LinearLayout root = (LinearLayout) findViewById(R.id.issue_detail_view);
+        if(show) {
+            textView.setText(R.string.item_issue_detail_empty);
+            root.addView(textView,params);
+        }
+        else{
+            listView.setEmptyView(null);
+        }
     }
 
     /**
@@ -624,6 +647,12 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         mListAdapter.swapCursor(cursor);
         showLoadingProgressDialog(false);
+
+        if(cursor.getCount() == 0){
+            showListEmptyText(true);
+        }else{
+            showListEmptyText(false);
+        }
         Log.v(LOG_TAG, "onLoadFinished: Loader cursor swapped, cursorCount = " + cursor.getCount());
     }
 
