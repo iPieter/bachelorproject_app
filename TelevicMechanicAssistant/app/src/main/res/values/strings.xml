@@ -22,7 +22,7 @@
     <string name="error_field_required">Dit veld is verplicht</string>
 
     <!--Other-->
-    <string name="item_issue_overview_empty">Geen taken toegewezen...</string>
-    <string name="item_issue_detail_empty">Geen geplaatste berichten...</string>
+    <string name="item_issue_overview_empty">Geen toegewezen taken</string>
+    <string name="item_issue_detail_empty">Geen berichten</string>
 
 </resources>

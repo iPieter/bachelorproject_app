@@ -7,7 +7,7 @@
     android:gravity="center"
     android:id="@android:id/content">
 
-    <!-- DISPLAYED WHEN DATA IS LOADING-->
+    <!-- DISPLAYED WHEN DATA IS LOADING -->
     <ProgressBar
         android:id="@+id/overviewlist_progress"
         style="?android:attr/progressBarStyleLarge"

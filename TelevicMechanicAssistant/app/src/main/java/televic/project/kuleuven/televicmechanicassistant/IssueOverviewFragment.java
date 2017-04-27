@@ -181,7 +181,7 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
                 mListView.setVisibility(show ? View.GONE : View.VISIBLE);
             }
         });
-        
+
         mEmptyListTextView.setVisibility(show? View.VISIBLE : View.GONE);
         mEmptyListTextView.animate().setDuration(shortAnimTime).alpha(
                 show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
@@ -274,15 +274,15 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
         Log.v(LOG_TAG, "Loader onLoadFinished");
         mOverviewListAdapter.swapCursor(cursor);
 
+        //Hide progressbar
+        showProgress(false);
+
         //When no tasks assigned, display message
         if (cursor.getCount() == 0) {
             showListEmptyText(true);
         } else {
             showListEmptyText(false);
         }
-
-        //Hide progressbar
-        showProgress(false);
         Log.v(LOG_TAG, "Loader cursor swapped, cursorCount = " + cursor.getCount());
     }
 

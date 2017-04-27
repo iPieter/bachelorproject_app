@@ -11,6 +11,28 @@
     android:focusable="true"
     android:focusableInTouchMode="true">
 
+    <!-- DISPLAYED WHEN DATA IS LOADING -->
+    <ProgressBar
+        android:id="@+id/detaillist_progress"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone" />
+
+    <!-- DISPLAYED WHEN LIST IS EMPTY-->
+    <TextView
+        android:id="@+id/detaillist_empty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/item_issue_detail_empty"
+        android:textColor="#000000"
+        android:visibility="gone" />
+
+    <!-- LIST (CONTENT) -->
     <ListView
         android:id="@+id/issue_asset_link"
         android:layout_width="match_parent"
@@ -21,6 +43,7 @@
         android:divider="@null"
         android:dividerHeight="0dp"/>
 
+    <!-- DOWNSIDE BAR-->
     <RelativeLayout
         android:id="@+id/layout_add"
         android:layout_width="match_parent"

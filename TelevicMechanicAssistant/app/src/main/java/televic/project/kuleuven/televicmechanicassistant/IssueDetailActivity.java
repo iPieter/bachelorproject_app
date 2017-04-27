@@ -1,13 +1,16 @@
 package televic.project.kuleuven.televicmechanicassistant;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -18,18 +21,15 @@ import android.support.v4.content.FileProvider;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.LinearLayout.LayoutParams;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
@@ -75,7 +75,10 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
 
     //GUI components
     private ProgressDialog sendingDialog;
-    private ProgressDialog loadingDialog;
+    //private ProgressDialog loadingDialog; TODO DELETE
+    private TextView mEmptyListTextView;
+    private View mDataLoadingProgressView;
+    private ListView mListView;
 
     //Id of the loader
     private static final int DETAIL_LOADER = 1;
@@ -117,6 +120,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     /**
      * Called when Activity is created. The intent data are initialized and all
      * attributes are initialized.
+     *
      * @param savedInstanceState
      */
     protected void onCreate(Bundle savedInstanceState) {
@@ -152,18 +156,18 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
 
         //INIT adapter
         mListAdapter = new IssueAssetListAdapter(getApplicationContext(), null, 0);
-        ListView listView = (ListView) findViewById(R.id.issue_asset_link);
-        listView.setAdapter(mListAdapter);
+        mListView = (ListView) findViewById(R.id.issue_asset_link);
+        mListView.setAdapter(mListAdapter);
 
         //INIT loader
         getSupportLoaderManager().initLoader(DETAIL_LOADER, null, this);
 
         //INIT loading dialog
-        loadingDialog = new ProgressDialog(this);
+        /*loadingDialog = new ProgressDialog(this);
         loadingDialog.setTitle("Laden..");
         loadingDialog.setMessage("De boodschappen worden geladen");
         loadingDialog.setCancelable(false);
-        showLoadingProgressDialog(true);
+        showLoadingProgressDialog(true);*/
 
         //INIT sending dialog
         sendingDialog = new ProgressDialog(this);
@@ -171,12 +175,20 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         sendingDialog.setMessage("De boodschap wordt verstuurd.");
         sendingDialog.setCancelable(false); // disable dismiss by tapping outside of the dialog
 
+        //INIT attributes
+        mDataLoadingProgressView = findViewById(R.id.detaillist_progress);
+        mEmptyListTextView = (TextView) findViewById(R.id.detaillist_empty);
+
+        //Show progressbar until backend is handled
+        showProgress(true);
+
         //Calling Backend
         fetchIssueAssetImages();
     }
 
     /**
      * Inflating the menu items to the menu bar
+     *
      * @param menu
      * @return true if successful
      */
@@ -189,6 +201,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
 
     /**
      * Binding actions to the menu items
+     *
      * @param item
      * @return true if successful
      */
@@ -224,25 +237,6 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         intent.putExtra(INTENT_DATA_ID_GRAPH, mDataId);
         Log.v(LOG_TAG, "Starting Graph with dataid=" + mDataId);
         startActivity(intent);
-    }
-
-    //TODO
-    public void showListEmptyText(boolean show) {
-        /*
-        TextView textView = new TextView(this);
-        textView.setTextColor(Color.BLACK);
-        textView.setId();
-        LayoutParams params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-        params.gravity= Gravity.CENTER;
-
-        LinearLayout root = (LinearLayout) findViewById(R.id.issue_detail_view);
-        if(show) {
-            textView.setText(R.string.item_issue_detail_empty);
-            root.addView(textView,params);
-        }
-        else{
-            listView.setEmptyView(null);
-        }*/
     }
 
     /**
@@ -290,6 +284,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
 
     /**
      * Method that updates the status of a row in the IssueAsset table.
+     *
      * @param status
      */
     private void updateStatusInDatabase(String status) {
@@ -309,6 +304,61 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                 contentValues,
                 selection,
                 selectionArgs);
+    }
+
+    /**
+     * Text showed when there are no Issues assigned to the user.
+     *
+     * @param show
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    public void showListEmptyText(final boolean show) {
+        Log.v(LOG_TAG,"LIST EMPTY TEXT show="+show);
+        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+        mListView.setVisibility(show ? View.GONE : View.VISIBLE);
+        mListView.animate().setDuration(shortAnimTime).alpha(
+                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mListView.setVisibility(show ? View.GONE : View.VISIBLE);
+            }
+        });
+
+        mEmptyListTextView.setVisibility(show ? View.VISIBLE : View.GONE);
+        mEmptyListTextView.animate().setDuration(shortAnimTime).alpha(
+                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mDataLoadingProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+        });
+    }
+
+    /**
+     * Shows the progress UI and hides the list
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    public void showProgress(final boolean show) {
+        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+        mListView.setVisibility(show ? View.GONE : View.VISIBLE);
+        mListView.animate().setDuration(shortAnimTime).alpha(
+                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mListView.setVisibility(show ? View.GONE : View.VISIBLE);
+            }
+        });
+
+        mDataLoadingProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+        mDataLoadingProgressView.animate().setDuration(shortAnimTime).alpha(
+                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mDataLoadingProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+        });
     }
 
     /**
@@ -554,13 +604,14 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
      *
      * @param show
      */
-    private void showLoadingProgressDialog(final boolean show) {
+    //private void showLoadingProgressDialog(final boolean show) {
+        /*
         if (show) {
             loadingDialog.show();
         } else {
             loadingDialog.dismiss();
-        }
-    }
+        }*/
+    //}
 
     /**
      * Method to open the Picture App of the Android phone and take a picture with it.
@@ -647,18 +698,23 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         mListAdapter.swapCursor(cursor);
-        showLoadingProgressDialog(false);
 
-        if(cursor.getCount() == 0){
+        //Hide progressbar
+        showProgress(false);
+
+        //When no tasks assigned, display message
+        if (cursor.getCount() == 0) {
             showListEmptyText(true);
-        }else{
+        } else {
             showListEmptyText(false);
         }
+
         Log.v(LOG_TAG, "onLoadFinished: Loader cursor swapped, cursorCount = " + cursor.getCount());
     }
 
     /**
      * Called when loader resets
+     *
      * @param loader
      */
     @Override
