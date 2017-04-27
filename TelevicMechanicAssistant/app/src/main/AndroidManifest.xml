@@ -48,13 +48,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".IssueOverviewActivity" />
         </activity>
-        <activity android:name=".GraphActivity"
-            android:parentActivityName=".IssueDetailActivity">
-            <!-- Parent activity meta-data to support 4.0 and lower -->
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".IssueDetailActivity" />
-        </activity>
+        <activity android:name=".GraphActivity"/>
 
         <!-- PROVIDERS -->
         <provider
