@@ -36,6 +36,7 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
     //UI Components
     private View mProgressView;
     private ListView mListView;
+    private TextView mEmptyListTextView;
 
     //Tag for Extra to pass with intent to other activity
     public static String INTENT_ISSUE_ID = "issue_id_value987564321";
@@ -73,6 +74,7 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
 
     /**
      * Setup on creation of fragment
+     *
      * @param savedInstanceState
      */
     @Override
@@ -102,6 +104,7 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
 
     /**
      * Initialization of all attributes of the class
+     *
      * @param inflater
      * @param container
      * @param savedInstanceState
@@ -117,6 +120,7 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
         mCurrentUserId = Utility.getLocalUserId(getActivity());
         mListView = (ListView) rootView.findViewById(android.R.id.list);
         mProgressView = rootView.findViewById(R.id.overviewlist_progress);
+        mEmptyListTextView = (TextView) rootView.findViewById(R.id.overviewlist_empty);
 
         //Setting up adapter
         mOverviewListAdapter = new OverviewListAdapter(getActivity(), null, 0);
@@ -151,6 +155,7 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
 
     /**
      * When the activity is created, the loader must be initialized.
+     *
      * @param savedInstanceState
      */
     @Override
@@ -160,16 +165,31 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
         Log.v(LOG_TAG, "Activity created and initLoader");
     }
 
-    public void showListEmptyText(boolean show) {
-        TextView textView = (TextView) getView().findViewById(android.R.id.empty);
-        String msg="Geen taken toegewezen.";
+    /**
+     * Text showed when there are no Issues assigned to the user.
+     * @param show
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    public void showListEmptyText(final boolean show) {
+        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-        if(show) {
-            textView.setText(msg);
-        }
-        else{
-            textView.setText("");
-        }
+        mListView.setVisibility(show ? View.GONE : View.VISIBLE);
+        mListView.animate().setDuration(shortAnimTime).alpha(
+                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mListView.setVisibility(show ? View.GONE : View.VISIBLE);
+            }
+        });
+        
+        mEmptyListTextView.setVisibility(show? View.VISIBLE : View.GONE);
+        mEmptyListTextView.animate().setDuration(shortAnimTime).alpha(
+                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+        });
     }
 
     /**
@@ -177,35 +197,25 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     public void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            mListView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mListView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mListView.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
+        mListView.setVisibility(show ? View.GONE : View.VISIBLE);
+        mListView.animate().setDuration(shortAnimTime).alpha(
+                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mListView.setVisibility(show ? View.GONE : View.VISIBLE);
+            }
+        });
 
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mListView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
+        mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+        mProgressView.animate().setDuration(shortAnimTime).alpha(
+                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+        });
     }
 
     /**
@@ -228,6 +238,7 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
 
     /**
      * Called when loader is initializing
+     *
      * @param i
      * @param bundle
      * @return CursorLoader
@@ -254,6 +265,7 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
     /**
      * Called when loader is finished.
      * Show a message when no tasks are loaded.
+     *
      * @param cursorLoader
      * @param cursor
      */
@@ -263,9 +275,9 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
         mOverviewListAdapter.swapCursor(cursor);
 
         //When no tasks assigned, display message
-        if(cursor.getCount() == 0){
+        if (cursor.getCount() == 0) {
             showListEmptyText(true);
-        }else{
+        } else {
             showListEmptyText(false);
         }
 
@@ -276,6 +288,7 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
 
     /**
      * Called when loader resets
+     *
      * @param cursorLoader
      */
     @Override

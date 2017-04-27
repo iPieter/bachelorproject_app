@@ -7,6 +7,7 @@
     android:gravity="center"
     android:id="@android:id/content">
 
+    <!-- DISPLAYED WHEN DATA IS LOADING-->
     <ProgressBar
         android:id="@+id/overviewlist_progress"
         style="?android:attr/progressBarStyleLarge"
@@ -14,6 +15,16 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:visibility="gone" />
+
+    <!-- DISPLAYED WHEN LIST IS EMPTY-->
+    <TextView
+        android:id="@+id/overviewlist_empty"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_weight="1"
+        android:text="@string/item_issue_overview_empty"
+        android:visibility="gone"/>
 
     <!-- LIST -->
     <ListView
@@ -23,10 +34,4 @@
         android:divider="@null"
         android:dividerHeight="0dp"/>
 
-    <!-- DISPLAYED WHEN LIST IS EMPTY-->
-    <TextView
-        android:id="@android:id/empty"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/item_issue_overview_empty" />
 </LinearLayout>
