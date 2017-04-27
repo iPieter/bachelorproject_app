@@ -60,7 +60,7 @@ public class LoginActivity extends AppCompatActivity {
 
         //Redirect directly if a local TOKEN is present
         String token = Utility.getLocalToken(getApplicationContext());
-        if (token != null ) {
+        if (token != null) {
             goToOverviewPage();
         }
 
@@ -144,6 +144,7 @@ public class LoginActivity extends AppCompatActivity {
 
     /**
      * Method to check if the input email address is valid.
+     *
      * @param email
      * @return
      */
@@ -153,6 +154,7 @@ public class LoginActivity extends AppCompatActivity {
 
     /**
      * Method to check if the entered password is valid.
+     *
      * @param password
      * @return
      */
@@ -165,42 +167,33 @@ public class LoginActivity extends AppCompatActivity {
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+        int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
+        mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+        mLoginFormView.animate().setDuration(shortAnimTime).alpha(
+                show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+            }
+        });
 
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
+        mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+        mProgressView.animate().setDuration(shortAnimTime).alpha(
+                show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            }
+        });
     }
+
 
     /**
      * If new login or login with TOKEN successful: we redirect to the IssueOverviewActivity
      */
     public void goToOverviewPage() {
-        Log.v(LOG_TAG,"Creating intent: goToOverviewPage");
+        Log.v(LOG_TAG, "Creating intent: goToOverviewPage");
         Intent intent = new Intent(this, IssueOverviewActivity.class);
         startActivity(intent);
     }
@@ -242,12 +235,12 @@ public class LoginActivity extends AppCompatActivity {
             try {
                 //Creating JsonStringRequest for REST call
 
-                JSONObject params = new JSONObject( );
-                params.put( "email", mEmail );
-                params.put( "password", mPassword );
+                JSONObject params = new JSONObject();
+                params.put("email", mEmail);
+                params.put("password", mPassword);
 
-                Log.i( LOG_TAG, mEmail );
-                Log.i( LOG_TAG, mPassword );
+                Log.i(LOG_TAG, mEmail);
+                Log.i(LOG_TAG, mPassword);
 
                 StringRequest jsObjRequest = new StringRequest
                         (Request.Method.POST, url, new Response.Listener<String>() {
@@ -256,11 +249,9 @@ public class LoginActivity extends AppCompatActivity {
                                 Log.v(LOG_TAG, "JSONObject response received from REST:" + responseString);
 
                                 JSONObject response = null;
-                                try
-                                {
-                                    response = new JSONObject( responseString );
-                                } catch ( JSONException e )
-                                {
+                                try {
+                                    response = new JSONObject(responseString);
+                                } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
 
@@ -268,21 +259,21 @@ public class LoginActivity extends AppCompatActivity {
                                 int user_id;
                                 String user_name;
                                 String token;
-                                try{
+                                try {
                                     //PARSING
                                     token = response.getString(JSON_TOKEN);
 
                                     JSONObject user = response.getJSONObject(JSON_USER);
-                                    user_id=user.getInt(JSON_ID);
-                                    user_name=user.getString(JSON_NAME);
+                                    user_id = user.getInt(JSON_ID);
+                                    user_name = user.getString(JSON_NAME);
 
                                     //STORING DATA
-                                    Utility.putLocalToken(mContext,token);
-                                    Utility.putLocalUserInfo(mContext,user_id,user_name);
-                                }catch(JSONException e){
+                                    Utility.putLocalToken(mContext, token);
+                                    Utility.putLocalUserInfo(mContext, user_id, user_name);
+                                } catch (JSONException e) {
                                     e.printStackTrace();
-                                    Log.e(LOG_TAG,"Login attempt failed: fail in parse & save.");
-                                }finally{
+                                    Log.e(LOG_TAG, "Login attempt failed: fail in parse & save.");
+                                } finally {
                                     //CLEANUP
                                     mAuthTask = null;
                                     showProgress(false);
@@ -305,25 +296,25 @@ public class LoginActivity extends AppCompatActivity {
                                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                                 mPasswordView.requestFocus();
                             }
-                        }){
-                            @Override
-                            public String getBodyContentType() {
-                                Log.i( LOG_TAG, "CALLING GET-CONTENT-TYPE" );
-                                return "application/x-www-form-urlencoded; charset=UTF-8";
-                            }
+                        }) {
+                    @Override
+                    public String getBodyContentType() {
+                        Log.i(LOG_TAG, "CALLING GET-CONTENT-TYPE");
+                        return "application/x-www-form-urlencoded; charset=UTF-8";
+                    }
 
-                            @Override
-                            protected Map<String, String> getParams() throws AuthFailureError {
-                                Map<String, String> params = new HashMap<String, String>();
+                    @Override
+                    protected Map<String, String> getParams() throws AuthFailureError {
+                        Map<String, String> params = new HashMap<String, String>();
 
-                                Log.i( LOG_TAG, "CALLING GET-PARAMS" );
+                        Log.i(LOG_TAG, "CALLING GET-PARAMS");
 
-                                params.put("email", mEmail);
-                                params.put("password", mPassword);
-                                return params;
-                            }
+                        params.put("email", mEmail);
+                        params.put("password", mPassword);
+                        return params;
+                    }
 
-                        };
+                };
 
                 //Singleton handles call to REST
                 Log.v(LOG_TAG, "Calling RESTSingleton with context:" + mContext);
