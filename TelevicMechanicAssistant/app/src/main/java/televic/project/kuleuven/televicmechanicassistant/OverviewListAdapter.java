@@ -20,22 +20,31 @@ public class OverviewListAdapter extends CursorAdapter {
 
     public OverviewListAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
-        Log.v(LOG_TAG,"OverviewListAdapter Constructor called!");
+        Log.v(LOG_TAG, "OverviewListAdapter Constructor called!");
 
     }
 
+    /**
+     * Called when a new View in the List is created
+     *
+     * @param context
+     * @param cursor
+     * @param parent
+     * @return the view
+     */
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        Log.v(LOG_TAG,"newView");
+        Log.v(LOG_TAG, "newView");
         View view = LayoutInflater.from(context).inflate(R.layout.item_issue_overview, parent, false);
         return view;
     }
 
     /**
      * Binding the views in the ListView to Rows in the database, using the cursor.
-     * @param view The view returned in newView
+     *
+     * @param view    The view returned in newView
      * @param context
-     * @param cursor Cursor that is used to iterate over Database Rows
+     * @param cursor  Cursor that is used to iterate over Database Rows
      */
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
@@ -61,15 +70,24 @@ public class OverviewListAdapter extends CursorAdapter {
         Log.v(LOG_TAG, "List item set!");
     }
 
-    public String convertIssueStatus(String status)
-    {
-        switch (status)
-        {
-            case "CREATED": return "Aangemaakt";
-            case "ASSIGNED": return "Toewezen";
-            case "IN_PROGRESS": return "In behandeling";
-            case "CLOSED": return "Gesloten";
-            default: return "";
+    /**
+     * Making the status user friendly
+     *
+     * @param status
+     * @return
+     */
+    public String convertIssueStatus(String status) {
+        switch (status) {
+            case "CREATED":
+                return "Aangemaakt";
+            case "ASSIGNED":
+                return "Toewezen";
+            case "IN_PROGRESS":
+                return "In behandeling";
+            case "CLOSED":
+                return "Gesloten";
+            default:
+                return "";
         }
     }
 }
