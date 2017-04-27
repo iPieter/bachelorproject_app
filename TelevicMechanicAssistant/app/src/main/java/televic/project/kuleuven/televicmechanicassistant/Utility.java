@@ -19,15 +19,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 /**
+ * Class for Utility methods. This are methods that are useful to many activities.
  * Created by Matthias on 23/04/2017.
  */
 
 public class Utility {
     private static final String LOG_TAG = Utility.class.getSimpleName();
-
-    //Adapt the DEBUG_MODE here
-    public static final boolean DEBUG_MODE = false;
-    public static final boolean DEBUG_SKIP_LOGIN = false; //TODO DELETE THIS
 
     public static final String SHARED_PREF = "main_shared_pref";
     public static final int PRIVATE_MODE = 0;

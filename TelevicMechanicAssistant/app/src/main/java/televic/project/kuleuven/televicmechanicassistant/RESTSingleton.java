@@ -11,6 +11,8 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;
 
 /**
+ * The RESTSingleton is a singleton that should be created with the ApplicationContext.
+ * This way, any request can be handled by Volley through the app's lifecycle.
  * Created by Matthias on 28/03/2017.
  */
 
@@ -50,6 +52,11 @@ public class RESTSingleton{
         Log.v(LOG_TAG, "RESTSingleton intialized: current context = " + mCtx +", appcontext = "+ mCtx.getApplicationContext());
     }
 
+    /**
+     * Returning the RESTSingleton instance
+     * @param context
+     * @return
+     */
     public static synchronized RESTSingleton getInstance(Context context) {
         if (mInstance == null) {
             mInstance = new RESTSingleton(context);
@@ -57,6 +64,10 @@ public class RESTSingleton{
         return mInstance;
     }
 
+    /**
+     * return the Volley requestQueue
+     * @return
+     */
     public RequestQueue getRequestQueue() {
         if (mRequestQueue == null) {
             // getApplicationContext() is key, it keeps you from leaking the
@@ -66,11 +77,20 @@ public class RESTSingleton{
         return mRequestQueue;
     }
 
+    /**
+     * Method to add the request to the requestQueue.
+     * @param req
+     * @param <T>
+     */
     public <T> void addToRequestQueue(Request<T> req) {
         getRequestQueue().add(req);
         Log.v(LOG_TAG, "REST request added to requestqueue: " + req.toString());
     }
 
+    /**
+     * Returning the imageLoader.
+     * @return
+     */
     public ImageLoader getImageLoader() {
         return mImageLoader;
     }
