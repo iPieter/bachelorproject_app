@@ -26,7 +26,9 @@ import android.widget.TextView;
 import televic.project.kuleuven.televicmechanicassistant.data.IssueContract;
 
 
-//MAIN LAUNCH Activity
+/**
+ * This fragment shows a list of all assigned Issues to the user.
+ */
 public class IssueOverviewFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private final String LOG_TAG = IssueOverviewFragment.class.getSimpleName();
     private int mCurrentUserId;
@@ -69,6 +71,10 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
     static final int COL_ISSUE_WORKPLACE = 7;
     static final int COL_ISSUE_DATA_ID = 8;
 
+    /**
+     * Setup on creation of fragment
+     * @param savedInstanceState
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,6 +100,13 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Initialization of all attributes of the class
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return
+     */
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -104,10 +117,6 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
         mCurrentUserId = Utility.getLocalUserId(getActivity());
         mListView = (ListView) rootView.findViewById(android.R.id.list);
         mProgressView = rootView.findViewById(R.id.overviewlist_progress);
-
-        if (Utility.DEBUG_MODE) {
-            mCurrentUserId = 1;
-        }
 
         //Setting up adapter
         mOverviewListAdapter = new OverviewListAdapter(getActivity(), null, 0);
@@ -151,9 +160,16 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
         Log.v(LOG_TAG, "Activity created and initLoader");
     }
 
-    public void setEmptyText(String text) {
+    public void showListEmptyText(boolean show) {
         TextView textView = (TextView) getView().findViewById(android.R.id.empty);
-        textView.setText(text);
+        String msg="Geen taken toegewezen.";
+
+        if(show) {
+            textView.setText(msg);
+        }
+        else{
+            textView.setText("");
+        }
     }
 
     /**
@@ -204,17 +220,18 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
 
         //Calling backend
         if (Utility.isUserIdValid(mCurrentUserId)) {
-            if (Utility.DEBUG_MODE) {
-                mRestRequestHandler.setIssueStringResponse(RESTRequestHandler.testStringIssue);
-                mRestRequestHandler.setWorkplaceStringResponse(RESTRequestHandler.testStringWorkplace);
-            } else {
-                mRestRequestHandler.sendParallelRequest(mCurrentUserId);
-            }
+            mRestRequestHandler.sendParallelRequest(mCurrentUserId);
         } else {
             Log.e(LOG_TAG, "Current user id is not valid!");
         }
     }
 
+    /**
+     * Called when loader is initializing
+     * @param i
+     * @param bundle
+     * @return CursorLoader
+     */
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         Log.v(LOG_TAG, "Creating CursorLoader");
@@ -234,16 +251,33 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
                 sortOrder);
     }
 
+    /**
+     * Called when loader is finished.
+     * Show a message when no tasks are loaded.
+     * @param cursorLoader
+     * @param cursor
+     */
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         Log.v(LOG_TAG, "Loader onLoadFinished");
         mOverviewListAdapter.swapCursor(cursor);
+
+        //When no tasks assigned, display message
+        if(cursor.getCount() == 0){
+            showListEmptyText(true);
+        }else{
+            showListEmptyText(false);
+        }
 
         //Hide progressbar
         showProgress(false);
         Log.v(LOG_TAG, "Loader cursor swapped, cursorCount = " + cursor.getCount());
     }
 
+    /**
+     * Called when loader resets
+     * @param cursorLoader
+     */
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
         Log.v(LOG_TAG, "Loader onLoaderReset");
