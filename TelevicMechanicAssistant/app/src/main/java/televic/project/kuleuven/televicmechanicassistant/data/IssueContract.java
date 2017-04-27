@@ -6,9 +6,9 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-import java.util.List;
-
 /**
+ * The IssueContract class defines all constants used for the database.
+ * Also static helper methods for URI's are implemented here.
  * Created by Matthias on 18/04/2017.
  */
 
@@ -28,7 +28,9 @@ public class IssueContract {
     public static final String PATH_TRAINCOACH = "traincoach";
     public static final String PATH_WITH_IMG = "with_img";
 
-    /* TABLE 1: Inner class that defines the table contents of the Issue table */
+    /**
+     * TABLE 1: Inner class that defines the table contents of the Issue table
+     */
     public static final class IssueEntry implements BaseColumns {
         public static final Uri CONTENT_URI =
                 BASE_CONTENT_URI.buildUpon().appendPath(PATH_ISSUE).build();
@@ -55,20 +57,35 @@ public class IssueContract {
         public static final String COLUMN_TRAINCOACH_ID = "traincoach_id"; //Needed to link REST request to eachother
 
 
+        /**
+         * Method to help build a URI for a given id
+         *
+         * @param id
+         * @return the URI
+         */
         public static Uri buildIssueUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
-        public static int getIssueIdFromUri(Uri uri){
+        /**
+         * Method to receive the id from the URI
+         *
+         * @param uri
+         * @return id -1 if no id found
+         */
+        public static int getIssueIdFromUri(Uri uri) {
             String idString = uri.getQueryParameter(_ID);
-            if(idString!=null && idString.length()>0){
+            if (idString != null && idString.length() > 0) {
                 return Integer.parseInt(idString);
             }
             return -1;
         }
     }
 
-    /* TABLE 2: Inner class that defines the table contents of the IssueAsset table */
+    /**
+     * TABLE 2: Inner class that defines the table contents of the IssueAsset table.
+     * Each IssueAsset has a IssueId, to link the IssueAsset table to the Issue Table.
+     */
     //ELKE ASSET HEEFT ISSUE_ID
     public static final class IssueAssetEntry implements BaseColumns {
         public static final Uri CONTENT_URI =
@@ -95,37 +112,64 @@ public class IssueContract {
         public static final String COLUMN_USER_EMAIL = "user_email";
         public static final String COLUMN_ISSUE_ID = "issue_id"; //Foreign key to Issue Table
 
+        /**
+         * Method to build a URI for an IssueAsset and append the id on the end.
+         *
+         * @param id
+         * @return the URI
+         */
         public static Uri buildIssueAssetUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
-        public static Uri buildIssueAssetWithImgUri(long id){
+        /**
+         * Method to build a URI, with appended path and with appended id
+         *
+         * @param id
+         * @return the URI
+         */
+        public static Uri buildIssueAssetWithImgUri(long id) {
             Uri uri = IssueContract.IssueAssetEntry.CONTENT_URI
                     .buildUpon().appendPath(IssueContract.PATH_WITH_IMG).build();
             return ContentUris.withAppendedId(uri, id);
         }
 
-        public static int getIssueIdFromUri(Uri uri){
+        /**
+         * Returns the id from the URI
+         *
+         * @param uri
+         * @return id -1 if no id found
+         */
+        public static int getIssueIdFromUri(Uri uri) {
             String idString = uri.getPathSegments().get(1);
-            Log.v(LOG_TAG,"idString in getIssueIdFromUri="+idString);
-            if(idString!=null && idString.length()>0){
+            Log.v(LOG_TAG, "idString in getIssueIdFromUri=" + idString);
+            if (idString != null && idString.length() > 0) {
                 return Integer.parseInt(idString);
             }
             return -1;
         }
 
-        public static int getIssueIdFromImgUri(Uri uri){
+        /**
+         * Return the id from the URI
+         *
+         * @param uri
+         * @return id -1 if no id found
+         */
+        public static int getIssueIdFromImgUri(Uri uri) {
             String idString = uri.getPathSegments().get(2);
 
-            if(idString!=null && idString.length()>0){
+            if (idString != null && idString.length() > 0) {
                 return Integer.parseInt(idString);
             }
             return -1;
         }
     }
 
-    /* TABLE 3: Inner class that defines the table contents of the Traincoach table */
-    //Table om per traincoach_id de bijhorende workplacename te krijgen
+    /**
+     * TABLE 3: Inner class that defines the table contents of the Traincoach table.
+     * This table is linked to the Issue table by the unique Traincoach ID. This way we can
+     * retrieve the workplace info for the Issue.
+     */
     public static final class TraincoachEntry implements BaseColumns {
         public static final Uri CONTENT_URI =
                 BASE_CONTENT_URI.buildUpon().appendPath(PATH_TRAINCOACH).build();
@@ -145,6 +189,12 @@ public class IssueContract {
         public static final String COLUMN_WORKPLACE_ID = "workplace_id";
         public static final String COLUMN_WORKPLACE_NAME = "workplace_name";
 
+        /**
+         * Returns a URI with the id appended as parameter.
+         *
+         * @param id
+         * @return the URI with appended id
+         */
         public static Uri buildTraincoachUri(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
