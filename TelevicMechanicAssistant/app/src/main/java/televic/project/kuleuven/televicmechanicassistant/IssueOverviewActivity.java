@@ -7,6 +7,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+/**
+ * This activity contains the IssueOverviewFragment.
+ */
 public class IssueOverviewActivity extends AppCompatActivity {
     private final String LOG_TAG = IssueOverviewActivity.class.getSimpleName();
 
@@ -24,6 +27,11 @@ public class IssueOverviewActivity extends AppCompatActivity {
         Log.v(LOG_TAG, "Added application context in main_overview activity");
     }
 
+    /**
+     * Inflating the menu items to the menu bar
+     * @param menu
+     * @return true if successful
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // adds items to the action bar if it is present.
@@ -31,7 +39,12 @@ public class IssueOverviewActivity extends AppCompatActivity {
         return true;
     }
 
-    //See Fragment for implementation
+    /**
+     * Binding actions to the menu items
+     * See Fragment for fragment related implementation
+     * @param item
+     * @return true if successful
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
