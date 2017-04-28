@@ -26,4 +26,16 @@ When the user successfully logs in, the token received from the server is stored
 
 ## Work on the app
 ### Anton Danneels
+- REST(Image Requests)
+- GraphActivity
+- Static version DetailActivity
+
 ### Matthias De Lange
+- Backend (Database, ContentProvider)
+- REST (App Data Requests)
+- Parsing (REST data to database)
+- Authentication (Tokens, Login)
+- OverviewActivity
+- Dynamic version DetailActivity
+- Documentation
+- ReadMe
