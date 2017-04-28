@@ -19,7 +19,7 @@ import com.android.volley.toolbox.Volley;
 public class RESTSingleton{
     private final String LOG_TAG = RESTSingleton.class.getSimpleName();
 
-    public final static String BASE_URL = "http://10.108.81.65:8080/DWPProject-0.0.1-SNAPSHOT/rest";
+    public final static String BASE_URL = "http://ec2-54-202-94-106.us-west-2.compute.amazonaws.com:8080/DWPProject/rest";
     public final static String ISSUES_ALL_FOR_USER_PATH = "issues/all_for_user";
     public final static String ISSUES_PATH = "issues";
     public final static String WORKPLACE_PATH = "workplace/get_by_user_id";
