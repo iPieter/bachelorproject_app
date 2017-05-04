@@ -122,8 +122,7 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
         mProgressView = rootView.findViewById(R.id.overviewlist_progress);
         mEmptyListTextView = (TextView) rootView.findViewById(android.R.id.empty);
 
-        //Show progressbar until backend is handled
-        //Disadvantage if you uncomment: laggy
+        //Show progressbar until backend is handled (Disadvantage=laggy if you uncomment code)
         //showProgress(true);
 
         //Setting up adapter
