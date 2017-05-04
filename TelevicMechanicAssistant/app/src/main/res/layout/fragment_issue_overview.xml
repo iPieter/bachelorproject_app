@@ -18,7 +18,7 @@
 
     <!-- DISPLAYED WHEN LIST IS EMPTY-->
     <TextView
-        android:id="@+id/overviewlist_empty"
+        android:id="@android:id/empty"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:gravity="center"

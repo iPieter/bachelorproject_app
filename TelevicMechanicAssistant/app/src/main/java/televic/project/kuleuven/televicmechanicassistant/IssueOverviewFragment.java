@@ -120,7 +120,7 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
         mCurrentUserId = Utility.getLocalUserId(getActivity());
         mListView = (ListView) rootView.findViewById(android.R.id.list);
         mProgressView = rootView.findViewById(R.id.overviewlist_progress);
-        mEmptyListTextView = (TextView) rootView.findViewById(R.id.overviewlist_empty);
+        mEmptyListTextView = (TextView) rootView.findViewById(android.R.id.empty);
 
         //Show progressbar until backend is handled
         showProgress(true);
