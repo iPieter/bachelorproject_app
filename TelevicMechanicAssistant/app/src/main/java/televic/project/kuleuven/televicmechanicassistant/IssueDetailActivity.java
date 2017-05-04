@@ -172,7 +172,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         mEmptyListTextView = (TextView) findViewById(R.id.detaillist_empty);
 
         //Show progressbar until backend is handled
-        showProgress(true);
+        //showProgress(true);
 
         //Calling Backend
         fetchIssueAssetImages();
@@ -680,7 +680,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         mListAdapter.swapCursor(cursor);
 
         //Hide progressbar
-        showProgress(false);
+        //showProgress(false);
 
         //When no tasks assigned, display message
         if (cursor.getCount() == 0) {
