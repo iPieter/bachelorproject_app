@@ -81,7 +81,7 @@ public class OverviewListAdapter extends CursorAdapter {
             case "CREATED":
                 return "Aangemaakt";
             case "ASSIGNED":
-                return "Toewezen";
+                return "Toegewezen";
             case "IN_PROGRESS":
                 return "In behandeling";
             case "CLOSED":
