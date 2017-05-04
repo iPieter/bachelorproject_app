@@ -341,6 +341,8 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
      */
     public void parseWorkplaceJSON(String jsonResponse) {
         Log.d(LOG_TAG, "Entering parseWorkplaceJSON");
+        Log.v(LOG_TAG,"REST RESPONSE WORKPLACE: "+jsonResponse.toString());
+
         try {
             //Will cast Exception if only on item is present
             JSONArray workplaces = new JSONArray(jsonResponse);
