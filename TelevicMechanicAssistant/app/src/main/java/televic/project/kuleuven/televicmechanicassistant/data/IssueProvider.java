@@ -25,6 +25,8 @@ public class IssueProvider extends ContentProvider {
     private static final UriMatcher sUriMatcher = buildUriMatcher();
     private IssueDbHelper mOpenHelper;
 
+    private Uri mLoaderUri;
+
     //The Codes for the UriMatcher, corresponding with a certain path
     static final int ISSUE = 100; //contains traincoach table for workplace info: see SQLiteQueryBuilder for JOIN!
     static final int ISSUE_WITH_ID = 101;
@@ -184,6 +186,7 @@ public class IssueProvider extends ContentProvider {
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
         Log.v(LOG_TAG, "QUERY cursor #rows = " + retCursor.getCount());
+        mLoaderUri=uri;
         retCursor.setNotificationUri(getContext().getContentResolver(), uri);
         return retCursor;
     }
@@ -327,7 +330,7 @@ public class IssueProvider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
-        getContext().getContentResolver().notifyChange(uri, null);
+        getContext().getContentResolver().notifyChange(mLoaderUri, null);
         return returnUri;
     }
 
@@ -358,7 +361,7 @@ public class IssueProvider extends ContentProvider {
                 } finally {
                     db.endTransaction();
                 }
-                getContext().getContentResolver().notifyChange(uri, null);
+                getContext().getContentResolver().notifyChange(mLoaderUri, null);
                 return returnCount;
 
             case ISSUE_ASSET:
@@ -375,7 +378,7 @@ public class IssueProvider extends ContentProvider {
                 } finally {
                     db.endTransaction();
                 }
-                getContext().getContentResolver().notifyChange(uri, null);
+                getContext().getContentResolver().notifyChange(mLoaderUri, null);
                 return returnCount;
 
             case TRAINCOACH:
@@ -392,7 +395,7 @@ public class IssueProvider extends ContentProvider {
                 } finally {
                     db.endTransaction();
                 }
-                getContext().getContentResolver().notifyChange(uri, null);
+                getContext().getContentResolver().notifyChange(mLoaderUri, null);
                 return returnCount;
 
             default:
@@ -433,7 +436,7 @@ public class IssueProvider extends ContentProvider {
         }
         // Because a null deletes all rows
         if (rowsDeleted != 0) {
-            getContext().getContentResolver().notifyChange(uri, null);
+            getContext().getContentResolver().notifyChange(mLoaderUri, null);
         }
 
         Log.v(LOG_TAG, "ROWS DELETED = " + rowsDeleted);
@@ -481,8 +484,10 @@ public class IssueProvider extends ContentProvider {
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
         if (rowsUpdated != 0) {
-            getContext().getContentResolver().notifyChange(uri, null);
+            Log.v(LOG_TAG,"Notification notifychange!!!");
+            getContext().getContentResolver().notifyChange(mLoaderUri, null);
         }
+
         Log.v(LOG_TAG, rowsUpdated + " rows updated!");
         return rowsUpdated;
     }

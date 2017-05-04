@@ -369,6 +369,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         Log.i(LOG_TAG, assetsWithImgUri.getPath());
         Cursor cursor = getContentResolver().query(
                 assetsWithImgUri, REST_COLUMNS, null, null, null);
+        Log.v(LOG_TAG,"fetchIssueAssetImages query resultcount="+cursor.getCount());
 
         String baseUrl = RESTSingleton.BASE_URL + "/" + RESTSingleton.ISSUE_ASSET_PATH;
         String url;
@@ -440,6 +441,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
      * @param assetId the IssueAsset to update
      */
     public void updateImageInDatabase(Bitmap bitmap, int assetId) {
+        Log.v(LOG_TAG,"updateImageInDatabase from assetId="+assetId+", bitmap="+bitmap);
         ContentValues contentValues = new ContentValues();
         contentValues.put(IssueContract.IssueAssetEntry.COLUMN_IMAGE_BLOB,
                 Utility.toByteArray(bitmap));
@@ -590,21 +592,6 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
             sendingDialog.dismiss();
         }
     }
-
-    /**
-     * This ProgressDialog is showed when the data of the list is loading.
-     * If show is true, then the ProgressDialog will be showed, otherwise it is dismissed.
-     *
-     * @param show
-     */
-    //private void showLoadingProgressDialog(final boolean show) {
-        /*
-        if (show) {
-            loadingDialog.show();
-        } else {
-            loadingDialog.dismiss();
-        }*/
-    //}
 
     /**
      * Method to open the Picture App of the Android phone and take a picture with it.

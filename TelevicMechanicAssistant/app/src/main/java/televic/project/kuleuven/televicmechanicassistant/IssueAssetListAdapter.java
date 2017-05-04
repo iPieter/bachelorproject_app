@@ -73,9 +73,11 @@ public class IssueAssetListAdapter extends CursorAdapter
 
         byte[] imgBlob = cursor.getBlob(IssueDetailActivity.COL_ASSET_IMAGE_BLOB);
         if( imgBlob == null ) {
+            Log.v(LOG_TAG,"List item BLOB ==null");
             imageView.setVisibility(View.GONE);
         }
         else {
+            Log.v(LOG_TAG,"List item BLOB !=null");
             Bitmap imageBitmap = Utility.toBitmap(imgBlob);
             imageView.setImageBitmap( imageBitmap );
             imageView.setVisibility( View.VISIBLE );

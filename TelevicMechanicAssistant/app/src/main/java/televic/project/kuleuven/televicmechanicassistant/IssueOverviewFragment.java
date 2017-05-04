@@ -253,6 +253,8 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
 
         // Sort order =  Ascending, by Assigned Time
         String sortOrder = IssueContract.IssueEntry.COLUMN_ASSIGNED_TIME + " ASC";
+
+        //All Issues
         Uri allIssues = IssueContract.IssueEntry.CONTENT_URI;
         Log.v(LOG_TAG, "CURSORLOADER URI: " + allIssues);
 

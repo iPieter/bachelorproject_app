@@ -12,7 +12,6 @@ import org.json.JSONObject;
 import java.util.Vector;
 
 import televic.project.kuleuven.televicmechanicassistant.data.IssueContract;
-import televic.project.kuleuven.televicmechanicassistant.data.IssueDbHelper;
 
 
 /**
@@ -88,8 +87,10 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
     private void deleteCacheInDatabase() {
         //Deleting all entries
         mContext.getContentResolver().delete(IssueContract.TraincoachEntry.CONTENT_URI, null, null);
-        mContext.getContentResolver().delete(IssueContract.IssueAssetEntry.CONTENT_URI, null, null);
         mContext.getContentResolver().delete(IssueContract.IssueEntry.CONTENT_URI, null, null);
+
+        //If delete tuples IssueAssets, images wont be cached!
+        //mContext.getContentResolver().delete(IssueContract.IssueAssetEntry.CONTENT_URI, null, null);
     }
 
     /**
@@ -341,7 +342,7 @@ public class JSONParserTask extends AsyncTask<String, Void, Void> {
      */
     public void parseWorkplaceJSON(String jsonResponse) {
         Log.d(LOG_TAG, "Entering parseWorkplaceJSON");
-        Log.v(LOG_TAG,"REST RESPONSE WORKPLACE: "+jsonResponse.toString());
+        Log.v(LOG_TAG, "REST RESPONSE WORKPLACE: " + jsonResponse.toString());
 
         try {
             //Will cast Exception if only on item is present
