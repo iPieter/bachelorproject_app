@@ -123,7 +123,8 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
         mEmptyListTextView = (TextView) rootView.findViewById(android.R.id.empty);
 
         //Show progressbar until backend is handled
-        showProgress(true);
+        //Disadvantage if you uncomment: laggy
+        //showProgress(true);
 
         //Setting up adapter
         mOverviewListAdapter = new OverviewListAdapter(getActivity(), null, 0);
@@ -277,7 +278,7 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         Log.v(LOG_TAG, "Loader onLoadFinished");
         mOverviewListAdapter.swapCursor(cursor);
-
+/*
         //Hide progressbar
         showProgress(false);
 
@@ -286,7 +287,7 @@ public class IssueOverviewFragment extends Fragment implements LoaderManager.Loa
             showListEmptyText(true);
         } else {
             showListEmptyText(false);
-        }
+        }*/
         Log.v(LOG_TAG, "Loader cursor swapped, cursorCount = " + cursor.getCount());
     }
 
