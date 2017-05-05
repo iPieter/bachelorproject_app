@@ -1,6 +1,7 @@
 <resources>
     <!--App Hierarchy -->
     <string name="app_name">Televic Mechanic Assistant</string>
+    <string name="app_display_name">OnRails</string>
     <string name="title_activity_issue_detail">IssueDetailActivity</string>
     <string name="title_activity_login">Log in</string>
 
