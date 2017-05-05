@@ -176,6 +176,8 @@ public class Utility {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int quality = 100;
 
+        Log.v(LOG_TAG,"toByteArray");
+
         //Compress the bitmap and write to the ByteArrayOutputStream
         bitmap.compress(Bitmap.CompressFormat.PNG, quality, baos);
 
@@ -194,26 +196,33 @@ public class Utility {
     }
 
     /**
-     *
+     * Method to convert picture in external storage to a byte array
      * @param path
      * @return byte array of image, if it is present. null if no image present on path.
      */
     public static byte[] getBytesFromPicture(String path){
+        Log.v(LOG_TAG,"Getting bytes from picture");
         byte[] blob=null;
         if (path != null) {
             File file = new File(path);
+
+            //Security check
             if (file.isFile()) {
-                int size = (int) file.length();
-                blob = new byte[size];
-                try {
-                    BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
-                    buf.read(blob, 0, blob.length);
-                    buf.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                Bitmap bitmap = convertToCompressedBitmap(path);
+                blob = toByteArray(bitmap);
             }
         }
         return blob;
+    }
+
+    /**
+     * Method to convert a file from the selected path to a bitmap
+     * @param filePath
+     * @return
+     */
+    public static Bitmap convertToCompressedBitmap(String filePath){
+        Log.v(LOG_TAG,"Compressing bitmap");
+        Bitmap bitmap= BitmapFactory.decodeFile(filePath);
+        return Bitmap.createScaledBitmap(bitmap, bitmap.getWidth(), 350, true);
     }
 }
