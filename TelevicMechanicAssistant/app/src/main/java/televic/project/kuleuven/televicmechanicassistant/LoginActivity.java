@@ -58,6 +58,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        setTitle(R.string.title_activity_login);
         //Redirect directly if a local TOKEN is present
         String token = Utility.getLocalToken(getApplicationContext());
         if (token != null) {

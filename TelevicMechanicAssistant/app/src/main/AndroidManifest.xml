@@ -30,9 +30,8 @@
         <!-- ACTIVITIES -->
         <activity
             android:name=".LoginActivity"
-            android:label="@string/title_activity_login">
-            <intent-filter
-                android:label="@string/app_display_name">
+            android:label="@string/app_display_name">
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
