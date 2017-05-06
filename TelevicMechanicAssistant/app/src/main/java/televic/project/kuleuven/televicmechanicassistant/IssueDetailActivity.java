@@ -78,6 +78,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
     private TextView mEmptyListTextView;
     private View mDataLoadingProgressView;
     private ListView mListView;
+    private EditText mUploadTextField;
 
     //Id of the loader
     private static final int DETAIL_LOADER = 1;
@@ -129,6 +130,9 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Berichten");
 
+        //INIT UI component textfield
+        mUploadTextField = ((EditText) findViewById(R.id.textfield_issueasset));
+
         //INIT get values from intent
         mIssueId = getIntent().getIntExtra(IssueOverviewFragment.INTENT_ISSUE_ID, -1);
         mDataId = getIntent().getIntExtra(IssueOverviewFragment.INTENT_DATA_ID, -1);
@@ -141,7 +145,9 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         ImageButton buttonSend = (ImageButton) findViewById(R.id.button_send);
         buttonSend.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                sendIssueAssetPostRequest();
+                if (mUploadTextField.getText().length() > 0 || mCurrentPhotoPath != null) {
+                    sendIssueAssetPostRequest();
+                }
             }
         });
 
@@ -369,7 +375,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         Log.i(LOG_TAG, assetsWithImgUri.getPath());
         Cursor cursor = getContentResolver().query(
                 assetsWithImgUri, REST_COLUMNS, null, null, null);
-        Log.v(LOG_TAG,"fetchIssueAssetImages query resultcount="+cursor.getCount());
+        Log.v(LOG_TAG, "fetchIssueAssetImages query resultcount=" + cursor.getCount());
 
         String baseUrl = RESTSingleton.BASE_URL + "/" + RESTSingleton.ISSUE_ASSET_PATH;
         String url;
@@ -397,7 +403,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                                 int assetId = ASSET_ID;
                                 updateImageInDatabase(response, assetId);
                             }
-                        }, 350, 350, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565,
+                        }, Utility.MAX_IMG_HEIGHT * 2, Utility.MAX_IMG_HEIGHT, ImageView.ScaleType.CENTER, Bitmap.Config.RGB_565,
                         new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
@@ -441,7 +447,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
      * @param assetId the IssueAsset to update
      */
     public void updateImageInDatabase(Bitmap bitmap, int assetId) {
-        Log.v(LOG_TAG,"updateImageInDatabase from assetId="+assetId+", bitmap="+bitmap);
+        Log.v(LOG_TAG, "updateImageInDatabase from assetId=" + assetId + ", bitmap=" + bitmap);
         ContentValues contentValues = new ContentValues();
         contentValues.put(IssueContract.IssueAssetEntry.COLUMN_IMAGE_BLOB,
                 Utility.toByteArray(bitmap));
@@ -508,12 +514,12 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
                 showSendingProgressDialog(false);
 
                 //Clearing the message inputbar
-                ((EditText) findViewById(R.id.textfield_issueasset)).setText("");
+                mUploadTextField.setText("");
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.v(LOG_TAG,"Error response on image upload!");
+                Log.v(LOG_TAG, "Error response on image upload!");
                 mCurrentPhotoPath = null;
                 showSendingProgressDialog(false);
 
@@ -576,6 +582,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
 
         //Adding the request to the requestQueue
         RESTSingleton.getInstance(getApplicationContext()).addToRequestQueue(multipartRequest);
+
     }
 
 

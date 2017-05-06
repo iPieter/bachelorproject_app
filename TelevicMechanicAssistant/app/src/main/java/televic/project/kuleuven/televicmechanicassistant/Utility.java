@@ -22,7 +22,6 @@ import java.io.File;
 
 public class Utility {
     private static final String LOG_TAG = Utility.class.getSimpleName();
-    private static final int MAX_IMG_HEIGHT = 350;
 
     public static final String SHARED_PREF = "main_shared_pref";
     public static final int PRIVATE_MODE = 0;
@@ -35,6 +34,8 @@ public class Utility {
     //ErrorCodes Http
     public static final int UNAUTHORIZED = 401;
 
+    //IMG properties
+    public static final int MAX_IMG_HEIGHT = 350;
 
     /**
      * Fetching locally stored TOKEN in sharedPreferences.
@@ -235,7 +236,7 @@ public class Utility {
      * Scaling the bitmap to the max height parameter, maintaining the width-height ratio.
      * @param bitmap the bitmap to resize
      * @param maxHeight the specified max height
-     * @return the rescaled bitmap
+     * @return the rescaled bitmap or null when invalid parameters
      */
     public static Bitmap scaleBitmapToMaxHeight(Bitmap bitmap, int maxHeight){
         if (bitmap != null && maxHeight > 0) {
