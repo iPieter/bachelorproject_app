@@ -11,12 +11,9 @@ import android.util.Log;
 import com.android.volley.NetworkResponse;
 import com.android.volley.VolleyError;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 
 /**
  * Class for Utility methods. This are methods that are useful to many activities.
@@ -25,6 +22,7 @@ import java.io.IOException;
 
 public class Utility {
     private static final String LOG_TAG = Utility.class.getSimpleName();
+    private static final int MAX_IMG_HEIGHT = 350;
 
     public static final String SHARED_PREF = "main_shared_pref";
     public static final int PRIVATE_MODE = 0;
@@ -222,7 +220,33 @@ public class Utility {
      */
     public static Bitmap convertToCompressedBitmap(String filePath){
         Log.v(LOG_TAG,"Compressing bitmap");
-        Bitmap bitmap= BitmapFactory.decodeFile(filePath);
-        return Bitmap.createScaledBitmap(bitmap, bitmap.getWidth(), 350, true);
+
+        //Set prefered options for compressing
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inPreferredConfig = Bitmap.Config.RGB_565;
+
+        //Decode the bitmap
+        Bitmap bitmap = BitmapFactory.decodeFile(filePath, options);
+
+        return scaleBitmapToMaxHeight(bitmap, MAX_IMG_HEIGHT);
+    }
+
+    /**
+     * Scaling the bitmap to the max height parameter, maintaining the width-height ratio.
+     * @param bitmap the bitmap to resize
+     * @param maxHeight the specified max height
+     * @return the rescaled bitmap
+     */
+    public static Bitmap scaleBitmapToMaxHeight(Bitmap bitmap, int maxHeight){
+        if (bitmap != null && maxHeight > 0) {
+            double scaleFactor = (double) maxHeight / (double) bitmap.getHeight();
+            int newWidth = (int) (bitmap.getWidth() * scaleFactor);
+            Log.v(LOG_TAG,"original width="+bitmap.getWidth()+", scalefactor="+scaleFactor+", newWidth="+newWidth);
+            return Bitmap.createScaledBitmap(bitmap,
+                    newWidth,
+                    MAX_IMG_HEIGHT,
+                    true);
+        }
+        return null;
     }
 }

@@ -513,6 +513,7 @@ public class IssueDetailActivity extends AppCompatActivity implements LoaderMana
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                Log.v(LOG_TAG,"Error response on image upload!");
                 mCurrentPhotoPath = null;
                 showSendingProgressDialog(false);
 
