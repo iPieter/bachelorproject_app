@@ -3,6 +3,8 @@
 ### Overview Of Issues
 Consist of a fragment IssueOverviewFragment. This fragment dynamicly handles the REST request and JSONParsing for the list in this fragment. For the REST request Volley is used (see REST Singleton). The ListView needs an adapter to dynamicly load the listitems. Therefore a custom adapter OverviewListAdapter for this view is inherited from the CursorAdapter. We bind the adapter to the database with a CursorLoader. The loader will detect any changes in the database and give the corresponding listitems the dynamicly loaded values.
 
+![Overview Activity](/Git/Screenshots/overview.png?raw=true "The Overview Activity")
+
 ### Detailview of an Issue
 The data gets loaded from the database to populate the listview. The IMAGE_PRESENT column gets queried to check which IssueAsset have an image attached. If the IssueAsset has an attached image on the server, than a REST-request is handed over to Volley to fetch the image from the server. On response of the server, the bitmap gets saved into the database as a Blob. The CursorLoader notifies the adaptation in the database and populates the images in the listview.
 
