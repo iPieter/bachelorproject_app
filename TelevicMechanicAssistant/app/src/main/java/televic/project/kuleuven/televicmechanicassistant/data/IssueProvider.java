@@ -28,12 +28,12 @@ public class IssueProvider extends ContentProvider {
     private Uri mLoaderUri;
 
     //The Codes for the UriMatcher, corresponding with a certain path
-    static final int ISSUE = 100; //contains traincoach table for workplace info: see SQLiteQueryBuilder for JOIN!
-    static final int ISSUE_WITH_ID = 101;
-    static final int ISSUE_ASSET = 300;
-    static final int ISSUE_ASSET_WITH_ISSUE_ID = 301;
-    static final int ISSUE_ASSET_WITH_ISSUE_ID_AND_IMG = 302;
-    static final int TRAINCOACH = 400;
+    public static final int ISSUE = 100; //contains traincoach table for workplace info: see SQLiteQueryBuilder for JOIN!
+    public static final int ISSUE_WITH_ID = 101;
+    public static final int ISSUE_ASSET = 300;
+    public static final int ISSUE_ASSET_WITH_ISSUE_ID = 301;
+    public static final int ISSUE_ASSET_WITH_ISSUE_ID_AND_IMG = 302;
+    public static final int TRAINCOACH = 400;
 
     //SQLiteQueryBuilder JOINS used for QUERIES (NOT for inserts,deletes,updates)
     private static final SQLiteQueryBuilder sIssueAssetWorkplaceByIssueQueryBuilder;
@@ -83,7 +83,7 @@ public class IssueProvider extends ContentProvider {
      *
      * @return UriMatcher
      */
-    static UriMatcher buildUriMatcher() {
+    public static UriMatcher buildUriMatcher() {
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
         final String authority = IssueContract.CONTENT_AUTHORITY;
 
